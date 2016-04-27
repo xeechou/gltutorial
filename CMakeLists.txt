@@ -20,4 +20,8 @@ pkg_search_module(GLFW REQUIRED glfw3)
 
 include_directories(include)
 add_subdirectory(common)
-add_subdirectory(first_triangle)
+
+#tutorial folders
+add_subdirectory(t0_triangle)
+add_subdirectory(t2_matrix)
+add_subdirectory(t3_cube)
