@@ -18,7 +18,9 @@ const unsigned int width = 1024;
 const unsigned int height = 1024;
 using namespace glm;
 
+GLuint loadDDS(const char * imagepath);
 GLuint LoadShaders(const char *, const char *);
+GLuint load_texture(const char *);
 int main(void)
 {
 	if ( !glfwInit() ) {
@@ -56,24 +58,20 @@ int main(void)
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID); 
 
-/*
-	static const GLfloat g_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, -1.0f,
-		0.0f, 1.0f, 0.0f
-	};
-	*/
-	
+
+	//load vertex data
 	GLuint vertexBuffer;
-	//generate 1 buffer
 	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//change the context, the context GL_ARRAY_BUFFER now means vertexBuffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW );
 
-	GLuint colorBuffer;
-	glGenBuffers(1, &colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+	//load color buffer?
+	GLuint uvBuffer;
+	glGenBuffers(1, &uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+
+//	GLuint texture = loadDDS("tex.DDS");
 
 //	GLuint prog_id = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
 
@@ -85,7 +83,7 @@ int main(void)
 				     glm::vec3(0,1,0));//head is up
 	glm::mat4 Model = glm::mat4(1.0f);//do nothing
 	glm::mat4 mvp = Projection * View * Model;
-
+	
 
 	GLuint vsid = load_shader("vs.glsl", GL_VERTEX_SHADER);
 	GLuint fsid = load_shader("fs.glsl", GL_FRAGMENT_SHADER);
@@ -94,11 +92,16 @@ int main(void)
 	GLuint prog_id = load_shader_program(shaders, 2);
 	
 	GLuint MatrixID = glGetUniformLocation(prog_id, "MVP");
-	
+	GLuint textureID = glGetUniformLocation(prog_id, "texturesampler");
 	do{
 		glClear( GL_COLOR_BUFFER_BIT );
 		glUseProgram(prog_id);
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniform1i(textureID, 0);
+		
 		
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -111,7 +114,7 @@ int main(void)
 			(void*)0);
 
 		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
 		glVertexAttribPointer(
 			1,
 			3,
@@ -131,5 +134,8 @@ int main(void)
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 	       glfwWindowShouldClose(window) == 0 );
+	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteBuffers(1, &uvBuffer);
+	glDeleteTextures(1, &textureID);
 	glDeleteProgram(prog_id);
 }
