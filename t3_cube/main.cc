@@ -71,7 +71,7 @@ int main(void)
 	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
 
-//	GLuint texture = loadDDS("tex.DDS");
+	GLuint texture = loadDDS("tex.DDS");
 
 //	GLuint prog_id = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
 
