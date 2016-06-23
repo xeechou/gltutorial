@@ -94,9 +94,9 @@ int main(void)
 	glBindVertexArray(0); // Unbind VAO
 	
 	//loading textures
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	GLuint textures[2];
+	glGenTextures(2, textures);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	cv::Mat image = cv::imread("data/container.jpg");
 	if (!image.data) {
 		std::cout << "error loading textures" << std::endl;
@@ -104,12 +104,26 @@ int main(void)
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.cols, image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	GLuint Textureid = glGetUniformLocation(shader_man.getPid(), "ourTexture");
+	
+	glBindTexture(GL_TEXTURE_2D, textures[1]);
+	image = cv::imread("data/awesomeface.png");
+	if (!image.data) {
+		std::cout << "error loading textures" << std::endl;
+		return -1;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.cols, image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	
 	do{
 
 		glClear( GL_COLOR_BUFFER_BIT );
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glUniform1i(Textureid, 0);//we don't actually need to do it, as we are only assign a default location
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
+		glUniform1i(glGetUniformLocation(shader_man.getPid(), "ourTexture0"), 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, textures[1]);
+		glUniform1i(glGetUniformLocation(shader_man.getPid(), "ourTexture1"), 1);
 		
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -124,6 +138,6 @@ int main(void)
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
 	glDeleteVertexArrays(1, &VAO);
-	glDeleteTextures(1, &texture);
+	glDeleteTextures(2, textures);
 	glfwTerminate();
 }
