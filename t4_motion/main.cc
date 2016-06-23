@@ -14,6 +14,7 @@
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <utils.h>
+#include <shaderman.h>
 #include "data.h"
 #include "controls.hpp"
 
@@ -55,15 +56,13 @@ int main(void)
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	//Step 1: loading shaders
-	GLuint vsid = load_shader("vs.glsl", GL_VERTEX_SHADER);
-	GLuint fsid = load_shader("fs.glsl", GL_FRAGMENT_SHADER);
-	fprintf(stderr, "%d %d\n" ,vsid, fsid);
-	GLuint shaders[] = {vsid, fsid};
-	GLuint prog_id = load_shader_program(shaders, 2);
+	ShaderMan shader_man("vs.glsl", "fs.glsl");
+	GLuint prog_id = shader_man.getPid();
 	glUseProgram(prog_id);
 
+
+	
 	//step 2: vertex data
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID); 
@@ -121,9 +120,10 @@ int main(void)
 		currentTime = glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		update_position(window, offset, deltaTime);
-		glm::mat4 translation = glm::translate(offset);
-
-		glm::mat4 mvp = translation;
+		glm::mat4 translation = glm::translate(offset);//the translation works, why does not the view matrix?
+		glm::mat4 mvp = Projection * View * translation;
+		std::cout << glm::to_string(mvp) << std::endl;
+		//glm::mat4 mvp = translation;
 		glClear( GL_COLOR_BUFFER_BIT );
 		
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);

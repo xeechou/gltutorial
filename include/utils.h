@@ -1,7 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
+#include <vector>
 #include <GL/glew.h>
+#include <string>
 
-GLuint load_shader(const char *fname, GLenum type);
-GLuint load_shader_program(GLuint *, int);
+
+int read_file(const char *fname, std::string *str);
+
 #endif /* UTILS_H */
