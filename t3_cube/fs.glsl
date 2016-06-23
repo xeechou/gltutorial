@@ -1,13 +1,14 @@
 #version 330 core
 
 // Ouput data
-in vec2 UV;
-out vec3 color;
+in vec3 outColor;
+in vec2 TexCoord;
 
-uniform sampler2D texturesampler;
+out vec4 color;
+uniform sampler2D ourTexture;
 
 void main()
 {
 
-	color = texture( texturesampler, UV).rgb;
+	color = texture(ourTexture, TexCoord);
 }

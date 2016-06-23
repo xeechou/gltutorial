@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <iostream>
 #include <GL/glew.h>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
 
 #ifdef __linux__
 #include <GLFW/glfw3.h>
@@ -12,6 +14,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <shaderman.h>
 #include <utils.h>
 #include "data.h"
 const unsigned int width = 1024;
@@ -52,80 +55,64 @@ int main(void)
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
+	ShaderMan shader_man("vs.glsl", "fs.glsl");
+	glUseProgram(shader_man.getPid());
 	//the gl code started
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID); 
+	GLfloat vertices[] = {
+		// Positions          // Colors           // Texture Coords
+		0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // Top Right
+		0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // Bottom Right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left
+	};
+	GLuint indices[] = {  // Note that we start from 0!
+		0, 1, 3, // First Triangle
+		1, 2, 3  // Second Triangle
+	};
+	GLuint VBO, VAO, EBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+	glBindVertexArray(VAO);
 
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	//load vertex data
-	GLuint vertexBuffer;
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//change the context, the context GL_ARRAY_BUFFER now means vertexBuffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW );
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	//load color buffer?
-	GLuint uvBuffer;
-	glGenBuffers(1, &uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
-
-	GLuint texture = loadDDS("tex.DDS");
-
-//	GLuint prog_id = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
-
-	//the projection matrix
-	glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-	//for an ortho camera:
-	glm::mat4 View = glm::lookAt(glm::vec3(4,3,3),//position
-				     glm::vec3(0,0,0),//where do you want to look at?
-				     glm::vec3(0,1,0));//head is up
-	glm::mat4 Model = glm::mat4(1.0f);//do nothing
-	glm::mat4 mvp = Projection * View * Model;
+	// Position attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+	// Color attribute
+	glEnableVertexAttribArray(1);	
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	// TexCoord attribute
+	glEnableVertexAttribArray(2);	
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+	//glUniform1i(glGetUniformLocation(shader_man.getPid(), "ourTexture"), 0);
+	glBindVertexArray(0); // Unbind VAO
 	
-
-	GLuint vsid = load_shader("vs.glsl", GL_VERTEX_SHADER);
-	GLuint fsid = load_shader("fs.glsl", GL_FRAGMENT_SHADER);
-	fprintf(stderr, "%d %d\n" ,vsid, fsid);
-	GLuint shaders[] = {vsid, fsid};
-	GLuint prog_id = load_shader_program(shaders, 2);
-	
-	GLuint MatrixID = glGetUniformLocation(prog_id, "MVP");
-	GLuint textureID = glGetUniformLocation(prog_id, "texturesampler");
+	//loading textures
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	cv::Mat image = cv::imread("data/container.jpg");
+	if (!image.data) {
+		std::cout << "error loading textures" << std::endl;
+		return -1;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.cols, image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	GLuint Textureid = glGetUniformLocation(shader_man.getPid(), "ourTexture");
 	do{
+
 		glClear( GL_COLOR_BUFFER_BIT );
-		glUseProgram(prog_id);
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
-
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glUniform1i(textureID, 0);
+		glUniform1i(Textureid, 0);
 		
-		
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glVertexAttribPointer(
-			0,
-			3,
-			GL_FLOAT,
-			GL_FALSE,
-			0,
-			(void*)0);
-
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-		glVertexAttribPointer(
-			1,
-			3,
-			GL_FLOAT,
-			GL_FALSE,
-			0,
-			(void*)0);
-
-		glDrawArrays(GL_TRIANGLES, 0, 12*3);
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		// Draw nothing, see you in tutorial 2 !
 		// Swap buffers
 		glfwSwapBuffers(window);
@@ -134,8 +121,9 @@ int main(void)
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 	       glfwWindowShouldClose(window) == 0 );
-	glDeleteBuffers(1, &vertexBuffer);
-	glDeleteBuffers(1, &uvBuffer);
-	glDeleteTextures(1, &textureID);
-	glDeleteProgram(prog_id);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteTextures(1, &texture);
+	glfwTerminate();
 }
