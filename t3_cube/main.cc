@@ -109,7 +109,7 @@ int main(void)
 
 		glClear( GL_COLOR_BUFFER_BIT );
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glUniform1i(Textureid, 0);
+		glUniform1i(Textureid, 0);//we don't actually need to do it, as we are only assign a default location
 		
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
