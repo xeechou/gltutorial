@@ -3,6 +3,7 @@ include_directories(
   ${GLEW_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
   ${OPENGL_INCLUDE_DIR}
+  ${OpenCV_INCLUDE_DIR}
   )
 
 
@@ -16,4 +17,5 @@ target_link_libraries(t4
   ${GLEW_LIBRARIES}
   ${GLM_LIBRARIES}
   ${OPENGL_LIBRARY}
+  ${OpenCV_LIBS}
   common)

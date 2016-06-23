@@ -16,7 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <shaderman.h>
 #include <utils.h>
-#include "data.h"
+
 const unsigned int width = 1024;
 const unsigned int height = 1024;
 using namespace glm;
@@ -95,18 +95,19 @@ int main(void)
 	
 	//loading textures
 	GLuint textures[2];
+	//texture0
 	glGenTextures(2, textures);
 	glBindTexture(GL_TEXTURE_2D, textures[0]);
-	cv::Mat image = cv::imread("data/container.jpg");
+	cv::Mat image = cv::imread("../imgs/container.jpg");
 	if (!image.data) {
 		std::cout << "error loading textures" << std::endl;
 		return -1;
 	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.cols, image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	
+	//texture1
 	glBindTexture(GL_TEXTURE_2D, textures[1]);
-	image = cv::imread("data/awesomeface.png");
+	image = cv::imread("../imgs/awesomeface.png");
 	if (!image.data) {
 		std::cout << "error loading textures" << std::endl;
 		return -1;
@@ -114,17 +115,21 @@ int main(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.cols, image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	
-	do{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+	glUniform1i(glGetUniformLocation(shader_man.getPid(), "ourTexture0"), 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, textures[1]);
+	glUniform1i(glGetUniformLocation(shader_man.getPid(), "ourTexture1"), 1);
 
+
+	glm::mat4 trans;
+	do{
+		trans = glm::rotate(trans, 0.10f, glm::vec3(0,0,1.0f));
+		//trans = glm::scale(trans, glm::vec3(0.5,0.5,0.5));
 		glClear( GL_COLOR_BUFFER_BIT );
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textures[0]);
-		glUniform1i(glGetUniformLocation(shader_man.getPid(), "ourTexture0"), 0);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textures[1]);
-		glUniform1i(glGetUniformLocation(shader_man.getPid(), "ourTexture1"), 1);
-		
+		GLuint transformloc = glGetUniformLocation(shader_man.getPid(), "transform");
+		glUniformMatrix4fv(transformloc, 1, GL_FALSE, &trans[0][0]);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		// Draw nothing, see you in tutorial 2 !
