@@ -16,7 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <utils.h>
 #include <shaderman.h>
-#include "data.h"
+
 #include "controls.hpp"
 
 const unsigned int width = 1024;
