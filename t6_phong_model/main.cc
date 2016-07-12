@@ -134,8 +134,18 @@ int main(void)
 	//fragment shader uniforms
 	glUniform3f(glGetUniformLocation(prog_id, "objectColor"), 1.0f, 0.5f, 0.31f);
 	glUniform3f(glGetUniformLocation(prog_id, "lightColor"), 1.0f, 1.0f, 1.0f); 
-	glUniform3f(glGetUniformLocation(prog_id, "viewPos"), 0.0f, 0.0f, 0.0f); 
+	glUniform3f(glGetUniformLocation(prog_id, "viewPos"), 4.0f, 3.0f, 3.0f); 
 
+	GLint matAmbientLoc  = glGetUniformLocation(prog_id, "material.ambient");
+	GLint matDiffuseLoc  = glGetUniformLocation(prog_id, "material.diffuse");
+	GLint matSpecularLoc = glGetUniformLocation(prog_id, "material.specular");
+	GLint matShineLoc    = glGetUniformLocation(prog_id, "material.shininess");
+
+	glUniform1f(matAmbientLoc,  0.5f);
+	glUniform1f(matDiffuseLoc,  0.1f); 
+	glUniform1f(matSpecularLoc, 0.5f);
+	glUniform1f(matShineLoc,    32.0f);
+	
 	//second program
 	ShaderMan light("vs.glsl", "fs.glsl");
 	GLuint light_id = light.getPid();
@@ -162,9 +172,15 @@ int main(void)
 		glUseProgram(light_id);
 		//compute the light pos at every step, the light is in 
 		glm::vec3 light_pos(cos(theta), 0.0f, -sin(theta));
+		std::cout << "The light position is ["
+			  << light_pos[0] << ", "
+			  << light_pos[1] << ", "
+			  << light_pos[2] << "]" << std::endl;
+		
 		theta += 0.01f;
-		glm::mat4 model = glm::translate(light_pos);
-		model = glm::scale(model, glm::vec3(0.1f));
+		glm::mat4 scale = glm::scale(glm::vec3(0.01, 0.01, 0.01));
+		glm::mat4 trans = glm::translate(light_pos);
+		glm::mat4 model = trans * scale;
 		glm::mat4 mvp2 = Projection * View * model;
 		glUniformMatrix4fv(glGetUniformLocation(light_id, "mvp"), 1, GL_FALSE, &mvp2[0][0]);
 		glBindVertexArray(lightVAO);
