@@ -1,0 +1,47 @@
+[
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/common",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include    -o CMakeFiles/common.dir/utils.cpp.o -c /home/developer/Courses/cpp/mysamples/common/utils.cpp",
+  "file": "/home/developer/Courses/cpp/mysamples/common/utils.cpp"
+},
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/common",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include    -o CMakeFiles/common.dir/controls.cpp.o -c /home/developer/Courses/cpp/mysamples/common/controls.cpp",
+  "file": "/home/developer/Courses/cpp/mysamples/common/controls.cpp"
+},
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/common",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include    -o CMakeFiles/common.dir/shaderman.cpp.o -c /home/developer/Courses/cpp/mysamples/common/shaderman.cpp",
+  "file": "/home/developer/Courses/cpp/mysamples/common/shaderman.cpp"
+},
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/t3_cube",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t3.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t3_cube/main.cc",
+  "file": "/home/developer/Courses/cpp/mysamples/t3_cube/main.cc"
+},
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/t4_motion",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t4.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t4_motion/main.cc",
+  "file": "/home/developer/Courses/cpp/mysamples/t4_motion/main.cc"
+},
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/t4_motion",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t4.dir/controls.cpp.o -c /home/developer/Courses/cpp/mysamples/t4_motion/controls.cpp",
+  "file": "/home/developer/Courses/cpp/mysamples/t4_motion/controls.cpp"
+},
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/t5_two_cubes",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t5.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t5_two_cubes/main.cc",
+  "file": "/home/developer/Courses/cpp/mysamples/t5_two_cubes/main.cc"
+},
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/t6_phong_model",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t6.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t6_phong_model/main.cc",
+  "file": "/home/developer/Courses/cpp/mysamples/t6_phong_model/main.cc"
+},
+{
+  "directory": "/home/developer/Courses/cpp/mysamples/t7_lighting_map",
+  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t7.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t7_lighting_map/main.cc",
+  "file": "/home/developer/Courses/cpp/mysamples/t7_lighting_map/main.cc"
+}
+]
