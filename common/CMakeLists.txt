@@ -4,5 +4,7 @@ include_directories(
   )
 
 add_library(common STATIC
-  utils.cpp)
+  utils.cpp
+  controls.cpp
+  shaderman.cpp)
 
