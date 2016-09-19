@@ -30,7 +30,9 @@ GLuint load_shader(const char *fname, GLenum type)
 //		std::cout<<"there shoud be something" << glGetError()<<std::endl;
 		std::vector<char> err_msg(loglen+1);
 		glGetShaderInfoLog(sid, loglen, NULL, &err_msg[0]);
-		fprintf(stderr, "shader Compile info: %s\n", &err_msg[0]);
+		fprintf(stderr, "%s shader Compile info: %s\n",
+			(type == GL_FRAGMENT_SHADER) ? "fragment" : "vertex",
+			&err_msg[0]);
 		return 0;
 	}
 	return sid;
@@ -86,4 +88,40 @@ ShaderMan::ShaderMan(const char *vshader, const char *fshader)
 ShaderMan::~ShaderMan(void)
 {
 	glDeleteProgram(pid);
+}
+
+/* I should setup the texture before loading them */
+
+bool
+TextureMan::activeTexture(const char *name)
+{
+	GLuint texture;
+
+	if (actived_texture >= 31 || !(texture = textures[name]))
+		return false;
+	glActiveTexture(GL_TEXTURE0+actived_texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	actived_texture+=1;
+	return true;
+}
+
+bool
+TextureMan::loadTexture(const char *img_fname, const char *ind)
+{
+	GLuint texture_handler;
+	cv::Mat img;
+	std::string new_img(img_fname);
+	img = cv::imread(img_fname);
+	if (!img.data)
+		return false;
+	glGenTextures(1, &texture_handler);
+	glBindTexture(GL_TEXTURE_2D, texture_handler);
+	//you will get a image that is upside down actually, maybe you need to flip the image before applying
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.cols, img.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, img.data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+	//and, don't forget add image to textures
+	textures[ind] = texture_handler;
+	curr_texture+= 1;
+	return true;
 }

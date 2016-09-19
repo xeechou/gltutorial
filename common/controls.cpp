@@ -25,6 +25,26 @@ public:
 	glm::vec3 getDIR(void);
 };
 
+/**
+ *
+ * @brief a camera surrounds a object by mouse
+ */
+class AnchorCamera: MVP
+{
+	
+};
+
+
+/**
+ *
+ * @brief god-view camera, that can surround a point and move arroud
+ */
+class GodView: AnchorCamera
+{
+	
+};
+
+
 class FPSCamera : MVP
 {
 	glm::vec3 camera_pos; /** the last camera position */
