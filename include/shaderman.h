@@ -41,8 +41,9 @@ public:
 	bool activeTexture(const char *name);
 	TextureMan(void) {curr_texture = 0; actived_texture = 0;}
 	~TextureMan() {
-		for (auto it: textures)
-			glDeleteTextures(1, &(it.second));
+		for (std::map<std::string, GLuint>::const_iterator it = textures.begin();
+		     it != textures.end(); it++)
+			glDeleteTextures(1, &(it->second));
 	};
 };
 
