@@ -30,3 +30,7 @@ add_subdirectory(t4_motion)
 add_subdirectory(t5_two_cubes)
 add_subdirectory(t6_phong_model)
 add_subdirectory(t7_lighting_map)
+
+
+#TODO list
+#controls: add anchor based controls
