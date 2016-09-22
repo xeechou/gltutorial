@@ -6,85 +6,28 @@
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "../include/controls.h"
 
-class MVP
+void arcball_rotate(double xpos_prev, double ypos_prev,
+		    double xpos, double ypos,
+		    glm::mat4& rotation_mat)
 {
-protected:	
-	glm::mat4 model_mat;
-	glm::mat4 view_mat;
-	glm::mat4 projection_mat;
-public:
-	virtual glm::mat4 getMVP(void);
-};
+	double ratio = 0.5;//in this case it is really usesless
+	if (abs(xpos) > ratio || abs(ypos) > ratio)
+		return;
 
-class SteadyCamera : MVP
-{
-	/* steady camera moves object, seriously? */
-public:
-	glm::mat4 getMVP(float delta_time, float speed, glm::vec3& direction);
-	glm::vec3 getDIR(void);
-};
-
-/**
- *
- * @brief a camera surrounds a object by mouse
- */
-class AnchorCamera: MVP
-{
+	//looks like we only deal with the front face of the sphere
 	
-};
-
-
-/**
- *
- * @brief god-view camera, that can surround a point and move arroud
- */
-class GodView: AnchorCamera
-{
+	double zpos_prev = sqrt(0.25 - xpos_prev * xpos_prev - ypos_prev * ypos_prev);
+	double zpos = sqrt(0.25 - xpos * xpos - ypos * ypos);
+	//we should we original camear position, in spherical form.
 	
-};
-
-
-class FPSCamera : MVP
-{
-	glm::vec3 camera_pos; /** the last camera position */
-	glm::vec3 up; /** in most case, the direction is (0,1,0) */
-	/* the thing about fps camera is interesting, it always points to 1 unit
-	 * in front of its position */
-	glm::vec3 direction;  /** a unit vector which is the same as where the
-				  camera points to, so the center becomes
-				  camera_pos + direction */
-	FPSCamera(glm::vec3& init_pos) {
-		up = glm::vec3(0.0, 1.0, 0.0);
-		camera_pos = glm::vec3(init_pos);
-	}
-public:
-	glm::mat4 getMVP(float delta_time, float speed, glm::vec3& direction);
-};
-
-glm::mat4
-SteadyCamera::getMVP(float delta_time, float speed, glm::vec3& direction)
-{
-	assert(delta_time > 0);
-	assert(speed >= 0);
-	/* direction should have norm 1 */
-	this->model_mat = translate(direction * speed * (float)delta_time);
-	return this->projection_mat * this->view_mat * this->model_mat;
-
+	//alright, now we setup the camera position, but we want to deal with the relative system.
+	//I just need to figure out the angle
+	glm::vec3 prev_pos = glm::vec3(xpos_prev, ypos_prev, zpos_prev);
+	glm::vec3 curr_pos = glm::vec3(xpos, ypos, zpos);
+	glm::vec3 rotation_axis = glm::cross(prev_pos, curr_pos);
+	float angle = acos(fmin(1.0, glm::dot(glm::normalize(prev_pos), glm::normalize(curr_pos) )) );
+	rotation_mat = glm::rotate(rotation_mat, angle, glm::normalize(rotation_axis));
 }
 
-
-/**
- * @brief fps version of get mvp
- *
- * The world matrix doesn't change, camera moves to any direction, within the shortime period
- */
-glm::mat4
-FPSCamera::getMVP(float delta_time, float speed, glm::vec3& direction)
-{
-	assert(delta_time > 0);
-	assert(speed >= 0);
-
-	this->camera_pos += direction * speed * delta_time;
-	glm::mat4 mod_mat = glm::lookAt(camera_pos, camera_pos+ direction, up);
-}
