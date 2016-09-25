@@ -6,5 +6,6 @@ include_directories(
 add_library(common STATIC
   utils.cpp
   controls.cpp
-  shaderman.cpp)
+  shaderman.cpp
+  mesh.cpp)
 
