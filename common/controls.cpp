@@ -1,3 +1,4 @@
+#include <iostream>
 #include <assert.h>
 #include <GL/glew.h>
 
@@ -13,7 +14,7 @@ void arcball_rotate(double xpos_prev, double ypos_prev,
 		    glm::mat4& rotation_mat)
 {
 	double ratio = 0.5;//in this case it is really usesless
-	if (abs(xpos) > ratio || abs(ypos) > ratio)
+	if ((xpos * xpos + ypos * ypos) > 0.25)
 		return;
 
 	//looks like we only deal with the front face of the sphere
@@ -28,6 +29,9 @@ void arcball_rotate(double xpos_prev, double ypos_prev,
 	glm::vec3 curr_pos = glm::vec3(xpos, ypos, zpos);
 	glm::vec3 rotation_axis = glm::cross(prev_pos, curr_pos);
 	float angle = acos(fmin(1.0, glm::dot(glm::normalize(prev_pos), glm::normalize(curr_pos) )) );
+//	std::cout << "(" << prev_pos[0] << "," << prev_pos[1] << "," << prev_pos[2] << ")" << " and ";
+//	std::cout << "(" << curr_pos[0] << "," << curr_pos[1] << "," << curr_pos[2] << ")" << std::endl;
+//	std::cout << angle / M_PI << std::endl;
 	rotation_mat = glm::rotate(rotation_mat, angle, glm::normalize(rotation_axis));
 }
 

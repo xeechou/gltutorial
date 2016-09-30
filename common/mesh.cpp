@@ -88,7 +88,7 @@ void Mesh::Draw(GLuint prog_id)
 			ss << specularNr++; // Transfer GLuint to stream
 		number = ss.str();
 
-		glUniform1f(glGetUniformLocation(prog_id, ("material." + name + number).c_str()), i);
+		glUniform1i(glGetUniformLocation(prog_id, ("material." + name + number).c_str()), i);
 		glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
 	}
 	glActiveTexture(GL_TEXTURE0);

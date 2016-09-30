@@ -2,25 +2,26 @@
 
 
 struct Light {
-       vec3 position;
-       float ambient;
-       float diffuse;
-       float specular;
+       vec3 position;//setted
+       float ambient;//setted
+       float diffuse;//setted
+       float specular;//setted
 };
+uniform Light light; //static, setup in main.cc
 
 struct Material {
-       sampler2D diffuse0;
-       sampler2D specular0;
-       float	 shininess;
+       sampler2D diffuse0;//setted
+       sampler2D specular0;//setted
+       float	 shininess;//setted
 };
-uniform vec3 viewPos; //change at every step
-
-uniform vec3 lightColor; //statically
+uniform Material material; //setup in the Mesh class
+uniform vec3 viewPos;//setted
+uniform vec3 lightColor; //setted
 
 //the fragment shader must follow this protocol, we could optimize it in the
 //future by setting the name in Mesh class.
-uniform Material material; //setup in the Mesh class
-uniform Light light; //static, setup in main.cc
+
+
 
 
 in vec3 Normal;
@@ -58,27 +59,26 @@ vec4 when_le(vec4 x, vec4 y) {
 
 void main(void)
 {
-/*
 	vec3 norm = normalize(Normal);
 	vec3 lightDir =  normalize(light.position-fragPos);
 	//mute light on the back of object
 	lightDir = max(sign(dot(lightDir, norm)), 0.0f) * lightDir;
 
 	//ambient
-	vec3 ambient = light.ambient *
-	     	       vec3(texture(material.diffuse0, TexCoords));
+//	vec3 ambient = vec3(light.ambient, 1.0, 1.0);
+	vec3 ambient = 0.3 * vec3(texture(material.diffuse0, TexCoords));
 
 	//diffuse
 	float diff   = dot(lightDir, norm);
-	vec3 diffuse = light.diffuse * diff *
+	vec3 diffuse = 0.7 * diff *
 	     	       vec3(texture(material.diffuse0, TexCoords));
 
 	//specular
 	vec3 refDir  = reflect(-lightDir, norm);
-	vec3 viewDir = normalize(viewPos - fragPos);
-	float spec   = pow(max(dot(refDir, viewDir), 0.0), material.shininess);
-	vec3 specular= light.specular * spec * vec3(texture(material.specular0, TexCoords));
-*/
-	color = vec4(vec3(texture(material.diffuse0, TexCoords)) +
-	      	     vec3(texture(material.specular0, TexCoords)), 1.0f);
+	vec3 viewDir = normalize(vec3(4.0,3.0,5.0) - fragPos);
+	float spec   = pow(max(dot(refDir, viewDir), 0.0), 32.0);
+	vec3 specular= 0.5 * spec * vec3(texture(material.specular0, TexCoords));
+
+	//so the problem is light struct doesn't work...
+	color = vec4(ambient+diffuse+specular, 1.0f);
 }

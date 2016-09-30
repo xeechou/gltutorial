@@ -66,22 +66,33 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 	static double lypos_prev = 0.0;
 	static double rxpos_prev = 0.0;
 	static double rypos_prev = 0.0;
+	static int lstate_prev = GLFW_RELEASE;
+	static int rstate_prev = GLFW_RELEASE;
 
 	//I am not sure, I need to
 	//okay, the xpos and ypos is in opencv-Coordinates
 	xpos = (xpos - width / 2.0) / width;
 	ypos = (height/ 2.0 - ypos) / height;
+
 	int lstate = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
 	int rstate = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
-	
+	if (xpos == rxpos_prev && ypos == rypos_prev)
+		return;
+		
 	if (lstate == GLFW_PRESS) {
 		//moving_joint(window, lxpos_prev, lypos_prev, xpos, ypos);
-		lxpos_prev = xpos; lypos_prev = ypos;
-	} else if (rstate == GLFW_PRESS) {
-		arcball_rotate(rxpos_prev, rypos_prev, xpos, ypos, get_rotation_mat());
-		rxpos_prev = xpos; rypos_prev = ypos;
-	}
 
+	} else if (rstate == GLFW_PRESS) {
+//		std::cout << xpos << " and " << ypos << std::endl;		
+//		if (rstate_prev == GLFW_RELEASE) {
+//			rxpos_prev = xpos - 0.000001; rypos_prev = ypos - 0.000001;
+//		}
+		arcball_rotate(rxpos_prev, rypos_prev, xpos, ypos, get_rotation_mat());
+	}
+	rstate_prev = rstate;
+	lstate_prev = lstate;
+	lxpos_prev = xpos; lypos_prev = ypos;
+	rxpos_prev = xpos; rypos_prev = ypos;
 }
 		
 		
@@ -92,11 +103,15 @@ int main(int argc, char **argv)
 	//we have two object to draw
 	ShaderMan container("vs.glsl", "fs.glsl");
 	GLuint prog_id = container.getPid();
+
+	
 	Model nanosuit(argv[1]);
 	std::cout << "Done loading models" << std::endl;
-
-	//static datas
+	std::cout << "light.diffuse is " << glGetUniformLocation(prog_id, "light.ambient") << std::endl;
+	//the only thing that material doesn't change
 	glUniform1f(glGetUniformLocation(prog_id, "material.shininess"), 32.0f);
+	//here we are
+	
 	glUniform3f(glGetUniformLocation(prog_id, "viewPos"), 4.0f, 3.0f, 3.0f);
 	glUniform3f(glGetUniformLocation(prog_id, "objectColor"), 1.0f, 0.5f, 0.31f);
 	glUniform3f(glGetUniformLocation(prog_id, "lightColor"), 1.0f, 1.0f, 1.0f);
@@ -105,7 +120,7 @@ int main(int argc, char **argv)
 	GLint matAmbientLoc  = glGetUniformLocation(prog_id, "light.ambient");
 	GLint matDiffuseLoc  = glGetUniformLocation(prog_id, "light.diffuse");
 	GLint matSpecularLoc = glGetUniformLocation(prog_id, "light.specular");
-
+	
 	glUniform1f(matAmbientLoc,  0.3f);
 	glUniform1f(matDiffuseLoc,  0.5f);
 	glUniform1f(matSpecularLoc, 0.5f);
@@ -121,9 +136,9 @@ int main(int argc, char **argv)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//for container, the uniform data does not change, so we can apply now
-		glm::mat4 Model = glm::scale(glm::vec3(0.15f));
+		glm::mat4 Model = get_rotation_mat() * glm::scale(glm::vec3(0.15f));
 		//Model = glm::scale(Model, glm::vec3(0.1f));
-		glm::mat4 View  = glm::lookAt(glm::vec3(4,3,3), glm::vec3(0,0,0), glm::vec3(0,1,0)) * get_rotation_mat();
+		glm::mat4 View  = glm::lookAt(glm::vec3(4,3,3), glm::vec3(0,0,0), glm::vec3(0,1,0));
 
 		glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 		glm::mat4 mvp = Projection * View * Model;
@@ -137,23 +152,24 @@ int main(int argc, char **argv)
 //			  << light_pos[0] << ", "
 //			  << light_pos[1] << ", "
 //			  << light_pos[2] << "]" << std::endl;
-		theta += 0.01f;
-
+//		theta += 0.01f;
 
 		glm::mat4 model = glm::translate(light_pos);
 		model = glm::scale(model, glm::vec3(0.01f));
 		glm::mat4 mvp2 = Projection * View * model;
 		glUniformMatrix4fv(glGetUniformLocation(light_id, "mvp"), 1, GL_FALSE, &mvp2[0][0]);
 
+
 		//for the container
 		glUseProgram(prog_id);
 		glUniformMatrix4fv(glGetUniformLocation(prog_id, "MVP"), 1, GL_FALSE, &mvp[0][0]);
 		//std::cout << glGetUniformLocation(prog_id, "MVP") << std::endl;
 		glUniformMatrix4fv(glGetUniformLocation(prog_id, "model"), 1, GL_FALSE, &Model[0][0]);
-		glUniform3f(glGetUniformLocation(prog_id, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
+		//light's other attributes are setted in other places
+		//glUniform3f(glGetUniformLocation(prog_id, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
+		glUniform3f(glGetUniformLocation(prog_id, "light.position"), 4.0, 5.0, 6.0);
 		nanosuit.Draw(prog_id);
 
-		
 		glfwSwapBuffers(window);
 		
 	} while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
