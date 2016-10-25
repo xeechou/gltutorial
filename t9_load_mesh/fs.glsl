@@ -22,8 +22,6 @@ uniform vec3 lightColor; //setted
 //future by setting the name in Mesh class.
 
 
-
-
 in vec3 Normal;
 in vec2 TexCoords;
 in vec3 fragPos;
@@ -75,7 +73,7 @@ void main(void)
 
 	//specular
 	vec3 refDir  = reflect(-lightDir, norm);
-	vec3 viewDir = normalize(vec3(4.0,3.0,5.0) - fragPos);
+	vec3 viewDir = normalize(viewPos - fragPos);
 	float spec   = pow(max(dot(refDir, viewDir), 0.0), 32.0);
 	vec3 specular= 0.5 * spec * vec3(texture(material.specular0, TexCoords));
 

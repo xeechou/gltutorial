@@ -4,6 +4,7 @@ include_directories(
   ${GLM_INCLUDE_DIRS}
   ${OPENGL_INCLUDE_DIR}
   ${OpenCV_INCLUDE_DIR}
+  ${assimp_INCLUDE_DIRS}
   )
 
 
@@ -17,4 +18,5 @@ target_link_libraries(t9
   ${GLM_LIBRARIES}
   ${OPENGL_LIBRARY}
   ${OpenCV_LIBS}
+  ${assimp_LIBRARIES}
   common)

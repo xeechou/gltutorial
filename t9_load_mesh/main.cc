@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 	//we have two object to draw
 	ShaderMan container("vs.glsl", "fs.glsl");
 	GLuint prog_id = container.getPid();
-
+	glUseProgram(prog_id);
 	
 	Model nanosuit(argv[1]);
 	std::cout << "Done loading models" << std::endl;
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 	glUniform1f(glGetUniformLocation(prog_id, "material.shininess"), 32.0f);
 	//here we are
 	
-	glUniform3f(glGetUniformLocation(prog_id, "viewPos"), 4.0f, 3.0f, 3.0f);
+
 	glUniform3f(glGetUniformLocation(prog_id, "objectColor"), 1.0f, 0.5f, 0.31f);
 	glUniform3f(glGetUniformLocation(prog_id, "lightColor"), 1.0f, 1.0f, 1.0f);
 	
@@ -162,12 +162,14 @@ int main(int argc, char **argv)
 
 		//for the container
 		glUseProgram(prog_id);
+		glUniform3f(glGetUniformLocation(prog_id, "viewPos"), 4.0f, 3.0f, 3.0f);
 		glUniformMatrix4fv(glGetUniformLocation(prog_id, "MVP"), 1, GL_FALSE, &mvp[0][0]);
 		//std::cout << glGetUniformLocation(prog_id, "MVP") << std::endl;
 		glUniformMatrix4fv(glGetUniformLocation(prog_id, "model"), 1, GL_FALSE, &Model[0][0]);
 		//light's other attributes are setted in other places
-		//glUniform3f(glGetUniformLocation(prog_id, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
-		glUniform3f(glGetUniformLocation(prog_id, "light.position"), 4.0, 5.0, 6.0);
+		glUniform3f(glGetUniformLocation(prog_id, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
+//		std::cout << glGetUniformLocation(prog_id, "light.position") << std::endl;
+
 		nanosuit.Draw(prog_id);
 
 		glfwSwapBuffers(window);
