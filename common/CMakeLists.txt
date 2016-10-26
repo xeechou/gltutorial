@@ -9,3 +9,5 @@ add_library(common STATIC
   shaderman.cpp
   mesh.cpp)
 
+target_link_libraries(common
+  ${assimp_LIBRARIES})

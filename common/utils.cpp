@@ -10,6 +10,8 @@
 #include <GLFW/glfw3.h>
 #include <assert.h>
 
+static float ASPECT_RATIO = 1.0;
+
 int
 read_file(const char *fname, std::string *str)
 {
@@ -31,6 +33,21 @@ void tutorial_error_callback(int error, const char *description)
 }
 
 
+
+static void
+window_resize_callback(GLFWwindow *window, int width, int height)
+{
+	//we need to figure out the viewport
+	int x, y, w, h;
+	if ( ( (float)width / (float)height ) > ASPECT_RATIO) {
+		w = height * ASPECT_RATIO; h = height;
+		x = (width - w)/2; y = 0;
+	} else {
+		w = width; h = (int)( (float)width/ASPECT_RATIO );
+		x = 0; h = (height -h) / 2;
+	}
+	glViewport(x, y, w, h);
+}
 
 GLFWwindow* tutorial_init(int width, int height,
 			  void (*keyboard_callback)(GLFWwindow*, int, int, int, int),
@@ -56,7 +73,7 @@ GLFWwindow* tutorial_init(int width, int height,
 		glfwTerminate();
 		return NULL;
 	}
-
+	ASPECT_RATIO = (float)width / (float) height;
 	glfwSetErrorCallback(tutorial_error_callback);
 	//for now we only have keyboard and mouse callback, let's try joystick later
 	//cursor and keyboard is most prior callback you can have, afterwards...
@@ -64,7 +81,7 @@ GLFWwindow* tutorial_init(int width, int height,
 		glfwSetKeyCallback(window, keyboard_callback);
 	if (cursor_callback)
 		glfwSetCursorPosCallback(window, cursor_callback);
-	
+	glfwSetWindowSizeCallback(window, window_resize_callback);
 	glfwMakeContextCurrent(window);
 	glewExperimental=true;
 
@@ -80,8 +97,9 @@ GLFWwindow* tutorial_init(int width, int height,
 	const GLubyte* version = glGetString(GL_VERSION); /// Version as a string
 	fprintf(stderr,"Renderer: %s\n", renderer);
 	fprintf(stderr, "OpenGL version supported %s\n", version);
-	
+	glViewport(0, 0, width, height);
 	return window;
+
 }
 
 

@@ -16,7 +16,8 @@ void arcball_rotate(double xpos_prev, double ypos_prev,
 	double ratio = 0.5;//in this case it is really usesless
 	if ((xpos * xpos + ypos * ypos) > 0.25)
 		return;
-
+	if ((xpos_prev * xpos_prev + ypos_prev * ypos_prev) > 0.25)
+		return;
 	//looks like we only deal with the front face of the sphere
 	
 	double zpos_prev = sqrt(0.25 - xpos_prev * xpos_prev - ypos_prev * ypos_prev);
