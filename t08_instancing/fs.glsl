@@ -24,6 +24,7 @@ uniform Light light;
 in vec3 Normal;
 in vec2 TexCoords;
 in vec3 fragPos;
+in vec3 Color;
 out vec4 color;
 
 /* 
@@ -78,3 +79,10 @@ void main(void)
 
 	color = vec4(ambient+diffuse+specular, 1.0f);	
 }
+
+/*
+void main(void)
+{
+	color = vec4(Color, 1.0f);
+}
+*/

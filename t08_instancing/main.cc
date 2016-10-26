@@ -111,25 +111,35 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 	static double lypos_prev = 0.0;
 	static double rxpos_prev = 0.0;
 	static double rypos_prev = 0.0;
+	static int lstate_prev = GLFW_RELEASE;
+	static int rstate_prev = GLFW_RELEASE;
 
 	//I am not sure, I need to
 	//okay, the xpos and ypos is in opencv-Coordinates
 	xpos = (xpos - width / 2.0) / width;
 	ypos = (height/ 2.0 - ypos) / height;
+
 	int lstate = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
 	int rstate = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
-	
+	if (xpos == rxpos_prev && ypos == rypos_prev)
+		return;
+		
 	if (lstate == GLFW_PRESS) {
 		//moving_joint(window, lxpos_prev, lypos_prev, xpos, ypos);
-		lxpos_prev = xpos; lypos_prev = ypos;
-//		std::cout << xpos << " and " << ypos << std::endl;
-	} else if (rstate == GLFW_PRESS) {
-		arcball_rotate(rxpos_prev, rypos_prev, xpos, ypos, get_rotation_mat());
-		rxpos_prev = xpos; rypos_prev = ypos;
-	}
 
-	//set_current_view_mat(&view_mat);
+	} else if (rstate == GLFW_PRESS) {
+//		std::cout << xpos << " and " << ypos << std::endl;		
+//		if (rstate_prev == GLFW_RELEASE) {
+//			rxpos_prev = xpos - 0.000001; rypos_prev = ypos - 0.000001;
+//		}
+		arcball_rotate(rxpos_prev, rypos_prev, xpos, ypos, get_rotation_mat());
+	}
+	rstate_prev = rstate;
+	lstate_prev = lstate;
+	lxpos_prev = xpos; lypos_prev = ypos;
+	rxpos_prev = xpos; rypos_prev = ypos;
 }
+
 
 struct Vertex {
 	glm::vec3 Position;
@@ -179,6 +189,26 @@ int main(void)
 			      (GLvoid*)(sizeof(GL_FLOAT)*6));
 	glBindVertexArray(0);
 	
+	{
+		GLint loc_inds[10];
+		for (int i = 0; i < 10; i++) {
+			std::stringstream ss;
+			ss << "offsets[" << i << "]";
+			loc_inds[i] = glGetUniformLocation(prog_id, ss.str().c_str());
+			std::cout << "offset loc: " << loc_inds[i] << std::endl;
+		}
+		glUniform3f(loc_inds[0], 0.0f, 0.0f, 0.0f);
+		glUniform3f(loc_inds[1], 1.0f, 1.0f, 1.0f);
+		glUniform3f(loc_inds[2], -1.0f, -1.0f, -1.0f);
+		glUniform3f(loc_inds[3], 1.0f, -1.0f, -1.0f);
+		glUniform3f(loc_inds[4], 1.0f, 1.0f, -1.0f);
+		glUniform3f(loc_inds[5], 1.0f, -1.0f, 1.0f);
+		glUniform3f(loc_inds[6], -1.0f, 1.0f, 1.0f);
+		glUniform3f(loc_inds[7], -1.0f, 1.0f, -1.0f);
+		glUniform3f(loc_inds[8], -1.0f, -1.0f, 1.0f);
+		glUniform3f(loc_inds[9], 1.0f, 1.0f, 0.0f);
+
+	}
 
 	
 	//fragment shader uniforms
@@ -237,6 +267,8 @@ int main(void)
 	//no texture this time
 	//there are some uniforms, in the vertex shader, we have to compute the uniform location
 
+
+
 	do {
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -244,13 +276,11 @@ int main(void)
 		//for container, the uniform data does not change, so we can apply now
 		glm::mat4 Model = glm::mat4(1.0f);
 		//Model = glm::scale(Model, glm::vec3(0.1f));
-		glm::mat4 View  = glm::lookAt(glm::vec3(4,3,3), glm::vec3(0,0,0), glm::vec3(0,1,0)) * get_rotation_mat();
+		glm::mat4 View  = glm::lookAt(glm::vec3(4,3, 3), glm::vec3(0,0,0), glm::vec3(0,1,0)) * get_rotation_mat();
 		glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 		glm::mat4 mvp = Projection * View * Model;
-
 		
 		//light program
-		
 		glUseProgram(light_id);
 		//compute the light pos at every step, the light is in 
 		glm::vec3 light_pos(cos(theta), 1.0f, -sin(theta));
@@ -275,11 +305,10 @@ int main(void)
 
 		glUniform3f(glGetUniformLocation(prog_id, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
 		glBindVertexArray(containerVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 10);
+//		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
-
-		
 		glfwSwapBuffers(window);
 		
 	} while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&

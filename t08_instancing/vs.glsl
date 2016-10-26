@@ -7,15 +7,19 @@ layout (location = 2) in vec2 texCoords;
 out vec2 TexCoords;
 out vec3 fragPos;
 out vec3 Normal;
-
+out vec3 Color;
 uniform mat4 MVP;
 uniform mat4 model;
 
+uniform vec3 offsets[10];
+
 void main(void)
 {
-	//it is still very simple
-	gl_Position = MVP * vec4(position, 1.0);
+
+	vec3 offset = offsets[gl_InstanceID];
+	gl_Position = MVP * vec4(position + offset, 1.0f);
 	Normal = normal;
-	fragPos = vec3(model * vec4(position, 1.0f));
+	fragPos = vec3(model * vec4(position + offset, 1.0f));
 	TexCoords = texCoords;
+	Color = offset;
 }
