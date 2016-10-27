@@ -27,7 +27,20 @@ const unsigned int width = 1024;
 const unsigned int height = 1024;
 using namespace glm;
 
-GLfloat VERTICES[] = {
+static GLfloat INSTANCE_OFFSETS[] = {
+	0.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 0.0f, -1.0f
+};
+
+static GLfloat VERTICES[] = {
     // Positions           // Normals           // Texture Coords
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
      0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
@@ -171,12 +184,17 @@ int main(void)
 	GLuint prog_id = container.getPid();
 	glUseProgram(prog_id);
 	
-	GLuint containerVAO, VBO;
+	GLuint containerVAO, VBO, instanceVBO;
 	glGenVertexArrays(1, &containerVAO);
 	glBindVertexArray(containerVAO);
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &instanceVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(VERTICES), VERTICES, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(INSTANCE_OFFSETS), INSTANCE_OFFSETS, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glEnableVertexAttribArray(0);
 	//vertex data
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void*)0);
@@ -187,8 +205,16 @@ int main(void)
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat),
 			      (GLvoid*)(sizeof(GL_FLOAT)*6));
+
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glEnableVertexAttribArray(3);//setup the indices
+
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat),
+			      (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribDivisor(3, 1);
 	glBindVertexArray(0);
-	
+	/*
 	{
 		GLint loc_inds[10];
 		for (int i = 0; i < 10; i++) {
@@ -209,6 +235,7 @@ int main(void)
 		glUniform3f(loc_inds[9], 1.0f, 1.0f, 0.0f);
 
 	}
+	*/
 
 	
 	//fragment shader uniforms
