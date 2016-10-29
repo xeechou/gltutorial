@@ -28,7 +28,7 @@
 #include <shaderman.h>
 #include <controls.h>
 
-#include <mesh.hpp>
+#include <model.hpp>
 
 //#include "controls.hpp"
 
@@ -99,7 +99,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 int main(int argc, char **argv)
 {
 	//there are keypress callback and cursor callback function.
-	GLFWwindow *window = tutorial_init(width, height, NULL, cursor_position_callback);
+	GLFWwindow *window = tutorial_init(width, height, NULL, unity_like_arcball);
 	//we have two object to draw
 	ShaderMan container("vs.glsl", "fs.glsl");
 	GLuint prog_id = container.getPid();
@@ -136,10 +136,10 @@ int main(int argc, char **argv)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//for container, the uniform data does not change, so we can apply now
-		glm::mat4 Model = get_rotation_mat() * glm::scale(glm::vec3(0.15f));
+		glm::mat4 Model = glm::scale(glm::vec3(0.15f));
 		//Model = glm::scale(Model, glm::vec3(0.1f));
-		glm::mat4 View  = glm::lookAt(glm::vec3(4,3,3), glm::vec3(0,0,0), glm::vec3(0,1,0));
-
+//		glm::mat4 View  = glm::lookAt(glm::vec3(4,3,3), glm::vec3(0,0,0), glm::vec3(0,1,0));
+		glm::mat4 View  = unity_like_get_camera_mat();
 		glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 		glm::mat4 mvp = Projection * View * Model;
 
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 //			  << light_pos[0] << ", "
 //			  << light_pos[1] << ", "
 //			  << light_pos[2] << "]" << std::endl;
-//		theta += 0.01f;
+		theta += 0.01f;
 
 		glm::mat4 model = glm::translate(light_pos);
 		model = glm::scale(model, glm::vec3(0.01f));
@@ -168,7 +168,8 @@ int main(int argc, char **argv)
 		glUniformMatrix4fv(glGetUniformLocation(prog_id, "model"), 1, GL_FALSE, &Model[0][0]);
 		//light's other attributes are setted in other places
 		glUniform3f(glGetUniformLocation(prog_id, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
-//		std::cout << glGetUniformLocation(prog_id, "light.position") << std::endl;
+		std::cout << "(" << light_pos[0] << ", " << light_pos[1] << ", " << light_pos[2] << ")" << std::endl;
+		std::cout << glGetUniformLocation(prog_id, "light.position") << std::endl;
 
 		nanosuit.Draw(prog_id);
 

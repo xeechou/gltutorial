@@ -49,12 +49,14 @@ private:
 };
 
 
-
+/* model is the hierarchy of mesh */
 class Model {
 public:
 	Model(GLchar *path) {this->loadModel(path);}
 	void Draw(GLuint shader);
 private:
+	//this is actually bad, after you loading all the meshes, the heirarchy
+	//info lost, we need to change the code
 	std::vector<Mesh> meshes;
 	std::string directory;
 	std::map<std::string, Texture> textures_loaded;
