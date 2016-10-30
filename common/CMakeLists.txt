@@ -7,7 +7,7 @@ add_library(common STATIC
   utils.cpp
   controls.cpp
   shaderman.cpp
-  mesh.cpp)
+  model.cpp)
 
 target_link_libraries(common
   ${assimp_LIBRARIES})

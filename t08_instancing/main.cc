@@ -172,11 +172,17 @@ glm::mat4 ROTATION = glm::mat4(1.0);
 glm::mat4& get_rotation_mat(void) {
 	return ROTATION;
 }
+
+void myscroll_callback(GLFWwindow *win, double xoffset, double yoffset)
+{
+	std::cout << "the xoffset: " << xoffset << " and the yoffset: " << yoffset << std::endl;
+}
 int main(void)
 {
 	//there are keypress callback and cursor callback function.
 	GLFWwindow *window = tutorial_init(width, height, NULL, cursor_position_callback);
 	
+	glfwSetScrollCallback(window, myscroll_callback);
 	//we have two object to draw
 	ShaderMan container("vs.glsl", "fs.glsl");
 	//create vertex array and vertex buffer
@@ -214,29 +220,6 @@ int main(void)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glVertexAttribDivisor(3, 1);
 	glBindVertexArray(0);
-	/*
-	{
-		GLint loc_inds[10];
-		for (int i = 0; i < 10; i++) {
-			std::stringstream ss;
-			ss << "offsets[" << i << "]";
-			loc_inds[i] = glGetUniformLocation(prog_id, ss.str().c_str());
-			std::cout << "offset loc: " << loc_inds[i] << std::endl;
-		}
-		glUniform3f(loc_inds[0], 0.0f, 0.0f, 0.0f);
-		glUniform3f(loc_inds[1], 1.0f, 1.0f, 1.0f);
-		glUniform3f(loc_inds[2], -1.0f, -1.0f, -1.0f);
-		glUniform3f(loc_inds[3], 1.0f, -1.0f, -1.0f);
-		glUniform3f(loc_inds[4], 1.0f, 1.0f, -1.0f);
-		glUniform3f(loc_inds[5], 1.0f, -1.0f, 1.0f);
-		glUniform3f(loc_inds[6], -1.0f, 1.0f, 1.0f);
-		glUniform3f(loc_inds[7], -1.0f, 1.0f, -1.0f);
-		glUniform3f(loc_inds[8], -1.0f, -1.0f, 1.0f);
-		glUniform3f(loc_inds[9], 1.0f, 1.0f, 0.0f);
-
-	}
-	*/
-
 	
 	//fragment shader uniforms
 	glUniform3f(glGetUniformLocation(prog_id, "objectColor"), 1.0f, 0.5f, 0.31f);

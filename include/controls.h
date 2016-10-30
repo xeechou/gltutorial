@@ -20,8 +20,8 @@ void arcball_rotate(double xpos_prev, double ypos_prev,
 
 
 //This is what they called singleton design pattern
-void unity_like_arcball(GLFWwindow* window, double xpos, double ypos);
-
+void unity_like_arcball_cursor(GLFWwindow* window, double xpos, double ypos);
+void unity_like_arcball_scroll(GLFWwindow* window, double xoffset, double yoffset);
 //this is the wrapper for the unity camera
 glm::mat4 unity_like_get_camera_mat(void);
 

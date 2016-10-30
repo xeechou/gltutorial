@@ -99,7 +99,8 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 int main(int argc, char **argv)
 {
 	//there are keypress callback and cursor callback function.
-	GLFWwindow *window = tutorial_init(width, height, NULL, unity_like_arcball);
+	GLFWwindow *window = tutorial_init(width, height, NULL, unity_like_arcball_cursor);
+	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 	//we have two object to draw
 	ShaderMan container("vs.glsl", "fs.glsl");
 	GLuint prog_id = container.getPid();
@@ -168,8 +169,8 @@ int main(int argc, char **argv)
 		glUniformMatrix4fv(glGetUniformLocation(prog_id, "model"), 1, GL_FALSE, &Model[0][0]);
 		//light's other attributes are setted in other places
 		glUniform3f(glGetUniformLocation(prog_id, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
-		std::cout << "(" << light_pos[0] << ", " << light_pos[1] << ", " << light_pos[2] << ")" << std::endl;
-		std::cout << glGetUniformLocation(prog_id, "light.position") << std::endl;
+//		std::cout << "(" << light_pos[0] << ", " << light_pos[1] << ", " << light_pos[2] << ")" << std::endl;
+//		std::cout << glGetUniformLocation(prog_id, "light.position") << std::endl;
 
 		nanosuit.Draw(prog_id);
 
