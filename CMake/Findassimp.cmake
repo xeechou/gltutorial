@@ -52,10 +52,21 @@ if(WIN32)
 	
 else(WIN32)
 
+  	find_path(
+	  assimp_INCLUDE_DIRS
+	  NAMES postprocess.h scene.h version.h config.h cimport.h
+	  PATHS /usr/include/assimp/
+	)
+
 	find_path(
 	  assimp_INCLUDE_DIRS
 	  NAMES postprocess.h scene.h version.h config.h cimport.h
 	  PATHS /usr/local/include/
+	)
+	find_library(
+	  assimp_LIBRARIES
+	  NAMES assimp
+	  PATHS /usr/lib/
 	)
 
 	find_library(
