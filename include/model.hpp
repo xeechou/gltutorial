@@ -4,7 +4,10 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <utility>
 #include <map>
+#include <string>
+
 
 #include <GL/glew.h>
 
@@ -13,12 +16,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-
 //asset loading library
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
 
 
 //The Vertex struct is one row of vertex. We need to makesure there is no hole between data
@@ -49,7 +50,9 @@ private:
 };
 
 
-/* model is the hierarchy of mesh */
+/**
+ * @brief The basic model class, only contains a list of meshes
+ */
 class Model {
 public:
 	Model(GLchar *path) {this->loadModel(path);}
@@ -68,5 +71,32 @@ private:
 	std::vector<Texture> loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const char *name);
 };
 
+enum TYPE_LIGHT {
+	POINT,
+	DIRECTION,
+	SPOT,
+};
 
-#endif
+struct light {
+	glm::vec3 color;
+	float ambient_intensity;
+	float diffuse_intensity;
+	//and there more stuff.
+};
+
+/**
+ * @brief The basic Scene data structure
+ *
+ *
+ * For now it is super simple, We can just use model for the rendering.
+ */
+class Scene {
+private:
+	std::vector<struct light> light_sources;
+
+	std::pair<std::string, Model> nodes;
+
+};
+
+
+#endif /* EOF */
