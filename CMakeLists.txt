@@ -19,8 +19,8 @@ find_package(glm   REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(assimp REQUIRED)
-find_package(GLFW REQUIRED)
-
+#find_package(GLFW REQUIRED)
+pkg_search_module(GLFW REQUIRED glfw3)
 include_directories(include)
 add_subdirectory(common)
 
