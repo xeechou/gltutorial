@@ -14,9 +14,13 @@ struct Material {
        sampler2D specular0;//setted
        float	 shininess;//setted
 };
-uniform Material material; //setup in the Mesh class
+//uniform Material material; //setup in the Mesh class
 uniform vec3 viewPos;//setted
 uniform vec3 lightColor; //setted
+
+
+uniform sampler2D diffuse;
+uniform sampler2D specular;
 
 //the fragment shader must follow this protocol, we could optimize it in the
 //future by setting the name in Mesh class.
@@ -64,19 +68,19 @@ void main(void)
 
 	//ambient
 //	vec3 ambient = vec3(light.ambient, 1.0, 1.0);
-	vec3 ambient = 0.3 * vec3(texture(material.diffuse0, TexCoords));
+	vec3 ambient = 0.3 * vec3(texture(diffuse, TexCoords));
 
 	//diffuse
 	float diff   = dot(lightDir, norm);
-	vec3 diffuse = 0.7 * diff *
-	     	       vec3(texture(material.diffuse0, TexCoords));
+	vec3 diffu = 0.7 * diff *
+	     	       vec3(texture(diffuse, TexCoords));
 
 	//specular
 	vec3 refDir  = reflect(-lightDir, norm);
 	vec3 viewDir = normalize(viewPos - fragPos);
 	float spec   = pow(max(dot(refDir, viewDir), 0.0), 32.0);
-	vec3 specular= 0.5 * spec * vec3(texture(material.specular0, TexCoords));
+	vec3 spec= 0.5 * spec * vec3(texture(specular, TexCoords));
 
 	//so the problem is light struct doesn't work...
-	color = vec4(ambient+diffuse+specular, 1.0f);
+	color = vec4(ambient+diffu+spec, 1.0f);
 }

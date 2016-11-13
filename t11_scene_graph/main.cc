@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 
 	Scene scene;
 	scene.loadModel(argv[1]);
-	Model nanosuit(argv[1]);
+//	Model nanosuit(argv[1]);
 	std::cout << "Done loading models" << std::endl;
 	std::cout << "light.diffuse is " << glGetUniformLocation(prog_id, "light.ambient") << std::endl;
 	//the only thing that material doesn't change
@@ -174,7 +174,8 @@ int main(int argc, char **argv)
 //		std::cout << "(" << light_pos[0] << ", " << light_pos[1] << ", " << light_pos[2] << ")" << std::endl;
 //		std::cout << glGetUniformLocation(prog_id, "light.position") << std::endl;
 
-		nanosuit.Draw(prog_id);
+//		nanosuit.Draw(prog_id);
+		scene.draw(prog_id);
 
 		glfwSwapBuffers(window);
 		
