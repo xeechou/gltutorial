@@ -23,8 +23,7 @@ const unsigned int width = 1024;
 const unsigned int height = 1024;
 using namespace glm;
 
-
-
+/*
 GLfloat VERTICES[] = {
     // Positions           // Normals           // Texture Coords
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
@@ -69,6 +68,54 @@ GLfloat VERTICES[] = {
     -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
+*/
+
+float VERTICES[] = {
+	// Back face
+	-0.5f, -0.5f, -0.5f,0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // Bottom-left
+	0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f,1.0f, 1.0f, // top-right
+	0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f,1.0f, 0.0f, // bottom-right
+	0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f,1.0f, 1.0f, // top-right
+	-0.5f, -0.5f, -0.5f,0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+	-0.5f,  0.5f, -0.5f,0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+	// Front face	                       
+	-0.5f, -0.5f,  0.5f,0.0f,  0.0f, 1.0f,  0.0f, 0.0f, // bottom-left
+	0.5f, -0.5f,  0.5f, 0.0f,  0.0f, 1.0f, 1.0f, 0.0f, // bottom-right
+	0.5f,  0.5f,  0.5f, 0.0f,  0.0f, 1.0f, 1.0f, 1.0f, // top-right
+	0.5f,  0.5f,  0.5f, 0.0f,  0.0f, 1.0f, 1.0f, 1.0f, // top-right
+	-0.5f,  0.5f,  0.5f,0.0f,  0.0f, 1.0f,  0.0f, 1.0f, // top-left
+	-0.5f, -0.5f,  0.5f,0.0f,  0.0f, 1.0f,  0.0f, 0.0f, // bottom-left
+	// Left face	                       
+	-0.5f,  0.5f,  0.5f,1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+	-0.5f,  0.5f, -0.5f,1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+	-0.5f, -0.5f, -0.5f,1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+	-0.5f, -0.5f, -0.5f,1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+	-0.5f, -0.5f,  0.5f,1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+	-0.5f,  0.5f,  0.5f,1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+	// Right face	                       
+	0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f,1.0f, 0.0f, // top-left
+	0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,0.0f, 1.0f, // bottom-right
+	0.5f,  0.5f, -0.5f, 1.0f,  0.0f,  0.0f,1.0f, 1.0f, // top-right
+	0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,0.0f, 1.0f, // bottom-right
+	0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f,1.0f, 0.0f, // top-left
+	0.5f, -0.5f,  0.5f, 1.0f,  0.0f,  0.0f,0.0f, 0.0f, // bottom-left
+	// Bottom face	                       
+	-0.5f, -0.5f, -0.5f,0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+	0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,1.0f, 1.0f, // top-left
+	0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,1.0f, 0.0f, // bottom-left
+	0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,1.0f, 0.0f, // bottom-left
+	-0.5f, -0.5f,  0.5f,0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+	-0.5f, -0.5f, -0.5f,0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+	// Top face	                       
+	-0.5f,  0.5f, -0.5f,0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+	0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,1.0f, 0.0f, // bottom-right
+	0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,1.0f, 1.0f, // top-right
+	0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,1.0f, 0.0f, // bottom-right
+	-0.5f,  0.5f, -0.5f,0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+	-0.5f,  0.5f,  0.5f,0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
+};
+
+
 
 void update_position(GLFWwindow *window, glm::vec3& position, double deltaTime);
 int main(void)
@@ -128,7 +175,7 @@ int main(void)
 	//for container, the uniform data does not change, so we can apply now
 	glm::mat4 Model = glm::mat4(1.0f);
 	//Model = glm::scale(Model, glm::vec3(0.1f));
-	glm::mat4 View  = glm::lookAt(glm::vec3(4,3,3), glm::vec3(0,0,0), glm::vec3(0,1,0));
+	glm::mat4 View  = glm::lookAt(glm::vec3(0,1,3), glm::vec3(0,0,0), glm::vec3(0,1,0));
 	glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 	glm::mat4 mvp = Projection * View * Model;
 	glUniformMatrix4fv(glGetUniformLocation(prog_id, "MVP"), 1, GL_FALSE, &mvp[0][0]);
@@ -196,6 +243,11 @@ int main(void)
 		glfwPollEvents();
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CW);
+		
 		//light program
 		
 		glUseProgram(light_id);
