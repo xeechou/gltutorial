@@ -67,7 +67,7 @@ public:
 
 	glm::mat4 getViewMat(void);
 };
-
+static UnityArcBall ARCBALL(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 void
 UnityArcBall::arcball_rotate(double xpos, double ypos, double xpos_prev, double ypos_prev)
 {
@@ -126,7 +126,7 @@ void UnityArcBall::arcball_scale(double length)
 	_camera_pos = glm::normalize(direction) * new_norm + _lookat_pos;
 	_inuse = false;
 }
-static UnityArcBall ARCBALL(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+
 
 glm::mat4
 UnityArcBall::getViewMat(void)
@@ -134,37 +134,40 @@ UnityArcBall::getViewMat(void)
 	return glm::lookAt(_camera_pos, _lookat_pos, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
-
+/** call backs */
 void unity_like_arcball_cursor(GLFWwindow *win, double xpos, double ypos)
 {
 	static double xprev = 0.0f, yprev = 0.0f;
 	static int lstate_prev = GLFW_RELEASE;
 	static int rstate_prev = GLFW_RELEASE;
 	static int mstate_prev = GLFW_RELEASE;
+	(void)lstate_prev;
+	(void)rstate_prev;
+	(void)mstate_prev;
 	
-	glfw2gl_coord(win, xpos, ypos, &xpos, &ypos);	
+	glfw2gl_coord(win, xpos, ypos, &xpos, &ypos);
 	int lstate = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT);
 	int rstate = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_RIGHT);	
 	int mstate = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_MIDDLE);
 	if (lstate == GLFW_PRESS) {
-		
+		ARCBALL.arcball_translate(xpos, ypos, xprev, yprev);
 	} else if (rstate == GLFW_PRESS) {
 		ARCBALL.arcball_rotate(xpos, ypos, xprev, yprev);
 	} else if (mstate == GLFW_PRESS) {
-		ARCBALL.arcball_translate(xpos, ypos, xprev, yprev);
 	}
-	
+	//update
 	xprev = xpos, yprev = ypos;
 	rstate_prev = rstate;
 	lstate_prev = lstate;
 	mstate_prev = mstate;
+
 }
 
 
 void unity_like_arcball_scroll(GLFWwindow *win, double xoffset, double yoffset)
 {
 	//xoffset is useless, only use yoffset
-	ARCBALL.arcball_scale(0.01 * yoffset);
+	ARCBALL.arcball_scale(0.1 * yoffset);
 }
 
 

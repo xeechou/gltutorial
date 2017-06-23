@@ -93,8 +93,10 @@ void Mesh::Draw(GLuint prog_id)
 	}
 	glActiveTexture(GL_TEXTURE0);
 
-	// Draw mesh
+	//since we only have one vao here. It's better to draw this first
 	glBindVertexArray(this->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
 	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
@@ -178,6 +180,7 @@ Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		aiFace face = mesh->mFaces[i];
 		for (size_t j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
+
 	}
 
 	//materials is diffuse and specular

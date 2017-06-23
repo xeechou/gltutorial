@@ -88,7 +88,7 @@ MeshNode::drawInstanced(GLuint program, Scene *scene)
 {
 	glUseProgram(program);
 
-	for (int i = 0; i < this->materials.size(); i++) {
+	for (size_t i = 0; i < this->materials.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		struct Tex& texture = scene->materials[this->materials[i]].second;
 		glBindTexture(GL_TEXTURE_2D, texture.id);
@@ -113,7 +113,7 @@ MeshNode::draw(GLuint program, Scene *scene)
 {
 	glUseProgram(program);
 
-	for (int i = 0; i < this->materials.size(); i++) {
+	for (size_t i = 0; i < this->materials.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		struct Tex& texture = scene->materials[this->materials[i]].second;
 		glBindTexture(GL_TEXTURE_2D, texture.id);
@@ -138,7 +138,6 @@ MeshNode::draw(GLuint program, Scene *scene)
 void
 MeshNode::setupMesh_forshader(GLuint program, Scene *scene)
 {
-
 	//Using this code means we need to have the same input layout for shaders
 
 	glUseProgram(program);
@@ -193,10 +192,10 @@ Scene::draw(GLuint program)
 {
 	//TODO The skybox code should be added here
 	//I need a program
-	for (int i = 0; i < this->children.size(); i++) {
+	for (size_t i = 0; i < this->children.size(); i++) {
 		model_ind_t& child = this->children[i];
 		std::vector<unsigned int>& mesh = std::get<0>(child);
-		for (int j = 0; j < meshes.size(); j++) {
+		for (size_t j = 0; j < meshes.size(); j++) {
 			auto it = this->instances.find(std::get<1>(child));
 			if ( it != this->instances.end() )
 				this->meshes[mesh[j]].drawInstanced(program, this);
@@ -204,8 +203,6 @@ Scene::draw(GLuint program)
 				this->meshes[mesh[j]].draw(program, this);
 		}
 	}
-
-		
 }
 
 
@@ -266,10 +263,10 @@ Scene::loadModel(const char *path, const std::vector<glm::mat4>& instances_trans
 	//but fuck that, this could make things becomes very nasty, on node should use one mesh
 
 	//second, setting up mesh for each node
-	for (int i = this->loaded_mesh; i < this->meshes.size(); i++)
+	for (size_t i = this->loaded_mesh; i < this->meshes.size(); i++)
 		this->meshes[i].setupMesh_forshader(0, this);
 
-	for (int i = 0; i < scene->mNumMaterials; i++) {
+	for (size_t i = 0; i < scene->mNumMaterials; i++) {
 
 		const aiMaterial *material = scene->mMaterials[i];
 		this->processingMaterial(material, directory);		
@@ -314,8 +311,8 @@ Scene::append_mesh(aiMesh* mesh, const aiScene *scene, unsigned int model_id)
 	
 	//draw mesh with materials
 	if (mesh->mMaterialIndex >= 0) {
-		aiString aistr;
-		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+//		aiString aistr;
+//		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 		m.materials.clear();
 		m.materials.push_back(this->getMaterialID(mesh->mMaterialIndex, TEX_DIFFUSE_MAP));
 		m.materials.push_back(this->getMaterialID(mesh->mMaterialIndex, TEX_SPECULAR_MAP));
@@ -335,14 +332,14 @@ Scene::processingMaterial(const aiMaterial *material, const std::string& directo
 	std::vector<std::pair<std::string, struct Tex> >mats(NUM_MATERIAL_TYPE, init_data);
 
 	aiString aistr;
-	for (int j = 0; j < material->GetTextureCount(aiTextureType_DIFFUSE); j++) {
+	for (size_t j = 0; j < material->GetTextureCount(aiTextureType_DIFFUSE); j++) {
 		if (material->GetTexture(aiTextureType_DIFFUSE, j, &aistr)) {
 			GLuint tid = texture_from_file(aistr.C_Str(), directory);
 			mats[j] = std::pair<std::string, struct Tex>(std::string(aistr.C_Str()), (struct Tex){tid, TEX_DIFFUSE_MAP});
 			break;
 		}
 	}
-	for (int j = 0; j < material->GetTextureCount(aiTextureType_SPECULAR); j++) {
+	for (size_t j = 0; j < material->GetTextureCount(aiTextureType_SPECULAR); j++) {
 		if (material->GetTexture(aiTextureType_SPECULAR, j, &aistr)) {
 			GLuint tid = texture_from_file(aistr.C_Str(), directory);
 			mats[j] = std::pair<std::string, struct Tex>(std::string(aistr.C_Str()), (struct Tex){tid, TEX_SPECULAR_MAP});
@@ -380,6 +377,7 @@ ModelNode::processNode(aiNode *ainode, const aiScene *aiscene, Scene *scene,
 		size_t node_id = scene->nodes.size();
 		scene->nodes.push_back(modelnode_t(nodeName,
 						   ModelNode(node_id, this->node_id)));
+		std::cout << nodeName << std::endl;
 		this->child_nodes.push_back(node_id);		
 		ModelNode *node = &scene->nodes[node_id].second;
 

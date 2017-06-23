@@ -51,7 +51,8 @@ window_resize_callback(GLFWwindow *window, int width, int height)
 
 GLFWwindow* tutorial_init(int width, int height,
 			  void (*keyboard_callback)(GLFWwindow*, int, int, int, int),
-			  void (*cursor_callback) (GLFWwindow *, double, double))
+			  void (*cursor_callback) (GLFWwindow *, double, double),
+			  void (*scroll_callback) (GLFWwindow *, double, double))
 {
 	GLFWwindow *window;
        
@@ -81,6 +82,8 @@ GLFWwindow* tutorial_init(int width, int height,
 		glfwSetKeyCallback(window, keyboard_callback);
 	if (cursor_callback)
 		glfwSetCursorPosCallback(window, cursor_callback);
+	if (scroll_callback)
+		glfwSetScrollCallback(window, scroll_callback);
 	glfwSetWindowSizeCallback(window, window_resize_callback);
 	glfwMakeContextCurrent(window);
 	glewExperimental=true;

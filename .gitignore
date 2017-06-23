@@ -1,8 +1,21 @@
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+Makefile
+
+
 # Object files
 *.o
 *.ko
 *.obj
 *.elf
+t*
 
 # Precompiled Headers
 *.gch
@@ -46,3 +59,5 @@ modeset
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
+
+

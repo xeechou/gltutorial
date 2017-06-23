@@ -18,8 +18,9 @@ int read_file(const char *fname, std::string *str);
  */
 
 GLFWwindow* tutorial_init(int width, int height,
-			  void (*keyboard_callback)(GLFWwindow*, int, int, int, int),
-			  void (*cursor_callback) (GLFWwindow *, double, double));
+			  void (*keyboard_callback)(GLFWwindow*, int, int, int, int) = NULL,
+			  void (*cursor_callback) (GLFWwindow *, double, double) = NULL,
+			  void (*scroll_callback) (GLFWwindow *, double, double) = NULL);
 
 void tutorial_terminate(void);
 void update_window(GLFWwindow* window);

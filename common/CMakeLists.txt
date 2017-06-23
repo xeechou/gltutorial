@@ -8,7 +8,8 @@ add_library(common STATIC
   controls.cpp
   shaderman.cpp
   model.cpp
-  scene.cpp)
+  #scene.cpp
+  )
 
 target_link_libraries(common
   ${assimp_LIBRARIES})
