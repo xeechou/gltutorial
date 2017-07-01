@@ -8,8 +8,10 @@ add_library(common STATIC
   controls.cpp
   shaderman.cpp
   model.cpp
-  #scene.cpp
+  framebuffer.cpp
   )
 
 target_link_libraries(common
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
   ${assimp_LIBRARIES})

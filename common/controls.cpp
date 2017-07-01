@@ -112,8 +112,8 @@ void
 UnityArcBall::arcball_translate(double xpos, double ypos, double xpos_prev, double ypos_prev)
 {
 	glm::vec3 distance = glm::vec3(xpos - xpos_prev, ypos - ypos_prev, 0.0f);
-	_camera_pos += distance;
-	_lookat_pos += distance;
+	_camera_pos -= distance;
+	_lookat_pos -= distance;
 }
 void UnityArcBall::arcball_scale(double length)
 {

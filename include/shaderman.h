@@ -12,18 +12,29 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
+#include <boost/filesystem.hpp>
 
 class ShaderMan
 {
+	enum STYPE {VERTEX, FRAGMENT, GEOMETRY, COMPUTE};
 	std::vector<GLuint>shaders;
 	GLuint pid; //program id
+
+	//I will call the static_callback first 
+	int (* static_cb) (GLuint program);
+	int (* perframe_cb) (GLuint program);
+	
 public:
+	//default, vertex shader and fragment shader
 	int loadShaders(const char *, const char *);
 	ShaderMan(void) {pid = 0;};
+	
 	ShaderMan(const char *vshader, const char *fshader);
+	//int loadShader(boost::filesystem::path& p, STYPE shader_type);
 	~ShaderMan();
 	const GLuint getPid(void) {return pid;}
 	void useProgram(void) {glUseProgram(pid);}
+	//we need two callback
 };
 
 

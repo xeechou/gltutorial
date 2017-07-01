@@ -13,7 +13,7 @@
 #include <GL/glfw3.h>
 #endif
 
-#include "fbobj.hpp"
+#include <fbobj.hpp>
 
 static float QUADVERTICES[] = {
 	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -27,9 +27,9 @@ static float QUADVERTICES[] = {
 };
 
 
-
 FBobject::FBobject(int width, int height)
 {
+	//when resolution changed. Detete this shit and use a new frambuffer
 	glGenVertexArrays(1, &this->vao);
 	glGenBuffers(1, &this->vbo);
 
@@ -53,6 +53,7 @@ FBobject::FBobject(int width, int height)
 
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	//to enable depth test, you have to allocate here as well. It is an option
 	glGenRenderbuffers(1, &this->rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
@@ -61,10 +62,6 @@ FBobject::FBobject(int width, int height)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
-	//you have to create a depth buffer as well for the framebuffer as
-	//well. Otherwise the framebuffer will not have depth
-
 }
 
 //don't allow user to know fbo where fbo is

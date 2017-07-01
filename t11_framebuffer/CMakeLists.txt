@@ -11,8 +11,6 @@ include_directories(
 
 add_executable(t11
   newmain.cpp
-  model.cpp
-  framebuffer.cpp
   )
 
 target_link_libraries(t11
