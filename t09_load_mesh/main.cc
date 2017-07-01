@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 //		std::cout << "(" << light_pos[0] << ", " << light_pos[1] << ", " << light_pos[2] << ")" << std::endl;
 //		std::cout << glGetUniformLocation(prog_id, "light.position") << std::endl;
 
-		nanosuit.Draw(prog_id);
+		nanosuit.draw(prog_id);
 
 		glfwSwapBuffers(window);
 		
