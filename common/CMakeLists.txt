@@ -9,6 +9,7 @@ add_library(common STATIC
   shaderman.cpp
   model.cpp
   framebuffer.cpp
+  context.cpp
   )
 
 target_link_libraries(common

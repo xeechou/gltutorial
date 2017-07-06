@@ -16,6 +16,8 @@
 
 class ShaderMan
 {
+	typedef boost::filesystem::path path_t;
+	
 	enum STYPE {VERTEX, FRAGMENT, GEOMETRY, COMPUTE};
 	std::vector<GLuint>shaders;
 	GLuint pid; //program id
@@ -28,8 +30,11 @@ public:
 	//default, vertex shader and fragment shader
 	int loadShaders(const char *, const char *);
 	ShaderMan(void) {pid = 0;};
-	
+	//old interface
 	ShaderMan(const char *vshader, const char *fshader);
+	//add shader from string
+	int addShader(const char *, STYPE type);
+	int addShader(const path_t&, STYPE type);
 	//int loadShader(boost::filesystem::path& p, STYPE shader_type);
 	~ShaderMan();
 	const GLuint getPid(void) {return pid;}
