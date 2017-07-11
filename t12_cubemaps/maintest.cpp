@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 			this->theta = 0.0f;
 			this->m = glm::mat4(0.01f);
 			this->v = unity_like_get_camera_mat();
-			
+
 			this->p = glm::perspective(glm::radians(90.0f),
 						   (float)width / (float)height, 0.1f, 100.f);
 //			count = 0;
@@ -101,6 +101,7 @@ int main(int argc, char **argv)
 			GLuint matDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
 			GLuint matSpecularLoc = glGetUniformLocation(this->prog, "light.specular");
 			GLuint skyboxSampler  = glGetUniformLocation(this->prog, "skybox");
+
 
 			glUniform1f(matAmbientLoc,  0.3f);
 			glUniform1f(matDiffuseLoc,  0.5f);
@@ -127,11 +128,13 @@ int main(int argc, char **argv)
 		int itr_setup(void) override {
 			this->theta += 0.1f;
 			this->v = unity_like_get_camera_mat();
+			glm::vec3 view_pos = this->v[3];
+			
 			glm::mat4 mvp = this->p * this->v * this->m;
 			glm::vec3 light_pos(cos(this->theta), 5.0f, -sin(this->theta));
 
 			//this is probably not right.
-			glUniform3f(glGetUniformLocation(this->prog, "viewPos"), 4.0f, 3.0f, 3.0f);
+			glUniform3f(glGetUniformLocation(this->prog, "viewPos"), view_pos[0], view_pos[1], view_pos[2]);
 			glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &mvp[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(this->prog, "model"), 1, GL_FALSE, &m[0][0]);
 			//light's other attributes are setted in other places

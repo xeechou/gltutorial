@@ -9,22 +9,9 @@ include_directories(
 
 
 
-add_executable(t12
-  main.cpp
-  )
 
 add_executable(tt12
   maintest.cpp
-  )
-
-target_link_libraries(t12
-  ${GLFW_LIBRARIES}
-  ${GLEW_LIBRARIES}
-  ${GLM_LIBRARIES}
-  ${OPENGL_LIBRARY}
-  ${OpenCV_LIBS}
-  ${assimp_LIBRARIES}
-  common
   )
 
 target_link_libraries(tt12
