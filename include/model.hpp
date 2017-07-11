@@ -18,6 +18,9 @@
 #include <assimp/postprocess.h>
 
 
+#include "types.hpp"
+#include "shaderman.h"
+
 class Mesh;
 class Texture;
 class Model;
@@ -36,16 +39,16 @@ class Texture {
 public:
 	//GPU representation
 	GLuint id;
-	enum TYPE {
-		Diffuse,
-		Specular,
-		Ambient,
-		Normal,
-		NTypeTexture = 4
-	};
-	TYPE type;
+//	enum TYPE {
+//		Diffuse,
+//		Specular,
+//		Ambient,
+//		Normal,
+//		NTypeTexture = 4
+//	};
+	TEX_TYPE type;
 //		cv::Mat texture;
-	Texture(GLuint gpu_handle, TYPE type) {
+	Texture(GLuint gpu_handle, TEX_TYPE type) {
 		this->id = gpu_handle;
 		this->type = type;
 	}
@@ -69,6 +72,7 @@ public:
 	     const std::vector<glm::vec2> *uvs = NULL,
 	     const unsigned int material_id = -1);
 	~Mesh();
+	//add a callback to user. 
 private:
 	//GPU representation
 	GLuint VAO;
@@ -81,13 +85,19 @@ private:
 	//push vertices to gpu
 	void pushMesh2GPU();
 	void draw(GLuint prog, const Model& model);
-};
+	void draw(const ShaderMan *sm, const Model& model);
 
+};
 
 //A model is a list of Meshes
 class Model {
 	friend Mesh;
 private:
+	enum Parameter {
+		NO_PARAMS   = 0,
+		NO_TEXTURE  = 1,
+		AUTO_NORMAL = 2,
+	};
 	//you can't actually draw one VBO at a time.
 	GLuint VAO;
 	//Each mesh coordinates is in the model coordinate system, this is how it works
@@ -95,14 +105,20 @@ private:
 	//materials is a vector of vector
 	std::vector<Material> Materials;
 	std::string root_path;
+	const ShaderMan *shader_to_draw;	
 	int processNode(const aiScene *scene, aiNode *node);
-		
+
 public:
 	//Model *modelFromFile(const std::string& file);
-	Model(const std::string& file);
+	Model(const std::string& file, Parameter params = NO_PARAMS);
 	Model(void);
 	~Model(void);
-	void draw(GLuint shader);
+	//you should actually draw with the shaderMan
+	void draw(void);
+	void setShader(const ShaderMan*);
+	//bind, unbind shader
+	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}
+	const ShaderMan* currentShader(void) {return this->shader_to_draw;}
 };
 
 //third layer of the geometry

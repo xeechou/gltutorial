@@ -10,24 +10,34 @@
 #include <GL/glfw3.h>
 #endif
 
+#include <utility>
+
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <boost/filesystem.hpp>
 
+#include "types.hpp"
+
+
+
+//now it becomes the second place where we use the
 class ShaderMan
 {
 	typedef boost::filesystem::path path_t;
 	
 	enum STYPE {VERTEX, FRAGMENT, GEOMETRY, COMPUTE};
-	std::vector<GLuint>shaders;
+	std::vector<GLuint> shaders;
 	GLuint pid; //program id
 
 	//I will call the static_callback first 
 	int (* static_cb) (GLuint program);
 	int (* perframe_cb) (GLuint program);
-	
+	//To shaders its only uniforms
 public:
-	//default, vertex shader and fragment shader
+	//so, we have a brunch of aiSupported texture, for texture like CUBEMAP...
+	//I need to figure out later how to support it.
+	std::vector<TEX_TYPE> tex_uniforms;
+	//default, vertex shader and fragment shader	
 	int loadShaders(const char *, const char *);
 	ShaderMan(void) {pid = 0;};
 	//old interface
@@ -37,9 +47,10 @@ public:
 	int addShader(const path_t&, STYPE type);
 	//int loadShader(boost::filesystem::path& p, STYPE shader_type);
 	~ShaderMan();
-	const GLuint getPid(void) {return pid;}
+	GLuint getPid(void) const {return pid;}
 	void useProgram(void) {glUseProgram(pid);}
 	//we need two callback
+	virtual void setupTexUniform(void)  {};
 };
 
 

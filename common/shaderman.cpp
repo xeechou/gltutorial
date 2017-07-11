@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <sstream>
 #include <iostream>
 #include <GL/glew.h>
@@ -5,6 +6,7 @@
 //#include <shaderman.h>
 #include "../include/shaderman.h"
 #include "../include/utils.h"
+
 
 static
 GLuint load_shader(const char *fname, GLenum type)

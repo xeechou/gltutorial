@@ -20,6 +20,12 @@
 
 #include <model.hpp>
 
+sprt_tex2d_t texture_types_supported[TEX_NTexType] = {
+	{aiTextureType_AMBIENT, TEX_Ambient},
+	{aiTextureType_DIFFUSE, TEX_Diffuse},
+	{aiTextureType_NORMALS, TEX_Normal},
+	{aiTextureType_SPECULAR, TEX_Specular}
+};
 
 GLuint
 loadTexture2GPU(const std::string fname)
@@ -145,25 +151,43 @@ Mesh::pushMesh2GPU(void)
 }
 
 void
-Mesh::draw(GLuint prog, const Model& model)
+Mesh::draw(const ShaderMan *sm, const Model& model)
 {
+	GLuint prog = sm->getPid();
 	glUseProgram(prog);
 	const Material& mat = model.Materials[this->materialIndx];
+	// The 2D texture binding should be like this, although we have too loop.
+	//it is is at most 4*4 something
+
+	for (GLuint i = 0; i < sm->tex_uniforms.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		for (GLuint j = 0; j < model.Materials[this->materialIndx].size(); j++) {
+			if (sm->tex_uniforms[i] == mat[i].type) {
+				glBindTexture(GL_TEXTURE_2D, mat[j].id);
+				break;
+			}
+		}
+	}
+	/*
 	for (GLuint i = 0; i < mat.size(); i++) {
 		std::string uniform;
 		GLuint uniform_loc;
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, mat[i].id);
-		//TODO here you assume you only have diffuse and specular material.
-		if (mat[i].type == Texture::Diffuse)
+		//here is the major problem: you think you know the uniform name
+		//for every mesh, you can't obviously, and this is obviously
+		//bad. you can't control the order of the uniform in this way
+		if (mat[i].type == TEX_Diffuse)
 			uniform = std::string("diffuse");
-		else if (mat[i].type == Texture::Specular)
+		else if (mat[i].type == TEX_Specular)
 			uniform = std::string("specular");
+		//we should assume here is done, what we need to do is 
 		uniform_loc = glGetUniformLocation(prog, uniform.c_str());
 		glUniform1i(uniform_loc, i);
 //		std::cout << "material localtion " << uniform_loc << std::endl;
 		glBindTexture(GL_TEXTURE_2D, mat[i].id);
 	}
+	*/
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
@@ -197,7 +221,8 @@ Model::processNode(const aiScene *scene, aiNode *node)
  * It does flags to the assimp, so we will get the triangluated mesh for sure
  * In terms of 
  */
-Model::Model(const std::string& file)
+	
+Model::Model(const std::string& file, Parameter param)
 {
 	Assimp::Importer import;
 	import.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
@@ -232,13 +257,9 @@ Model::Model(const std::string& file)
 		this->meshes[i].pushMesh2GPU();
 	
 	std::map<std::string, GLuint> textures_cache;
-	//TODO remove this later
-	//Processing texture types are the same code, make it into a loop. Or, 
-	std::array<std::pair<aiTextureType, Texture::TYPE>, 2> texture_types = {
-		std::make_pair(aiTextureType_DIFFUSE, Texture::Diffuse),
-		std::make_pair(aiTextureType_SPECULAR, Texture::Specular),
-	};
 	//remember, every mesh has a material index
+	if (param & NO_TEXTURE)
+		return;
 	this->Materials.resize(scene->mNumMaterials);
 	for (GLuint i = 0; i < scene->mNumMaterials; i++) {
 		std::cout << "material indx: " << i << std::endl;
@@ -246,9 +267,9 @@ Model::Model(const std::string& file)
 		aiString path;
 		Material material;
 		GLuint gpu_handle;
-		for (GLuint j = 0; j < texture_types.size(); j++) {
-			if (mat->GetTextureCount(texture_types[j].first) > 0) {
-				mat->GetTexture(texture_types[j].first, 0, &path);	
+		for (GLuint j = 0; j < TEX_NTexType; j++) {
+			if (mat->GetTextureCount(texture_types_supported[j].aiTextype) > 0) {
+				mat->GetTexture(texture_types_supported[j].aiTextype, 0, &path);
 				std::string full_path = this->root_path + "/" + std::string(path.C_Str());
 				//check whether we loaded already
 				auto it = textures_cache.find(full_path);
@@ -258,7 +279,8 @@ Model::Model(const std::string& file)
 				} else
 					gpu_handle = it->second;
 				material.push_back(
-					Texture(gpu_handle, texture_types[j].second));
+					Texture(gpu_handle,
+						texture_types_supported[j].ourTextype));
 			}
 		}
 		this->Materials[i] = material;
@@ -278,8 +300,11 @@ Model::~Model()
 }
 
 void
-Model::draw(GLuint shader)
+Model::draw()
 {
+	const ShaderMan *sm = this->shader_to_draw;
+	if (!sm)
+		throw std::runtime_error("no shader to draw");
 	for (GLuint i = 0; i < this->meshes.size(); i++)
-		this->meshes[i].draw(shader, *this);
+		this->meshes[i].draw(sm, *this);
 }

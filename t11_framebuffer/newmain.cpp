@@ -34,6 +34,21 @@
 const unsigned int width = 1024;
 const unsigned int height = 1024;
 
+class NanoShader : public ShaderMan {
+public:
+	NanoShader(const char *vs, const char *fs) : ShaderMan(vs, fs) {}
+	void setupTexUniform(void) override {
+		this->tex_uniforms.push_back(TEX_Diffuse);
+		this->tex_uniforms.push_back(TEX_Specular);
+		glUseProgram(this->getPid());
+		GLuint diffuse_id  = glGetUniformLocation(this->getPid(), "diffuse");
+		GLuint specular_id = glGetUniformLocation(this->getPid(), "specular");
+		//I should not need to active texture to 
+		glUniform1i(diffuse_id, 0);
+		glUniform1i(specular_id,1);
+	}
+};
+
 int main(int argc, char **argv)
 {
 	//there are keypress callback and cursor callback function.
@@ -45,10 +60,12 @@ int main(int argc, char **argv)
 	glUseProgram(postprocess.getPid());
 	FBobject fbobj(width, height);
 	
-	ShaderMan container("vs.glsl", "fs.glsl");
+	NanoShader container("vs.glsl", "fs.glsl");
+	container.setupTexUniform();
 	glUseProgram(container.getPid());
 	GLuint prog_id = container.getPid();
 	Model model(argv[1]);
+	model.bindShader(&container);
 
 	GLfloat theta = 0.0f;
 	do {
@@ -89,7 +106,7 @@ int main(int argc, char **argv)
 		
 //		fbobj.unreffbo();
 //		glDisable(GL_DEPTH_TEST);
-		model.draw(prog_id);
+		model.draw();
 
 		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" <<  std::endl;

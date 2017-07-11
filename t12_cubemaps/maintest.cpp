@@ -51,12 +51,14 @@ public:
 		this->prog = pid;
 		this->cube_tex = this->loadCubeMap(cubemaps);
 	}
+	GLuint getCubeTex(void) const {return cube_tex;}
 	int init_setup(void) override;
 	//this get called first
 	int itr_setup(void) override;
 	//then this get called
 	int itr_draw(void) override;
 };
+
 
 
 
@@ -73,12 +75,14 @@ int main(int argc, char **argv)
 	
 	ShaderMan container("vs.glsl", "fs.glsl");
 	Model model(argv[1]);
+	model.bindShader(&container);
 
 	class nanodobj : public DrawObj {
 	private:
 		glm::mat4 m, v, p;
 		Model *model;
 		float theta;
+		GLuint cubeTex = -1;
 
 	public:
 		nanodobj(GLuint pid, Model *m) : DrawObj(pid), model(m) {
@@ -86,18 +90,24 @@ int main(int argc, char **argv)
 			this->theta = 0.0f;
 			this->m = glm::mat4(0.01f);
 			this->v = unity_like_get_camera_mat();
+			
 			this->p = glm::perspective(glm::radians(90.0f),
 						   (float)width / (float)height, 0.1f, 100.f);
 //			count = 0;
 		}
+		void setCubeMapTex(GLuint cube_tex) {this->cubeTex = cube_tex;}
 		int init_setup(void) override {
 			GLuint matAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
 			GLuint matDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
 			GLuint matSpecularLoc = glGetUniformLocation(this->prog, "light.specular");
+			GLuint skyboxSampler  = glGetUniformLocation(this->prog, "skybox");
 
 			glUniform1f(matAmbientLoc,  0.3f);
 			glUniform1f(matDiffuseLoc,  0.5f);
 			glUniform1f(matSpecularLoc, 0.5f);
+
+			//for skybox
+			glUniform1i(skyboxSampler, 0);
 			return 0;
 		}
 		int itr_draw(void) override {
@@ -105,10 +115,13 @@ int main(int argc, char **argv)
 			glUseProgram(prog);
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, this->cubeTex);
 //			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
-
-			model->draw(prog);
+			//you cannot do this
+			model->draw();
 			return 0;
 		}
 		int itr_setup(void) override {
@@ -123,13 +136,15 @@ int main(int argc, char **argv)
 			glUniformMatrix4fv(glGetUniformLocation(this->prog, "model"), 1, GL_FALSE, &m[0][0]);
 			//light's other attributes are setted in other places
 			glUniform3f(glGetUniformLocation(this->prog, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
-		
+			
 			return 0;
 		}
 		
 	} nsuit(container.getPid(), &model);
-	context.append_drawObj(&nsuit);	
-	context.append_drawObj(&skybox);	
+	nsuit.setCubeMapTex(skybox.getCubeTex());
+	
+	context.append_drawObj(&nsuit);
+	context.append_drawObj(&skybox);
 	context.init();
 	context.run();
 }
