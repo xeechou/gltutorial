@@ -97,6 +97,28 @@ Mesh::Mesh(const std::vector<glm::vec3>& vertxs,
 	this->materialIndx = material_id; //the model should take care of this
 }
 
+
+Mesh::Mesh(const float *vertx, const float *norms, const float *uvs, const int nnodes,
+	     const float *indices, const int nfaces)
+{
+	const int size_vn = 3;
+	const int size_uv = 2;
+
+	this->vertices.resize(nnodes);
+	for (int i = 0; i < nnodes; i++) {
+		this->vertices[i].Position  = glm::make_vec3(i*size_vn + vertx);
+		this->vertices[i].Normal    = glm::make_vec3(i*size_vn + norms);
+		this->vertices[i].TexCoords = glm::make_vec2(i*size_uv + uvs);
+	}
+	if (indices) {
+		this->indices.resize(nfaces*3);
+		std::copy(indices, indices + nfaces*3, this->indices.begin());
+	}
+	
+}
+
+//a mesh uses draw_triangles instead of
+
 Mesh::~Mesh(void)
 {
 	if (this->VAO) {
@@ -114,7 +136,7 @@ Mesh::~Mesh(void)
 }
 
 void
-Mesh::pushMesh2GPU(void)
+Mesh::pushMesh2GPU(Mesh::PARAMS param)
 {
 	glGenVertexArrays(1, &this->VAO);
 	glGenBuffers(1, &this->VBO);
@@ -221,7 +243,6 @@ Model::processNode(const aiScene *scene, aiNode *node)
  * It does flags to the assimp, so we will get the triangluated mesh for sure
  * In terms of 
  */
-	
 Model::Model(const std::string& file, Parameter param)
 {
 	Assimp::Importer import;
@@ -307,4 +328,11 @@ Model::draw()
 		throw std::runtime_error("no shader to draw");
 	for (GLuint i = 0; i < this->meshes.size(); i++)
 		this->meshes[i].draw(sm, *this);
+}
+
+//well, you will need different types of mesh this time
+CubeModel::CubeModel()
+{
+	
+	
 }

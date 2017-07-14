@@ -27,9 +27,9 @@ class Model;
 class Instances;
 	
 struct Vertex {
-	glm::vec3 Position; //sizeof(glm::vec3) == 12
-	glm::vec3 Normal; 
-	glm::vec2 TexCoords; //sizeof(glm::vec2) == 8
+	glm::vec3 Position;
+	glm::vec3 Normal;
+	glm::vec2 TexCoords;
 };
 
 typedef struct Vertex Vertex;
@@ -39,15 +39,8 @@ class Texture {
 public:
 	//GPU representation
 	GLuint id;
-//	enum TYPE {
-//		Diffuse,
-//		Specular,
-//		Ambient,
-//		Normal,
-//		NTypeTexture = 4
-//	};
 	TEX_TYPE type;
-//		cv::Mat texture;
+
 	Texture(GLuint gpu_handle, TEX_TYPE type) {
 		this->id = gpu_handle;
 		this->type = type;
@@ -61,6 +54,20 @@ typedef std::vector<Texture> Material;
 
 class Mesh {
 	friend Model;
+	enum PARAMS {LOAD_ALL=0, NO_TEX=1, NO_NORMAL=2};	
+private:
+	//GPU representation
+	GLuint VAO;
+	GLuint VBO, EBO;
+	//CPU representation
+	std::vector<Vertex> vertices;
+	std::vector<GLuint> indices;
+	//since the texture is stored with scene, not 
+	int materialIndx;
+	//push vertices to gpu
+	void pushMesh2GPU(PARAMS=LOAD_ALL);
+	void draw(GLuint prog, const Model& model);
+	void draw(const ShaderMan *sm, const Model& model);
 public:
 	//a mesh contains the material
 	//this may not be a good constructor
@@ -72,27 +79,17 @@ public:
 	     const std::vector<glm::vec2> *uvs = NULL,
 	     const unsigned int material_id = -1);
 	~Mesh();
+	
+	//use draw_triangles instead of draw_elements. if no_indices is specified. Efficient for small objects
+	Mesh(const float *vertx, const float *norms, const float *uvs, const int nnodes,
+	     const float *indices = NULL, const int nfaces = 0);
 	//add a callback to user. 
-private:
-	//GPU representation
-	GLuint VAO;
-	GLuint VBO, EBO;
-	//CPU representation
-	std::vector<Vertex> vertices;
-	std::vector<GLuint> indices;
-	//since the texture is stored with scene, not 
-	int materialIndx;
-	//push vertices to gpu
-	void pushMesh2GPU();
-	void draw(GLuint prog, const Model& model);
-	void draw(const ShaderMan *sm, const Model& model);
-
 };
 
 //A model is a list of Meshes
 class Model {
 	friend Mesh;
-private:
+protected:
 	enum Parameter {
 		NO_PARAMS   = 0,
 		NO_TEXTURE  = 1,
@@ -119,6 +116,17 @@ public:
 	//bind, unbind shader
 	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}
 	const ShaderMan* currentShader(void) {return this->shader_to_draw;}
+};
+
+
+/* some special models to create */
+class CubeModel : Model {
+	
+public:
+	//this will give you a one-by-one cube
+	CubeModel(void);
+	CubeModel(const glm::vec3 translation, const glm::vec3 scale, const glm::vec3 rotation);
+	//void SetColor(glm::vec4 color);
 };
 
 //third layer of the geometry

@@ -31,4 +31,5 @@ typedef struct {
 
 extern sprt_tex2d_t texture_types_supported[TEX_NTexType];
 
+
 #endif /* EOF */

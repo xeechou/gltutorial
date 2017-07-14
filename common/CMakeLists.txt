@@ -10,6 +10,7 @@ add_library(common STATIC
   model.cpp
   framebuffer.cpp
   context.cpp
+  data.cpp
   )
 
 target_link_libraries(common

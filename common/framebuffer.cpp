@@ -14,17 +14,7 @@
 #endif
 
 #include <fbobj.hpp>
-
-static float QUADVERTICES[] = {
-	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-	// positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-	-1.0f, -1.0f,  0.0f, 0.0f,
-	1.0f,  -1.0f,  1.0f, 0.0f,
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	1.0f,  -1.0f,  1.0f, 0.0f,
-	1.0f,   1.0f,  1.0f, 1.0f
-};
+#include <data.hpp>
 
 
 FBobject::FBobject(int width, int height)
