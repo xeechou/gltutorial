@@ -112,6 +112,7 @@ int main(int argc, char **argv)
 	//the only thing that material doesn't change
 	glUniform1f(glGetUniformLocation(prog_id, "material.shininess"), 32.0f);
 	//here we are
+	nanosuit.bindShader(&container);
 	
 
 	glUniform3f(glGetUniformLocation(prog_id, "objectColor"), 1.0f, 0.5f, 0.31f);
@@ -172,7 +173,7 @@ int main(int argc, char **argv)
 //		std::cout << "(" << light_pos[0] << ", " << light_pos[1] << ", " << light_pos[2] << ")" << std::endl;
 //		std::cout << glGetUniformLocation(prog_id, "light.position") << std::endl;
 
-		nanosuit.draw(prog_id);
+		nanosuit.draw();
 
 		glfwSwapBuffers(window);
 		

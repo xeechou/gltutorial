@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 		int itr_setup(void) override {
 			this->theta += 0.1f;
 			this->v = unity_like_get_camera_mat();
-			glm::vec3 view_pos = this->v[3];
+			glm::vec3 view_pos = glm::vec3(this->v[3]);
 			
 			glm::mat4 mvp = this->p * this->v * this->m;
 			glm::vec3 light_pos(cos(this->theta), 5.0f, -sin(this->theta));
