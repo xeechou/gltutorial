@@ -58,6 +58,7 @@ vec4 when_le(vec4 x, vec4 y) {
   }
 */
 
+/* here we have a blin-phone model */
 void main(void)
 {
 	vec3 norm = normalize(Normal);
@@ -75,9 +76,10 @@ void main(void)
 	     	       vec3(texture(diffuse, TexCoords));
 
 	//specular
-	vec3 refDir  = reflect(-lightDir, norm);
+//	vec3 refDir  = reflect(-lightDir, norm);
 	vec3 viewDir = normalize(viewPos - fragPos);
-	float specl   = pow(max(dot(refDir, viewDir), 0.0), 32.0);
+	vec3 highDir = normalize(viewDir + lightDir);
+	float specl   = pow(max(dot(norm, highDir), 0.0), 32.0);
 	vec3 spec = 0.5 * specl * vec3(texture(specular, TexCoords));
 
 	//so the problem is light struct doesn't work...
