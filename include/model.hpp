@@ -26,13 +26,11 @@ class Texture;
 class Model;
 class Instances;
 	
-struct Vertex {
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec2 TexCoords;
+struct Vertices {
+	std::vector<glm::vec3> Positions;
+	std::vector<glm::vec3> Normals;
+	std::vector<glm::vec2> TexCoords;
 };
-
-typedef struct Vertex Vertex;
 
 /** UV mapping **/
 class Texture {
@@ -54,18 +52,18 @@ typedef std::vector<Texture> Material;
 
 class Mesh {
 	friend Model;
-	enum PARAMS {LOAD_ALL=0, NO_TEX=1, NO_NORMAL=2};	
+	enum PARAMS {LOAD_POS=1, LOAD_NORMAL=2, LOAD_TEX=4};
 private:
 	//GPU representation
 	GLuint VAO;
 	GLuint VBO, EBO;
 	//CPU representation
-	std::vector<Vertex> vertices;
+	struct Vertices vertices;
 	std::vector<GLuint> indices;
 	//since the texture is stored with scene, not 
 	int materialIndx;
 	//push vertices to gpu
-	void pushMesh2GPU(PARAMS=LOAD_ALL);
+	void pushMesh2GPU(int params = LOAD_POS | LOAD_NORMAL | LOAD_TEX);
 	void draw(GLuint prog, const Model& model);
 	void draw(const ShaderMan *sm, const Model& model);
 public:
@@ -76,7 +74,7 @@ public:
 	Mesh(const std::vector<glm::vec3>& vertxs,
 	     const std::vector<glm::vec3>& norms,
 	     const std::vector<float>& indices,
-	     const std::vector<glm::vec2> *uvs = NULL,
+	     const std::vector<glm::vec2>& uvs = std::vector<glm::vec2>(),
 	     const unsigned int material_id = -1);
 	~Mesh();
 	

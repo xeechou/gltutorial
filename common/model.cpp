@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 #include <GL/glew.h>
 #ifdef __linux__
@@ -50,19 +51,26 @@ loadTexture2GPU(const std::string fname)
 
 Mesh::Mesh(const aiScene *scene, aiMesh *mesh)
 {
-	this->vertices.resize(mesh->mNumVertices);
+	//rebind for easier name
+	std::vector<glm::vec3> &poses = this->vertices.Positions;
+	std::vector<glm::vec3> &norms = this->vertices.Normals;
+	std::vector<glm::vec2> &texuvs= this->vertices.TexCoords;
+
+	poses.resize(mesh->mNumVertices);
+	norms.resize(mesh->mNumVertices);
+	if (mesh->mTextureCoords[0])
+		texuvs.resize(mesh->mNumVertices);
+	
 	for (GLuint i = 0; i < mesh->mNumVertices; i++) {
-		this->vertices[i].Position = glm::vec3(mesh->mVertices[i].x,
-						       mesh->mVertices[i].y,
-						       mesh->mVertices[i].z);
-		this->vertices[i].Normal = glm::vec3(mesh->mNormals[i].x,
-						     mesh->mNormals[i].y,
-						     mesh->mNormals[i].z);
-		if (mesh->mTextureCoords[0])//if you have different texture coordinates...
-			this->vertices[i].TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x,
-								mesh->mTextureCoords[0][i].y);
-		else
-			this->vertices[i].TexCoords = glm::vec2(0.0f, 0.0f);
+		poses[i] = glm::vec3(mesh->mVertices[i].x,
+				     mesh->mVertices[i].y,
+				     mesh->mVertices[i].z);
+		norms[i] = glm::vec3(mesh->mNormals[i].x,
+				     mesh->mNormals[i].y,
+				     mesh->mNormals[i].z);
+		if (mesh->mTextureCoords[0])
+			texuvs[i] = glm::vec2(mesh->mTextureCoords[0][i].x,
+					      mesh->mTextureCoords[0][i].y);
 	}
 	this->indices.resize(mesh->mNumFaces * 3);
 	for (GLuint i = 0; i < mesh->mNumFaces; i++) {
@@ -79,20 +87,21 @@ Mesh::Mesh(const aiScene *scene, aiMesh *mesh)
 Mesh::Mesh(const std::vector<glm::vec3>& vertxs,
 	       const std::vector<glm::vec3>& norms,
 	       const std::vector<float>& indices,
-	       const std::vector<glm::vec2> *uvs,
+	       const std::vector<glm::vec2>& uvs,
 	       const unsigned int material_id)
 {
 	assert(vertxs.size() == norms.size());
 	assert(indices.size() % 3 == 0);
-	this->vertices.resize(vertices.size());
-	for (GLuint i = 0; i < this->vertices.size(); i++) {
-		this->vertices[i].Position  = vertxs[i];
-		this->vertices[i].Normal    = norms[i];
-		if (!uvs)
-			this->vertices[i].TexCoords = glm::vec2(0.0f, 0.0f);
-		else
-			this->vertices[i].TexCoords = (*uvs)[i];
-	}
+	assert(uvs.size() == vertxs.size() || uvs.size() == 0);
+	std::vector<glm::vec3> &poses   = this->vertices.Positions;
+	std::vector<glm::vec3> &normals = this->vertices.Normals;
+	std::vector<glm::vec2> &texuvs  = this->vertices.TexCoords;
+
+	std::copy(vertxs.begin(), vertxs.end(), poses.begin());
+	std::copy(norms.begin(), norms.end(), normals.begin());
+	if (uvs.size() > 0)
+		std::copy(uvs.begin(), uvs.end(), texuvs.begin());
+
 	std::copy(indices.begin(), indices.end(), this->indices.begin());
 	this->materialIndx = material_id; //the model should take care of this
 }
@@ -104,21 +113,30 @@ Mesh::Mesh(const float *vertx, const float *norms, const float *uvs, const int n
 	const int size_vn = 3;
 	const int size_uv = 2;
 
-	this->vertices.resize(nnodes);
+	std::vector<glm::vec3> &poses   = this->vertices.Positions;
+	std::vector<glm::vec3> &normals = this->vertices.Normals;
+	std::vector<glm::vec2> &texuvs  = this->vertices.TexCoords;
+	poses.resize(nnodes);
+	normals.resize(nnodes);
+	if (uvs)
+		texuvs.resize(nnodes);
 	for (int i = 0; i < nnodes; i++) {
-		this->vertices[i].Position  = glm::make_vec3(i*size_vn + vertx);
-		this->vertices[i].Normal    = glm::make_vec3(i*size_vn + norms);
-		this->vertices[i].TexCoords = glm::make_vec2(i*size_uv + uvs);
+		poses[i]   = glm::make_vec3(i*size_vn + vertx);
+		normals[i] = glm::make_vec3(i*size_vn + norms);
+		texuvs[i]  = glm::make_vec2(i*size_uv + uvs);
 	}
 	if (indices) {
 		this->indices.resize(nfaces*3);
 		std::copy(indices, indices + nfaces*3, this->indices.begin());
+	} else {
+		//otherwise we make a indices as well. so no draw triangles.
+		this->indices.resize(nnodes / 3);
+		int n = {0};
+		std::generate(this->indices.begin(), this->indices.end(), [&] {return n++;});
 	}
-	
 }
 
 //a mesh uses draw_triangles instead of
-
 Mesh::~Mesh(void)
 {
 	if (this->VAO) {
@@ -136,40 +154,51 @@ Mesh::~Mesh(void)
 }
 
 void
-Mesh::pushMesh2GPU(Mesh::PARAMS param)
+Mesh::pushMesh2GPU(int param)
 {
 	glGenVertexArrays(1, &this->VAO);
 	glGenBuffers(1, &this->VBO);
 	glGenBuffers(1, &this->EBO);
-	
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex), //size
-		     &this->vertices[0], //starting address
-		     GL_STATIC_DRAW);
+	glBindVertexArray(this->VAO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint), //size
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint),
 		     &this->indices[0],
 		     GL_STATIC_DRAW);
-
-	//Vertex positons for layouts
+	
+	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+	glBufferData(GL_ARRAY_BUFFER, this->vertices.Positions.size() * (2 * sizeof(glm::vec3) + sizeof(glm::vec2)),
+		     NULL, GL_STATIC_DRAW);
+	size_t offset = 0;
+	glBufferSubData(GL_ARRAY_BUFFER, offset, this->vertices.Positions.size() * sizeof(glm::vec3),
+			&this->vertices.Positions[0]);
+	//Enable Attributes
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-			      (GLvoid *)0);
-	//Vertex Normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-			      (GLvoid *)offsetof(Vertex, Normal));
-	//Vertex Texture Coords, if they dont have texture coordinates, we need
-	//to define texture for it.
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-			      (GLvoid *)offsetof(Vertex, TexCoords));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
+			      (GLvoid *)offset);
+	offset += this->vertices.Positions.size() * sizeof(glm::vec3);
+	
+	if (param & LOAD_NORMAL) {
+		glBufferSubData(GL_ARRAY_BUFFER, offset,
+				this->vertices.Normals.size() * sizeof(glm::vec3),
+				&this->vertices.Normals[0]);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
+				      (GLvoid *)offset);
+		offset += this->vertices.Normals.size() * sizeof(glm::vec3);
+	}
+	if (param & LOAD_TEX) {
+		glBufferSubData(GL_ARRAY_BUFFER,
+				offset, this->vertices.TexCoords.size() * sizeof(glm::vec2),
+				&this->vertices.TexCoords[0]);
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2),
+				      (GLvoid *)offset);
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-//	std::cout << "VAO: " << VAO << " VBO: " << this->VBO << " EBO: " << EBO << std::endl;
-//	std::cout << "indices size" << this->indices.size() << std::endl;
 }
 
 void
@@ -190,26 +219,6 @@ Mesh::draw(const ShaderMan *sm, const Model& model)
 			}
 		}
 	}
-	/*
-	for (GLuint i = 0; i < mat.size(); i++) {
-		std::string uniform;
-		GLuint uniform_loc;
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, mat[i].id);
-		//here is the major problem: you think you know the uniform name
-		//for every mesh, you can't obviously, and this is obviously
-		//bad. you can't control the order of the uniform in this way
-		if (mat[i].type == TEX_Diffuse)
-			uniform = std::string("diffuse");
-		else if (mat[i].type == TEX_Specular)
-			uniform = std::string("specular");
-		//we should assume here is done, what we need to do is 
-		uniform_loc = glGetUniformLocation(prog, uniform.c_str());
-		glUniform1i(uniform_loc, i);
-//		std::cout << "material localtion " << uniform_loc << std::endl;
-		glBindTexture(GL_TEXTURE_2D, mat[i].id);
-	}
-	*/
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
