@@ -10,6 +10,8 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -51,22 +53,8 @@ typedef std::vector<Texture> Material;
 //	typedef std::array<Texture, Texture::NTypeTexture> Material;
 
 class Mesh {
-	friend Model;
-	enum PARAMS {LOAD_POS=1, LOAD_NORMAL=2, LOAD_TEX=4};
-private:
-	//GPU representation
-	GLuint VAO;
-	GLuint VBO, EBO;
-	//CPU representation
-	struct Vertices vertices;
-	std::vector<GLuint> indices;
-	//since the texture is stored with scene, not 
-	int materialIndx;
-	//push vertices to gpu
-	void pushMesh2GPU(int params = LOAD_POS | LOAD_NORMAL | LOAD_TEX);
-	void draw(GLuint prog, const Model& model);
-	void draw(const ShaderMan *sm, const Model& model);
 public:
+	enum PARAMS {LOAD_POS=1, LOAD_NORMAL=2, LOAD_TEX=4};
 	//a mesh contains the material
 	//this may not be a good constructor
 	Mesh(const aiScene *scene, aiMesh *mesh);
@@ -81,6 +69,21 @@ public:
 	//use draw_triangles instead of draw_elements. if no_indices is specified. Efficient for small objects
 	Mesh(const float *vertx, const float *norms, const float *uvs, const int nnodes,
 	     const float *indices = NULL, const int nfaces = 0);
+	
+	friend Model;
+private:
+	//GPU representation
+	GLuint VAO;
+	GLuint VBO, EBO;
+	//CPU representation
+	struct Vertices vertices;
+	std::vector<GLuint> indices;
+	//since the texture is stored with scene, not 
+	int materialIndx;
+	//push vertices to gpu
+	void pushMesh2GPU(int params = LOAD_POS | LOAD_NORMAL | LOAD_TEX);
+	void draw(GLuint prog, const Model& model);
+	void draw(const ShaderMan *sm, const Model& model);
 	//add a callback to user. 
 };
 
@@ -114,16 +117,22 @@ public:
 	//bind, unbind shader
 	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}
 	const ShaderMan* currentShader(void) {return this->shader_to_draw;}
+	
+	//The model won't push the data to GPU by default if no scene is loaded
+	void push2GPU(int param) {
+		for (unsigned int i = 0; i < this->meshes.size(); i++)
+			this->meshes[i].pushMesh2GPU(param);
+	}
 };
 
 
 /* some special models to create */
-class CubeModel : Model {
+class CubeModel : public Model {
 	
 public:
 	//this will give you a one-by-one cube
 	CubeModel(void);
-	CubeModel(const glm::vec3 translation, const glm::vec3 scale, const glm::vec3 rotation);
+	CubeModel(const glm::vec3 translation, const glm::vec3 scale, const glm::quat rotation);
 	//void SetColor(glm::vec4 color);
 };
 
@@ -153,8 +162,6 @@ public:
 
 //now, define a bunch of functions
 GLuint loadTexture2GPU(const std::string fname);
-
-
 
 
 #endif /* EOF */

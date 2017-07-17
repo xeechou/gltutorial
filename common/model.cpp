@@ -11,6 +11,13 @@
 #include <GL/glfw3.h>
 #endif
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+
+
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
@@ -20,6 +27,7 @@
 #include <assimp/postprocess.h>
 
 #include <model.hpp>
+#include <data.hpp>
 
 sprt_tex2d_t texture_types_supported[TEX_NTexType] = {
 	{aiTextureType_AMBIENT, TEX_Ambient},
@@ -320,7 +328,6 @@ Model::Model(const std::string& file, Parameter param)
 
 Model::Model()
 {
-	
 }
 
 Model::~Model()
@@ -342,6 +349,11 @@ Model::draw()
 //well, you will need different types of mesh this time
 CubeModel::CubeModel()
 {
-	
-	
+	this->meshes.push_back(Mesh(CUBEVERTS, CUBENORMS, CUBETEXS, 36));
 }
+
+CubeModel::CubeModel(const glm::vec3 translation, const glm::vec3 scale, const glm::quat rotation)
+{
+	glm::mat3 rotate_mat = glm::mat3_cast(rotation);
+}
+
