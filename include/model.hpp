@@ -70,8 +70,7 @@ public:
 	Mesh(const float *vertx, const float *norms, const float *uvs, const int nnodes,
 	     const float *indices = NULL, const int nfaces = 0);
 	
-	friend Model;
-private:
+	//Okay, Mesh is naked now.
 	//GPU representation
 	GLuint VAO;
 	GLuint VBO, EBO;
@@ -96,8 +95,6 @@ protected:
 		NO_TEXTURE  = 1,
 		AUTO_NORMAL = 2,
 	};
-	//you can't actually draw one VBO at a time.
-	GLuint VAO;
 	//Each mesh coordinates is in the model coordinate system, this is how it works
 	std::vector<Mesh> meshes;
 	//materials is a vector of vector
@@ -131,8 +128,9 @@ class CubeModel : public Model {
 	
 public:
 	//this will give you a one-by-one cube
-	CubeModel(void);
-	CubeModel(const glm::vec3 translation, const glm::vec3 scale, const glm::quat rotation);
+	CubeModel(const glm::vec3 translation = glm::vec3(0.0f),
+		  const glm::vec3 scale = glm::vec3(1.0f),
+		  const glm::quat rotation = glm::quat(glm::vec3(0.0f)));
 	//void SetColor(glm::vec4 color);
 };
 

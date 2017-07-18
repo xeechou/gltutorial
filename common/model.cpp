@@ -138,7 +138,7 @@ Mesh::Mesh(const float *vertx, const float *norms, const float *uvs, const int n
 		std::copy(indices, indices + nfaces*3, this->indices.begin());
 	} else {
 		//otherwise we make a indices as well. so no draw triangles.
-		this->indices.resize(nnodes / 3);
+		this->indices.resize(nnodes);
 		int n = {0};
 		std::generate(this->indices.begin(), this->indices.end(), [&] {return n++;});
 	}
@@ -346,14 +346,21 @@ Model::draw()
 		this->meshes[i].draw(sm, *this);
 }
 
-//well, you will need different types of mesh this time
-CubeModel::CubeModel()
-{
-	this->meshes.push_back(Mesh(CUBEVERTS, CUBENORMS, CUBETEXS, 36));
-}
-
+//cpu based instancing
 CubeModel::CubeModel(const glm::vec3 translation, const glm::vec3 scale, const glm::quat rotation)
 {
-	glm::mat3 rotate_mat = glm::mat3_cast(rotation);
-}
+	this->meshes.push_back(Mesh(CUBEVERTS, CUBENORMS, CUBETEXS, 36));
+	
+	glm::mat3 position_mat = glm::mat3_cast(rotation) * glm::mat3(glm::scale(scale));
+	glm::mat3 normal_mat   = glm::transpose(glm::inverse(position_mat));
+	
+	std::vector<glm::vec3>& positions = this->meshes[0].vertices.Positions;
+	std::vector<glm::vec3>& normals   = this->meshes[0].vertices.Normals;
+	//scale, rotate, translated	
+	for (size_t i = 0; i < positions.size(); i++) {
+		positions[i] = translation + position_mat * positions[i];
+		if (!normals.empty())
+			normals[i] = normal_mat * normals[i];
+	}
 
+}

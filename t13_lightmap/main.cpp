@@ -44,11 +44,12 @@ protected:
 	const ShaderMan *shader;
 public:
 	cubesDraw(ShaderMan *shader) {
+		this->shader = shader;
 		this->prog = shader->getPid();
 	}
 	int init_setup(void) override {
 		for (unsigned int i = 0; i < cubes.size(); i++) {
-			this->cubes[i]->push2GPU(Mesh::LOAD_POS | Mesh::LOAD_NORMAL);
+			this->cubes[i]->push2GPU(Mesh::LOAD_POS);
 			this->cubes[i]->bindShader(this->shader);
 		}
 		this->p = glm::perspective(glm::radians(90.0f), (float)1.0/(float)1.0, 0.1f, 100.0f);		
@@ -73,6 +74,10 @@ public:
 			cubes[i]->draw();
 		return 0;
 	}
+
+	void append_cube(CubeModel *cube) {
+		this->cubes.push_back(cube);
+	}
 };
 
 
@@ -86,8 +91,12 @@ int main(int argc, char **argv)
 
 	ShaderMan cubeShader("vs.glsl", "fs.glsl");
 	
-	CubeModel cube0;
+	CubeModel cube0(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(10.0f, 1.0f, 10.0f), glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
+	CubeModel cube1;
 	cubesDraw cubes(&cubeShader);
+	cubes.append_cube(&cube0);
+	cubes.append_cube(&cube1);
+	cont.append_drawObj(&cubes);
 	
 	GLuint prog_id = cubeShader.getPid();
 	GLfloat theta = 0.0f;
