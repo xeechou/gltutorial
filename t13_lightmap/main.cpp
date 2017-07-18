@@ -79,22 +79,19 @@ public:
 int main(int argc, char **argv)
 {
 	//there are keypress callback and cursor callback function.
-	GLFWwindow *window = tutorial_init(width, height);
+	context cont(width, height, "window");
+	GLFWwindow *window = cont.getGLFWwindow();
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 
 	ShaderMan cubeShader("vs.glsl", "fs.glsl");
-
+	
 	CubeModel cube0;
+	cubesDraw cubes(&cubeShader);
 	
 	GLuint prog_id = cubeShader.getPid();
 	GLfloat theta = 0.0f;
-	do {
-		glfwPollEvents();
-		glfwSwapBuffers(window);
-		
-	} while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-	       glfwWindowShouldClose(window) == 0 );
-	
-	glfwTerminate();
+
+	cont.init();
+	cont.run();
 }
