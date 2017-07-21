@@ -27,7 +27,19 @@ class Mesh;
 class Texture;
 class Model;
 class Instances;
-	
+
+struct Instances {
+	std::vector<glm::vec3> translations;
+	std::vector<glm::quat> rotations;
+	std::vector<glm::vec3> scales;
+};
+
+struct Vertex {
+	glm::vec3 pos;
+	glm::vec3 normal;
+	glm::vec2 tex;
+};
+
 struct Vertices {
 	std::vector<glm::vec3> Positions;
 	std::vector<glm::vec3> Normals;
@@ -86,25 +98,38 @@ public:
 	//add a callback to user. 
 };
 
-//A model is a list of Meshes
+//It should be a tree later on
 class Model {
 	friend Mesh;
+	friend Instances;
 protected:
-	enum Parameter {
-		NO_PARAMS   = 0,
-		NO_TEXTURE  = 1,
-		AUTO_NORMAL = 2,
-	};
+	int processNode(const aiScene *scene, aiNode *node);	
+
 	//Each mesh coordinates is in the model coordinate system, this is how it works
 	std::vector<Mesh> meshes;
 	//materials is a vector of vector
 	std::vector<Material> Materials;
 	std::string root_path;
-	const ShaderMan *shader_to_draw;	
-	int processNode(const aiScene *scene, aiNode *node);
+	const ShaderMan *shader_to_draw;
+	//std::vector<Model *> children;
+	struct Instances instances;
+	//GL interfaces
+	GLuint instanceVBO = 0;
+	int n_mesh_layouts;
 
 public:
-	//Model *modelFromFile(const std::string& file);
+	enum InstanceINIT {
+		INIT_random, //randomly initialize n 
+		INIT_squares, // n by n from (0,0)
+	};
+	enum Parameter {
+		NO_PARAMS   = 0,
+		NO_TEXTURE  = 1,
+		AUTO_NORMAL = 2,
+	};
+	
+	
+	//Model *modelFromFile(const std::string& file), we could loaded instance nodes from here
 	Model(const std::string& file, Parameter params = NO_PARAMS);
 	Model(void);
 	~Model(void);
@@ -114,12 +139,37 @@ public:
 	//bind, unbind shader
 	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}
 	const ShaderMan* currentShader(void) {return this->shader_to_draw;}
+	//get methods
+	int get_layout_count() const {return this->n_mesh_layouts;}
+	int get_ninstances() const {return this->instances.translations.size(); }
 	
-	//The model won't push the data to GPU by default if no scene is loaded
+	void pushIntances2GPU(void);
 	void push2GPU(int param) {
+		//get the proper texture 
+		this->n_mesh_layouts = 1;
+		if (param & Mesh::LOAD_NORMAL)
+			this->n_mesh_layouts += 1;
+		if (param & Mesh::LOAD_TEX)
+			this->n_mesh_layouts += 1;
+		
 		for (unsigned int i = 0; i < this->meshes.size(); i++)
 			this->meshes[i].pushMesh2GPU(param);
+		
+		//We can do it here or 
+		if (this->instances.translations.size() > 0 && instanceVBO == 0)
+			this->pushIntances2GPU();
+		
 	}
+	//instancing interfaces
+	void append_instance(const glm::vec3 translation,
+			     const glm::vec3 scale=glm::vec3(1.0f),
+			     const glm::quat rotation=glm::quat(glm::vec3(0.0f))) {
+		this->instances.translations.push_back(translation);
+		this->instances.scales.push_back(scale);
+		this->instances.rotations.push_back(rotation);
+	}
+	//also call the instances2GPU 
+	void make_instances(const int n_instances, InstanceINIT method =INIT_squares);
 };
 
 
@@ -134,32 +184,8 @@ public:
 	//void SetColor(glm::vec4 color);
 };
 
-//third layer of the geometry
-class Instances {
-private:
-	//this is like the animations
-	std::vector<glm::vec3> positions;
-	std::vector<glm::mat3> rotations;
-//		std::vector<glm::vec3> traslations;
-	//we don't control the model here
-	const Model& target;
-
-public:
-	enum INIT {
-		INIT_random, //randomly initialize n 
-		INIT_squares,
-	};
-	//initialize n instances based on the flags.
-	Instances(const Model& target, const int n_instances = 1, INIT flag = INIT_random);
-	void appendInstance(const glm::vec3& positon, const glm::mat3& rotation);
-	//later on you need to figure out how to pass mats to GPU, or you could
-	//uses the draw instance function
-	void instaceMats(std::vector<glm::mat4>& mats);
-};
-
 
 //now, define a bunch of functions
 GLuint loadTexture2GPU(const std::string fname);
-
 
 #endif /* EOF */

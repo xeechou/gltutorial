@@ -76,6 +76,14 @@ int main(int argc, char **argv)
 	ShaderMan container("vs.glsl", "fs.glsl");
 	Model model(argv[1]);
 	model.bindShader(&container);
+	model.make_instances(100, Model::INIT_squares);
+//	model.append_instance(glm::vec3(0.0f));
+//	model.append_instance(glm::vec3(10.0f));
+//	model.append_instance(glm::vec3(-10.0f));
+//	model.append_instance(glm::vec3(20.0f));
+
+//	model.make_instances(10, Model::INIT_random);
+	model.pushIntances2GPU();
 
 	class nanodobj : public DrawObj {
 	private:

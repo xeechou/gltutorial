@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
+#include <random>
 
 #include <GL/glew.h>
 #ifdef __linux__
@@ -230,10 +231,18 @@ Mesh::draw(const ShaderMan *sm, const Model& model)
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+	if (model.instanceVBO == 0) {
+		glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+	}
+	else {
+//		std::cerr << model.get_ninstances() << std::endl;
+		glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, model.get_ninstances());
+	}
+
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 int
 Model::processNode(const aiScene *scene, aiNode *node)
@@ -262,6 +271,9 @@ Model::processNode(const aiScene *scene, aiNode *node)
  */
 Model::Model(const std::string& file, Parameter param)
 {
+	//setup constant
+	this->instanceVBO = 0;
+	
 	Assimp::Importer import;
 	import.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
 	//import.SetPropertyInteger(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80.0f);
@@ -293,6 +305,8 @@ Model::Model(const std::string& file, Parameter param)
 	int count = processNode(scene, scene->mRootNode);
 	for (GLuint i = 0; i < this->meshes.size(); i++)
 		this->meshes[i].pushMesh2GPU();
+	//setup the meshlayout
+	this->n_mesh_layouts = 3;
 	
 	std::map<std::string, GLuint> textures_cache;
 	//remember, every mesh has a material index
@@ -332,8 +346,8 @@ Model::Model()
 
 Model::~Model()
 {
-	//deallocate the materials
-	for (unsigned int i = 0; i < this->Materials.size(); i++);
+	if (this->instanceVBO)
+		glDeleteBuffers(1, &this->instanceVBO);
 }
 
 void
@@ -346,17 +360,113 @@ Model::draw()
 		this->meshes[i].draw(sm, *this);
 }
 
+void
+Model::make_instances(const int n_instances, InstanceINIT flag)
+{
+
+	glm::quat default_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
+	glm::vec3 default_scale(0.1f);
+	
+	if (flag == INIT_random) {
+		this->instances.translations.resize(n_instances);
+		this->instances.rotations.resize(n_instances);
+		this->instances.scales.resize(n_instances);
+		
+		std::random_device rd;
+		std::minstd_rand el(rd());
+
+		for (int i = 0; i < n_instances; i++) {
+			this->instances.translations[i] = glm::vec3(el(), el(), el());
+			this->instances.rotations[i] = default_rotation;
+			this->instances.scales[i] = default_scale;
+		}
+	} else {
+		//for square example
+		//take 1000 as example
+		int rows = n_instances; //31
+		int cols = n_instances; //32, 31*32 = 992
+		int count = 0;
+
+		this->instances.translations.resize(rows * cols);
+		this->instances.rotations.resize(rows * cols);
+		this->instances.scales.resize(rows * cols);
+		
+		for (int i = 0; i < rows; i++) {
+			for( int j = 0;  j < cols; j++) {
+				this->instances.translations[count] = glm::vec3((float)i, 0.0f, (float)j);
+				this->instances.rotations[count] = default_rotation;
+				this->instances.scales[count] = default_scale;
+				count += 1;
+			}
+		}
+	}
+	//you don't know whether the meshes is uploaded to GPU
+}
+
+void Model::pushIntances2GPU()
+{
+	if (this->instanceVBO)
+		glDeleteBuffers(1, &this->instanceVBO);
+	
+	std::vector<glm::vec3>& trs = this->instances.translations;
+	std::vector<glm::quat>& rts = this->instances.rotations;
+	std::vector<glm::vec3>& scs = this->instances.scales;
+	size_t ninstances = this->instances.translations.size();
+	
+	std::vector<glm::mat4> instance_mats(ninstances);
+	for (size_t i = 0; i < instance_mats.size(); i++)
+		instance_mats[i] = glm::translate(trs[i]) * glm::mat4_cast(rts[i]) * glm::scale(scs[i]);
+
+	glGenBuffers(1, &this->instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * instance_mats.size(), &instance_mats[0], GL_STATIC_DRAW);
+//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	size_t vec4_size = sizeof(glm::vec4);
+	
+	for (size_t i = 0; i < meshes.size(); i++) {
+		glBindVertexArray(meshes[i].VAO);
+//		glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
+
+		GLuint va = this->get_layout_count();
+		glEnableVertexAttribArray(va);
+		glVertexAttribPointer(va, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)0);
+		glEnableVertexAttribArray(va+1);
+		glVertexAttribPointer(va+1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)vec4_size);
+		glEnableVertexAttribArray(va+2);
+		glVertexAttribPointer(va+2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(2*vec4_size));
+		glEnableVertexAttribArray(va+3);
+		glVertexAttribPointer(va+3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(3*vec4_size));
+
+		glVertexAttribDivisor(va, 1);
+		glVertexAttribDivisor(va+1, 1);
+		glVertexAttribDivisor(va+2, 1);
+		glVertexAttribDivisor(va+3, 1);
+
+		glBindVertexArray(0);
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	std::cerr << "instanced!!"  << std::endl;
+}
+		
+
+
 //cpu based instancing
 CubeModel::CubeModel(const glm::vec3 translation, const glm::vec3 scale, const glm::quat rotation)
 {
+	this->instanceVBO = 0;
 	this->meshes.push_back(Mesh(CUBEVERTS, CUBENORMS, CUBETEXS, 36));
+	glm::quat default_rotation = glm::quat(glm::vec3(0.0f));
 	
 	glm::mat3 position_mat = glm::mat3_cast(rotation) * glm::mat3(glm::scale(scale));
 	glm::mat3 normal_mat   = glm::transpose(glm::inverse(position_mat));
 	
 	std::vector<glm::vec3>& positions = this->meshes[0].vertices.Positions;
 	std::vector<glm::vec3>& normals   = this->meshes[0].vertices.Normals;
-	//scale, rotate, translated	
+	//see if we need to do anything
+	if (translation == glm::vec3(0.0f) && scale == glm::vec3(1.0f) && rotation == default_rotation)
+		return;
+	
 	for (size_t i = 0; i < positions.size(); i++) {
 		positions[i] = translation + position_mat * positions[i];
 		if (!normals.empty())
@@ -364,3 +474,5 @@ CubeModel::CubeModel(const glm::vec3 translation, const glm::vec3 scale, const g
 	}
 
 }
+
+

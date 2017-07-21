@@ -52,7 +52,7 @@ public:
 			this->cubes[i]->push2GPU(Mesh::LOAD_POS);
 			this->cubes[i]->bindShader(this->shader);
 		}
-		this->p = glm::perspective(glm::radians(90.0f), (float)1.0/(float)1.0, 0.1f, 100.0f);		
+		this->p = glm::perspective(glm::radians(90.0f), (float)1.0/(float)1.0, 0.1f, 100.0f);
 		return 0;
 	}
 	int itr_setup(void) override {
@@ -91,11 +91,15 @@ int main(int argc, char **argv)
 
 	ShaderMan cubeShader("vs.glsl", "fs.glsl");
 	
-	CubeModel cube0(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(10.0f, 1.0f, 10.0f), glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
-	CubeModel cube1;
+	CubeModel cube;
+	cube.make_instances(100, Model::INIT_squares);
+//	cube.append_instance(glm::vec3(0.0f, 1.0f, 0.0f));
+//	cube.append_instance(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(10.0f, 1.0f, 10.0f));
+	
 	cubesDraw cubes(&cubeShader);
-	cubes.append_cube(&cube0);
-	cubes.append_cube(&cube1);
+	//so I can basically uses glUniformMatrix..(something, 1000, something...) to draw as many instance we want
+//	glUniformMatrix4fv
+	cubes.append_cube(&cube);
 	cont.append_drawObj(&cubes);
 	
 	GLuint prog_id = cubeShader.getPid();
