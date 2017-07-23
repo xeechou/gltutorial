@@ -2,6 +2,7 @@
 #define FBOBJ
 #include <GL/glew.h>
 
+//framebuffer for postprocess... I need to rename it
 class FBobject {
 private:
 	GLuint vao, vbo;
