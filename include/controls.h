@@ -24,6 +24,10 @@ void unity_like_arcball_cursor(GLFWwindow* window, double xpos, double ypos);
 void unity_like_arcball_scroll(GLFWwindow* window, double xoffset, double yoffset);
 //this is the wrapper for the unity camera
 glm::mat4 unity_like_get_camera_mat(void);
+glm::vec3 unity_like_get_view_pos(void);
 
+glm::mat4 fps_get_camera_mat(void);
+void fps_cursor(GLFWwindow *window, double xpos, double ypos);
+void fps_keyboard(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 #endif
