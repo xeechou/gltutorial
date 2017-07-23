@@ -365,7 +365,7 @@ Model::make_instances(const int n_instances, InstanceINIT flag)
 {
 
 	glm::quat default_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
-	glm::vec3 default_scale(0.1f);
+	glm::vec3 default_scale(0.5f);
 	
 	if (flag == INIT_random) {
 		this->instances.translations.resize(n_instances);
