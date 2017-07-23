@@ -173,7 +173,8 @@ public:
 };
 
 
-/* some special models to create */
+/* this is actually a bad design. I can either write public functions:
+   makeCube, makeUVSphere, makeCylinder, makePyramid something like that */
 class CubeModel : public Model {
 	
 public:

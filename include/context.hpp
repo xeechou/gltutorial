@@ -16,7 +16,7 @@
 /**
  * @brief skeleton class for setup one type of data 
  *
- * this thing should clearn up the drawing process
+ * this thing should clean up the drawing process. There are some common paradigms like framebuffers. 
  */
 class DrawObj {
 protected:
@@ -49,6 +49,11 @@ public:
 	};
 	int init(void);
 	int run();
+
+	void (* init_pre_cb) (void *data);
+	void (* init_post_cb) (void *data);
+	void (* itr_pre_cb) (void *data);
+	void (* itr_post_cb) (void *data);
 };
 
 

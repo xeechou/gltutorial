@@ -446,7 +446,6 @@ void Model::pushIntances2GPU()
 		glBindVertexArray(0);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	std::cerr << "instanced!!"  << std::endl;
 }
 		
 
