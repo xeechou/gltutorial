@@ -52,9 +52,8 @@ class UnityArcBall {
 //	double _xpos_prev, _ypos_prev;
 	glm::vec3 _camera_pos;
 	glm::vec3 _lookat_pos;
-	
 	glm::mat4 _view_mat;
-
+	
 public:
 	UnityArcBall(const glm::vec3& init_camera_pos, const glm::vec3& lookat) : _camera_pos(init_camera_pos), _lookat_pos(lookat) {
 		_inuse = false;
@@ -63,8 +62,8 @@ public:
 	void arcball_rotate(double xpos, double ypos, double pxpos, double pypos);
 	void arcball_translate(double xpos, double ypos, double xpos_prev, double ypos_prev);	
 	void arcball_scale(double length);
-		
-
+	
+	glm::vec3 getViewPos(void);
 	glm::mat4 getViewMat(void);
 };
 static UnityArcBall ARCBALL(glm::vec3(4.0f, 3.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f));
@@ -134,6 +133,12 @@ UnityArcBall::getViewMat(void)
 	return glm::lookAt(_camera_pos, _lookat_pos, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
+glm::vec3
+UnityArcBall::getViewPos(void)
+{
+	return _camera_pos;
+}
+
 /** call backs */
 void unity_like_arcball_cursor(GLFWwindow *win, double xpos, double ypos)
 {
@@ -175,3 +180,9 @@ glm::mat4 unity_like_get_camera_mat(void)
 {
 	return ARCBALL.getViewMat();
 }
+
+glm::vec3 unity_like_get_view_pos(void)
+{
+	return ARCBALL.getViewPos();
+}
+
