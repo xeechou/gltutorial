@@ -29,8 +29,8 @@ float ShadowCalculation(vec4 fpls)
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
-    float shadow = currentDepth > cd  ? 1.0 : 0.0;
-    shadow = cd;
+    float bias = 0.005;
+    float shadow = currentDepth-0.005 > cd  ? 1.0 : 0.0;
     return shadow;
 }  
 
@@ -54,8 +54,8 @@ void main(void)
 //	vec4 FragPosLS = lightMat * vec4(fs_in.FragPos, 1.0);
 	float shadow = ShadowCalculation(fs_in.FragPosLS);
 	vec3 lightling = ambient + (1.0 - shadow) * (diffuse + specular) * color;
-//	FragColor = vec4(lightling, 1.0);
-	FragColor = vec4(vec3(shadow), 1.0);
+	FragColor = vec4(lightling, 1.0);
+//	FragColor = vec4(vec3(shadow), 1.0);
 //	FragColor = vec4(vec3(texture(shadowmap, fs_in.TexCoord).r), 1.0);
 //	FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
 }

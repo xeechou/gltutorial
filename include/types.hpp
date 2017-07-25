@@ -31,5 +31,12 @@ typedef struct {
 
 extern sprt_tex2d_t texture_types_supported[TEX_NTexType];
 
+typedef union {
+	uint32_t u;
+	int32_t  i;
+	float f;
+	double d;
+	const char *name;
+} msg_t;
 
 #endif /* EOF */

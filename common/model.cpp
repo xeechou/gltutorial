@@ -361,6 +361,16 @@ Model::draw()
 }
 
 void
+Model::draw(const ShaderMan *different_shader)
+{
+//	const ShaderMan *sm = this->shader_to_draw;
+	if (!different_shader)
+		throw std::runtime_error("no shader to draw");
+	for (GLuint i = 0; i < this->meshes.size(); i++)
+		this->meshes[i].draw(different_shader, *this);
+}
+
+void
 Model::make_instances(const int n_instances, InstanceINIT flag)
 {
 

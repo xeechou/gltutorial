@@ -90,7 +90,6 @@ public:
 	}
 	int itr_draw(void) override {
 		glViewport(0, 0, 1024, 1024);
-		glUseProgram(this->prog);
 		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
@@ -141,7 +140,7 @@ public:
 		}
 		//mysterious orthognal projection 
 		glm::mat4 lpv = LP * LV;
-		glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"),
+		glUniformMatrix4fv(glGetUniformLocation(this->prog, "lightMatrix"),
 				   1, GL_FALSE, &lpv[0][0]);
 		
 		glBindTexture(GL_TEXTURE_2D, this->depthTex);
@@ -152,6 +151,7 @@ public:
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		return 0;		
 	}
 	int itr_setup(void) override {
@@ -166,7 +166,7 @@ public:
 		glEnable(GL_DEPTH_TEST);
 
 		for (unsigned int i = 0; i < cubes.size(); i++)
-			cubes[i]->draw();
+			cubes[i]->draw(this->shader);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		return 0;
 	}
@@ -186,7 +186,8 @@ int main(int argc, char **argv)
 	GLuint cubeTex = loadTexture2GPU("../imgs/container.jpg");
 
 	ShaderMan cubeShader("vs.glsl", "fs.glsl");
-	ShaderMan shadowShader("svs.glsl", "sfs.glsl");
+	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
+	
 	shadowMap shadow(&shadowShader);
 	AfterShadow cubes(&cubeShader);
 	cubes.setDepthTex(shadow.getShadowTex());
@@ -209,9 +210,6 @@ int main(int argc, char **argv)
 	cont.append_drawObj(&shadow);
 	cont.append_drawObj(&cubes);
 	
-	GLuint prog_id = cubeShader.getPid();
-	GLfloat theta = 0.0f;
-
 	cont.init();
 	cont.run();
 }
