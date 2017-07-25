@@ -371,11 +371,14 @@ Model::draw(const ShaderMan *different_shader)
 }
 
 void
-Model::make_instances(const int n_instances, InstanceINIT flag)
+Model::make_instances(const int n_instances, const InstanceINIT flag,
+		      //additional arguments, may get ignored
+			    const glm::vec3 default_scale,
+			    const glm::vec3 default_translation,
+			    const glm::quat default_rotation)
 {
-
-	glm::quat default_rotation(glm::vec3(0.0f, 0.0f, 0.0f));
-	glm::vec3 default_scale(0.5f);
+	//in current case, ignore translation
+	(void)default_translation;
 	
 	if (flag == INIT_random) {
 		this->instances.translations.resize(n_instances);

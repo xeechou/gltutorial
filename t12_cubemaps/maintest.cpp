@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 	ShaderMan container("vs.glsl", "fs.glsl");
 	Model model(argv[1]);
 	model.bindShader(&container);
-	model.make_instances(10, Model::INIT_squares);
+	model.make_instances(10, Model::INIT_squares, glm::vec3(0.1f));
 //	model.append_instance(glm::vec3(0.0f));
 //	model.append_instance(glm::vec3(10.0f));
 //	model.append_instance(glm::vec3(-10.0f));

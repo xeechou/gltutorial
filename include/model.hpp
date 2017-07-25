@@ -121,6 +121,8 @@ public:
 	enum InstanceINIT {
 		INIT_random, //randomly initialize n 
 		INIT_squares, // n by n from (0,0)
+		//TODO
+		//INIT_ORBIT //orbit around a position.
 	};
 	enum Parameter {
 		NO_PARAMS   = 0,
@@ -170,7 +172,11 @@ public:
 		this->instances.rotations.push_back(rotation);
 	}
 	//also call the instances2GPU 
-	void make_instances(const int n_instances, InstanceINIT method =INIT_squares);
+	void make_instances(const int n_instances, const InstanceINIT method =INIT_squares,
+			    //additional arguments maybe useful for different case, or ignored
+			    const glm::vec3 dscale=glm::vec3(1.0f),
+			    const glm::vec3 dtrans=glm::vec3(0.0f),
+			    const glm::quat drotat=glm::quat(glm::vec3(0.0f)));
 };
 
 
