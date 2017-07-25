@@ -80,6 +80,7 @@ context::run()
 			glUseProgram(drawobjs[i]->program());
 			drawobjs[i]->itr_setup();
 		}
+		glUseProgram(0);
 		for (unsigned int i = 0; i < drawobjs.size(); i++) {
 			//weird enough, glUseProgram caused problme for not drawing anything.
 			glUseProgram(drawobjs[i]->program());
