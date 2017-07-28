@@ -3,7 +3,6 @@
 *.ko
 *.obj
 *.elf
-t[0-9].*
 
 # Precompiled Headers
 *.gch
@@ -37,11 +36,12 @@ t[0-9].*
 .ycm_extra_conf.py
 .ycm_extra_conf.pyc
 
-Makefile
-
 
 #CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
 
+**/Makefile
+
+**/t[0-9]
