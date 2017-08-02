@@ -13,6 +13,8 @@
 #include <GL/glfw3.h>
 #endif
 
+#include "types.hpp"
+
 /**
  * @brief skeleton class for setup one type of data 
  *
@@ -54,6 +56,8 @@ public:
 	void (* init_post_cb) (void *data);
 	void (* itr_pre_cb) (void *data);
 	void (* itr_post_cb) (void *data);
+
+	//solution to eliminate the setTexShader, getTexShader calls. Because basically you have to 
 };
 
 

@@ -8,8 +8,8 @@ set(CMAKE_C_FLAGS "-g")
 add_definitions(
   -D_GNU_SOURCE
   )
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -g")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -g -fPIC")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/CMake")
 #set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build"), you cant have it
 
@@ -40,3 +40,4 @@ add_subdirectory(t10_blending)
 add_subdirectory(t11_framebuffer)
 add_subdirectory(t12_cubemaps)
 add_subdirectory(t13_lightmap)
+#add_subdirectory(t14_bonAnime)

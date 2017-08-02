@@ -31,6 +31,8 @@ typedef struct {
 
 extern sprt_tex2d_t texture_types_supported[TEX_NTexType];
 
+//This msg_t has to be POD data type.
+//the message system is used by draw objects to aquire input and output data
 typedef union {
 	uint32_t u;
 	int32_t  i;

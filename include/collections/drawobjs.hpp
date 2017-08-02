@@ -1,7 +1,7 @@
 #ifndef DRAW_COLLECTION_HPP
 #define DRAW_COLLECTION_HPP
 
-#include "context.hpp"
+#include "../context.hpp"
 
 /**
  * @file drawCollection.hpp
