@@ -13,6 +13,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
 #elif __MINGW32__

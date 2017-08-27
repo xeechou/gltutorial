@@ -32,6 +32,7 @@ include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(include)
 
+
 add_subdirectory(common)
 
 #tutorial folders
