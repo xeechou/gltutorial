@@ -13,7 +13,7 @@ GLuint load_shader(const char *fname, GLenum type)
 {
 	
 	std::string shader_code;
-	if (read_file(fname, &shader_code)) {
+	if (read_file(std::string(fname), shader_code)) {
 		std::cout << "do you even have the shader file?" << std::endl;
 		return 0;
 	}
