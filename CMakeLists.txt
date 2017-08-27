@@ -16,7 +16,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 find_package(PkgConfig REQUIRED)
 
-find_package(GLEW  REQUIRED)
 find_package(glm   REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -26,6 +25,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 #find_package(GLFW REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 pkg_search_module(EIGEN3 REQUIRED eigen3)
+pkg_search_module(GLEW REQUIRED glew)
 #for compatibility with mingw"
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${GLM_INCLUDE_DIR})
