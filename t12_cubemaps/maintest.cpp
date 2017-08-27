@@ -170,8 +170,9 @@ CubeMap::loadCubeMap(const fs::path& cubemaps)
 	std::string faces[6];
 	//load cubemaps information first, TODO remove this shitty code later
 	{
+		//okay, here is our first problem. on windows, the path becomes wchar_t, so we can't use
 		std::string content;
-		read_file(cubemaps.c_str(), &content);
+		read_file(cubemaps.string().c_str(), &content);
 		//read the six lines
 		std::stringstream ss(content);
 		for (int i = 0; i < 6; i++) {
@@ -186,7 +187,7 @@ CubeMap::loadCubeMap(const fs::path& cubemaps)
 
 	for (int i = 0; i < 6; i++) {
 		fs::path dir = cubemaps.parent_path();
-		cv::Mat img = cv::imread((dir / fs::path(faces[i])).c_str());
+		cv::Mat img = cv::imread((dir / fs::path(faces[i])).string());
 		if (!img.data) {
 			std::cerr << "where is your cubemap image" << std::endl;
 			return -1;
