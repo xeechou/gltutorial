@@ -20,4 +20,8 @@ add_library(common STATIC
 target_link_libraries(common
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
-  ${assimp_LIBRARIES})
+  ${assimp_LIBRARIES}
+  ${OPENGL_gl_LIBRARY}
+  ${GLEW_LIBRARIES}
+  ${GLFW_LIBRARIES}
+  )

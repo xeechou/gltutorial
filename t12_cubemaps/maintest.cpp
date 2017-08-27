@@ -170,6 +170,7 @@ CubeMap::loadCubeMap(const fs::path& cubemaps)
 	std::string faces[6];
 	//load cubemaps information first, TODO remove this shitty code later
 	{
+		//okay, here is our first problem. on windows, the path becomes wchar_t, so we can't use
 		std::string content;
 		read_file(cubemaps.string(), content);
 		//read the six lines

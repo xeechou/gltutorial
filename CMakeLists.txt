@@ -21,13 +21,15 @@ find_package(PkgConfig REQUIRED)
 find_package(glm   REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(assimp REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
-#find_package(GLFW REQUIRED)
+#find_package(assimp REQUIRED) this doesn't work on windows either
+#find_package(GLFW REQUIRED) 
+
 pkg_search_module(GLFW REQUIRED glfw3)
 pkg_search_module(EIGEN3 REQUIRED eigen3)
 pkg_search_module(GLEW REQUIRED glew)
+pkg_search_module(assimp REQUIRED assimp)
 #for compatibility with mingw"
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${GLM_INCLUDE_DIR})
@@ -37,7 +39,6 @@ include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(include)
 
 #message("the opengl gl libraries" ${OPENGL_gl_LIBRARY})
-message("he opengl gl library: ")
 add_subdirectory(common)
 
 #tutorial folders
@@ -54,4 +55,4 @@ add_subdirectory(t10_blending)
 add_subdirectory(t11_framebuffer)
 add_subdirectory(t12_cubemaps)
 add_subdirectory(t13_lightmap)
-#add_subdirectory(t14_bonAnime)
+add_subdirectory(t14_bonAnime)
