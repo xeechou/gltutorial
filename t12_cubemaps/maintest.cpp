@@ -13,8 +13,9 @@
 
 #include <boost/filesystem.hpp>
 
-#include <GL/glew.h>
 #ifdef __linux__
+#include <GLFW/glfw3.h>
+#elif __MINGW32__
 #include <GLFW/glfw3.h>
 #elif __WIN32
 #include <GL/glfw3.h>
@@ -32,7 +33,7 @@
 #include <model.hpp>
 #include <fbobj.hpp>
 
-#include "context.hpp"
+#include <context.hpp>
 
 const unsigned int width = 1024;
 const unsigned int height = 1024;
@@ -64,12 +65,13 @@ public:
 
 int main(int argc, char **argv)
 {
-	context context(1000, 1000, "window");
+	context ctxt(1000, 1000, "window");
 	//there are keypress callback and cursor callback function.
-	GLFWwindow *window = context.getGLFWwindow();
+	GLFWwindow *window = ctxt.getGLFWwindow();
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
-	
+
+
 	ShaderMan skybox_program("skyboxvs.glsl", "skyboxfs.glsl");
 	CubeMap skybox(skybox_program.getPid(), argv[2]);
 	
@@ -154,10 +156,10 @@ int main(int argc, char **argv)
 	} nsuit(container.getPid(), &model);
 	nsuit.setCubeMapTex(skybox.getCubeTex());
 	
-	context.append_drawObj(&nsuit);
-	context.append_drawObj(&skybox);
-	context.init();
-	context.run();
+	ctxt.append_drawObj(&nsuit);
+	ctxt.append_drawObj(&skybox);
+	ctxt.init();
+	ctxt.run();
 }
 
 

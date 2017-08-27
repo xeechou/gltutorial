@@ -25,6 +25,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 find_package(Eigen3 REQUIRED)
 #find_package(GLFW REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
+#for compatibility with mingw"
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIRS})
