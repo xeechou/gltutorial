@@ -6,12 +6,13 @@
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
+#elif __MINGW32__
+#include <GLFW/glfw3.h>
 #elif __WIN32
 #include <GL/glfw3.h>
 #endif
 
-
-#include "context.hpp"
+#include <context.hpp>
 
 //problem is, this is the boring code, nobody want to use it
 //you will have to setup your own window callback function
@@ -50,6 +51,8 @@ context::context(int width, int height, const char *winname)
 	fprintf(stderr,"Renderer: %s\n", renderer);
 	fprintf(stderr, "OpenGL version supported %s\n", version);
 	glViewport(0, 0, width, height);
+	std::cerr << this->forward_msg_que.size() << std::endl;
+
 }
 
 context::~context()
@@ -63,13 +66,18 @@ context::~context()
 int
 context::init(void)
 {
+//	this->_forward_msg_que = decltype(this->_forward_msg_que)();
 	for (unsigned int i = 0; i < drawobjs.size(); i++) {
 		glUseProgram(drawobjs[i]->program());
 		drawobjs[i]->init_setup();
 	}
+	//clean the queue, it should be clean actually
+
+	assert(this->forward_msg_que.empty());
+//	decltype(this->_forward_msg_que) swap_queue;
+//	std::swap(this->_forward_msg_que, swap_queue);
 	return 0;
 }
-
 
 int
 context::run()
@@ -86,6 +94,7 @@ context::run()
 			glUseProgram(drawobjs[i]->program());
 			drawobjs[i]->itr_draw();
 		}
+		assert(this->forward_msg_que.empty());
 		glfwPollEvents();		
 		glfwSwapBuffers(_win);
 	} while (glfwGetKey(_win, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
