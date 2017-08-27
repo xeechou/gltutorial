@@ -26,8 +26,11 @@ find_package(Eigen3 REQUIRED)
 #find_package(GLFW REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 include_directories(${EIGEN3_INCLUDE_DIR})
-include_directories(include)
 include_directories(${GLM_INCLUDE_DIR})
+include_directories(${GLEW_INCLUDE_DIRS})
+include_directories(${GLFW_INCLUDE_DIRS})
+include_directories(include)
+
 add_subdirectory(common)
 
 #tutorial folders
