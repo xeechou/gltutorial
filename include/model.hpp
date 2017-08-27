@@ -13,6 +13,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <Eigen/Core>
+#include <Eigen/Sparse>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
@@ -21,12 +23,13 @@
 
 
 #include "types.hpp"
+#include "tree.hpp"
 #include "shaderman.h"
+
 
 class Mesh;
 class Texture;
 class Model;
-class Instances;
 
 struct Instances {
 	std::vector<glm::vec3> translations;
@@ -59,10 +62,7 @@ public:
 	}
 };
 
-typedef struct Texture Texture;
 typedef std::vector<Texture> Material;
-//there are more texture types you know
-//	typedef std::array<Texture, Texture::NTypeTexture> Material;
 
 class Mesh {
 public:
@@ -76,39 +76,104 @@ public:
 	     const std::vector<float>& indices,
 	     const std::vector<glm::vec2>& uvs = std::vector<glm::vec2>(),
 	     const unsigned int material_id = -1);
-	~Mesh();
-	
+
 	//use draw_triangles instead of draw_elements. if no_indices is specified. Efficient for small objects
 	Mesh(const float *vertx, const float *norms, const float *uvs, const int nnodes,
 	     const float *indices = NULL, const int nfaces = 0);
+	~Mesh();	
 	
-	//Okay, Mesh is naked now.
 	//GPU representation
 	GLuint VAO;
 	GLuint VBO, EBO;
 	//CPU representation
 	struct Vertices vertices;
 	std::vector<GLuint> indices;
-	//since the texture is stored with scene, not 
+
 	int materialIndx;
-	//push vertices to gpu
+	/**
+	 * @brief Loading data to GPU
+	 * 
+	 * @param params, which data is avaiable for GPU
+	 */
 	void pushMesh2GPU(int params = LOAD_POS | LOAD_NORMAL | LOAD_TEX);
-	void draw(GLuint prog, const Model& model);
+	/**
+	 * @brief Draw current mesh data
+	 * 
+	 * @param sm The shader to draw
+	 * @param model The model that contains the materials
+	 */
 	void draw(const ShaderMan *sm, const Model& model);
-	//add a callback to user. 
+	
+	/**
+	 * @brief Loading the bone weights for current mesh
+	 * @param mesh The assimp mesh data that contains the bone info
+	 * @param model The model data data that we extract the bone list from
+	 */
+	void loadBoneWeights(aiMesh *mesh, const Model& model);
+	
+	//optional functions
+	//Bone information about the mesh
+	Eigen::SparseMatrix<float> boneWeights;
+	//matrix that transfer vertices from mesh space to bone space
+	glm::mat4 offsetMat;
+	//and the tree node
 };
 
-//It should be a tree later on
-class Model {
-	friend Mesh;
-	friend Instances;
-protected:
-	int processNode(const aiScene *scene, aiNode *node);	
+class Bone : public TreeNode {
+	///matrix that transfer the vertices from mesh(world) space to bone space.
+	glm::mat4 _offsetMat;
+	int _index;
+public:
+	Bone(const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
+	Bone(const Bone& bone);
+	int getInd() const {return _index;}
+	void setInd(int ind) {_index = ind;}
+};
 
-	//Each mesh coordinates is in the model coordinate system, this is how it works
+
+class Model {
+//it is too late for me to switch to template	
+	friend Mesh;
+protected:
+	/**
+	 *
+	 * @brief find the heirachy
+	 * 
+	 * @param scene AiScene to search info
+	 * @param node Node to start with
+	 *
+	 * The method is recursively through a set of bone node. The root node is
+	 * usually not a bone, so it will fail if you call this on root
+	 * node. The CORRECT method for a scene is more complicated, but here we
+	 * are only to load one bone, we just need to find the first bone to
+	 * start with.
+	 */
+	Bone *processBoneNode(const aiScene *scene, const aiNode *node);
+	/**
+	 *
+	 * @brief load every bone into bones
+	 * 
+	 * It must iterate through all nodes so we wont miss any bone.
+	 */
+	int loadBone(const aiScene *scene, const aiNode *node);
+	/**
+	 *
+	 * @brief find the first bone
+	 *
+	 * Use BFS search to find the first bone
+	 */
+	const Bone *findRootBone(const aiScene *scene, const aiNode *node);
+	//
+	// Data
+	//
+	//bones
+	Bone *root_bone;
+	std::map<std::string, Bone> bones;
+	
 	std::vector<Mesh> meshes;
 	//materials is a vector of vector
 	std::vector<Material> Materials;
+	
 	std::string root_path;
 	const ShaderMan *shader_to_draw;
 	//std::vector<Model *> children;
@@ -116,7 +181,6 @@ protected:
 	//GL interfaces
 	GLuint instanceVBO = 0;
 	int n_mesh_layouts;
-
 public:
 	enum InstanceINIT {
 		INIT_random, //randomly initialize n 
@@ -128,11 +192,10 @@ public:
 		NO_PARAMS   = 0,
 		NO_TEXTURE  = 1,
 		AUTO_NORMAL = 2,
-	};
-	
-	
+		LOAD_BONE   = 4,
+       };
 	//Model *modelFromFile(const std::string& file), we could loaded instance nodes from here
-	Model(const std::string& file, Parameter params = NO_PARAMS);
+	Model(const std::string& file, int params = NO_PARAMS);
 	Model(void);
 	~Model(void);
 	//you should actually draw with the shaderMan
@@ -194,6 +257,6 @@ public:
 
 
 //now, define a bunch of functions
-GLuint loadTexture2GPU(const std::string fname);
+GLint loadTexture2GPU(const std::string fname);
 
 #endif /* EOF */
