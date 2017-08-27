@@ -14,6 +14,8 @@
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
+#elif __MINGW32__
+#include <GLFW/glfw3.h>
 #elif __WIN32
 #include <GL/glfw3.h>
 #endif

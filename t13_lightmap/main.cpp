@@ -14,6 +14,8 @@
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
+#elif __MINGW32__
+#include <GLFW/glfw3.h>
 #elif __WIN32
 #include <GL/glfw3.h>
 #endif
@@ -41,7 +43,7 @@ static glm::vec3 LtP;
 class AfterShadow : public DrawObj {
 protected:
 	std::vector<Model *> cubes;
-	glm::mat4 p ;
+	glm::mat4 p;
 	const ShaderMan *shader;
 	//FBobject depth_frambuffer;
 	GLuint depthTex, cubeTex;
@@ -49,9 +51,6 @@ public:
 	AfterShadow(ShaderMan *shader) {
 		this->shader = shader;
 		this->prog = shader->getPid();
-	}
-	void setDepthTex(GLuint tex_id) {
-		this->depthTex = tex_id;
 	}
 	void setCubeTex(GLuint tex_id) {
 		this->cubeTex = tex_id;
@@ -66,14 +65,14 @@ public:
 		glm::mat4 lpv = LP * LV;
 		glUniformMatrix4fv(glGetUniformLocation(this->prog, "lightMat"),
 				   1, GL_FALSE, &lpv[0][0]);
-//		std::cout << glGetUniformLocation(this->prog, "lightMat") << std::endl;
 		
 		glUniform3f(glGetUniformLocation(this->prog, "lightPos"), LtP[0], LtP[1], LtP[2]);
-//		std::cerr << glm::to_string(lpv) << std::endl;
 
 		glUniform1i(glGetUniformLocation(this->prog, "cubetex"), 0);
 		glUniform1i(glGetUniformLocation(this->prog, "shadowmap"), 1);
 
+		//sendmsg and retriveMsg puts at the end of the operation
+		this->depthTex = this->ctxt->retriveMsg(*this).u;
 		return 0;
 	}
 	int itr_setup(void) override {
@@ -138,11 +137,10 @@ public:
 			//this->cubes[i]->push2GPU(Mesh::LOAD_POS);
 			this->cubes[i]->bindShader(this->shader);
 		}
-		//mysterious orthognal projection 
 		glm::mat4 lpv = LP * LV;
 		glUniformMatrix4fv(glGetUniformLocation(this->prog, "lightMatrix"),
 				   1, GL_FALSE, &lpv[0][0]);
-		
+		//setup framebuffer
 		glBindTexture(GL_TEXTURE_2D, this->depthTex);
 		//generate texture
 		glGenFramebuffers(1, &this->fbo);
@@ -152,7 +150,12 @@ public:
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		return 0;		
+
+		//annouce the depthTexture to after shadow draw
+		msg_t msg = {.u = this->depthTex};
+		this->ctxt->sendMsg(*this, msg);
+
+		return 0;
 	}
 	int itr_setup(void) override {
 		return 0;
@@ -190,7 +193,6 @@ int main(int argc, char **argv)
 	
 	shadowMap shadow(&shadowShader);
 	AfterShadow cubes(&cubeShader);
-	cubes.setDepthTex(shadow.getShadowTex());
 	cubes.setCubeTex(cubeTex);
 
 	LP = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
