@@ -36,7 +36,8 @@ include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(include)
 
-message("the opengl gl libraries" ${OPENGL_gl_LIBRARY})
+#message("the opengl gl libraries" ${OPENGL_gl_LIBRARY})
+message("he opengl gl library: " ${OPENGL_LIBRARY})
 add_subdirectory(common)
 
 #tutorial folders
