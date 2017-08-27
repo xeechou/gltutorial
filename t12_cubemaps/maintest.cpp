@@ -172,7 +172,7 @@ CubeMap::loadCubeMap(const fs::path& cubemaps)
 	{
 		//okay, here is our first problem. on windows, the path becomes wchar_t, so we can't use
 		std::string content;
-		read_file(cubemaps.string().c_str(), &content);
+		read_file(cubemaps.string(), content);
 		//read the six lines
 		std::stringstream ss(content);
 		for (int i = 0; i < 6; i++) {
