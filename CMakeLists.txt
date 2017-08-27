@@ -10,7 +10,7 @@ add_definitions(
   )
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -g -fPIC")
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/CMake")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
 #set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build"), you cant have it
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
@@ -31,6 +31,7 @@ include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(include)
+message("the eigen include dir is: " ${EIGEN3_INCLUDE_DIR})
 
 
 add_subdirectory(common)
