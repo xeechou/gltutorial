@@ -22,6 +22,7 @@ find_package(glm   REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(assimp REQUIRED)
+find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 #find_package(GLFW REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
@@ -32,10 +33,10 @@ include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${GLFW_INCLUDE_DIRS})
+include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(include)
-message("the eigen include dir is: " ${EIGEN3_INCLUDE_DIR})
 
-
+message("the opengl gl libraries" ${OPENGL_gl_LIBRARY})
 add_subdirectory(common)
 
 #tutorial folders
