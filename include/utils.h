@@ -10,7 +10,7 @@
 #include <string>
 
 
-int read_file(std::string& fname, std::string str);
+int read_file(const std::string& fname, std::string& str);
 
 /**
  * @brief glfw and glew init code, all state machine code

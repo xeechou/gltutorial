@@ -13,7 +13,7 @@
 static float ASPECT_RATIO = 1.0;
 
 int
-read_file(std::string& fname, std::string &str)
+read_file(const std::string& fname, std::string &str)
 {
 //	assert(str);
 	std::stringstream ss;
