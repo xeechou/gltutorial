@@ -8,9 +8,14 @@
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
+#elif __MINGW32__
+#include <GLFW/glfw3.h>
 #elif __WIN32
 #include <GL/glfw3.h>
 #endif
+
+#include <Eigen/Core>
+#include <Eigen/Sparse>
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -18,7 +23,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-
+#include <Eigen/Core>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
@@ -37,7 +42,7 @@ sprt_tex2d_t texture_types_supported[TEX_NTexType] = {
 	{aiTextureType_SPECULAR, TEX_Specular}
 };
 
-GLuint
+GLint
 loadTexture2GPU(const std::string fname)
 {
 	GLuint tid;
@@ -45,6 +50,10 @@ loadTexture2GPU(const std::string fname)
 	glGenTextures(1, &tid);
 	glBindTexture(GL_TEXTURE_2D, tid);
 	cv::Mat img = cv::imread(fname, CV_LOAD_IMAGE_COLOR);
+	if (!img.data) {
+		std::cerr << "not valid image" << std::endl;
+		return -1;
+	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.cols, img.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, img.data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -57,219 +66,13 @@ loadTexture2GPU(const std::string fname)
 	return tid;
 }
 
-
-Mesh::Mesh(const aiScene *scene, aiMesh *mesh)
-{
-	//rebind for easier name
-	std::vector<glm::vec3> &poses = this->vertices.Positions;
-	std::vector<glm::vec3> &norms = this->vertices.Normals;
-	std::vector<glm::vec2> &texuvs= this->vertices.TexCoords;
-
-	poses.resize(mesh->mNumVertices);
-	norms.resize(mesh->mNumVertices);
-	if (mesh->mTextureCoords[0])
-		texuvs.resize(mesh->mNumVertices);
-	
-	for (GLuint i = 0; i < mesh->mNumVertices; i++) {
-		poses[i] = glm::vec3(mesh->mVertices[i].x,
-				     mesh->mVertices[i].y,
-				     mesh->mVertices[i].z);
-		norms[i] = glm::vec3(mesh->mNormals[i].x,
-				     mesh->mNormals[i].y,
-				     mesh->mNormals[i].z);
-		if (mesh->mTextureCoords[0])
-			texuvs[i] = glm::vec2(mesh->mTextureCoords[0][i].x,
-					      mesh->mTextureCoords[0][i].y);
-	}
-	this->indices.resize(mesh->mNumFaces * 3);
-	for (GLuint i = 0; i < mesh->mNumFaces; i++) {
-		//one face should only have 3 indices
-		aiFace face = mesh->mFaces[i];
-		indices[3*i]   = face.mIndices[0];
-		indices[3*i+1] = face.mIndices[1];
-		indices[3*i+2] = face.mIndices[2];
-	}
-	this->materialIndx = (int)mesh->mMaterialIndex;
-}
-
-//a mesh without color
-Mesh::Mesh(const std::vector<glm::vec3>& vertxs,
-	       const std::vector<glm::vec3>& norms,
-	       const std::vector<float>& indices,
-	       const std::vector<glm::vec2>& uvs,
-	       const unsigned int material_id)
-{
-	assert(vertxs.size() == norms.size());
-	assert(indices.size() % 3 == 0);
-	assert(uvs.size() == vertxs.size() || uvs.size() == 0);
-	std::vector<glm::vec3> &poses   = this->vertices.Positions;
-	std::vector<glm::vec3> &normals = this->vertices.Normals;
-	std::vector<glm::vec2> &texuvs  = this->vertices.TexCoords;
-
-	std::copy(vertxs.begin(), vertxs.end(), poses.begin());
-	std::copy(norms.begin(), norms.end(), normals.begin());
-	if (uvs.size() > 0)
-		std::copy(uvs.begin(), uvs.end(), texuvs.begin());
-
-	std::copy(indices.begin(), indices.end(), this->indices.begin());
-	this->materialIndx = material_id; //the model should take care of this
-}
-
-
-Mesh::Mesh(const float *vertx, const float *norms, const float *uvs, const int nnodes,
-	     const float *indices, const int nfaces)
-{
-	const int size_vn = 3;
-	const int size_uv = 2;
-
-	std::vector<glm::vec3> &poses   = this->vertices.Positions;
-	std::vector<glm::vec3> &normals = this->vertices.Normals;
-	std::vector<glm::vec2> &texuvs  = this->vertices.TexCoords;
-	poses.resize(nnodes);
-	normals.resize(nnodes);
-	if (uvs)
-		texuvs.resize(nnodes);
-	for (int i = 0; i < nnodes; i++) {
-		poses[i]   = glm::make_vec3(i*size_vn + vertx);
-		normals[i] = glm::make_vec3(i*size_vn + norms);
-		texuvs[i]  = glm::make_vec2(i*size_uv + uvs);
-	}
-	if (indices) {
-		this->indices.resize(nfaces*3);
-		std::copy(indices, indices + nfaces*3, this->indices.begin());
-	} else {
-		//otherwise we make a indices as well. so no draw triangles.
-		this->indices.resize(nnodes);
-		int n = {0};
-		std::generate(this->indices.begin(), this->indices.end(), [&] {return n++;});
-	}
-}
-
-//a mesh uses draw_triangles instead of
-Mesh::~Mesh(void)
-{
-	if (this->VAO) {
-		glDeleteVertexArrays(1, &this->VAO);
-		this->VAO = 0;
-	}
-	if (this->VBO) {
-		glDeleteBuffers(1, &this->VBO);
-		this->VBO = 0;
-	}
-	if (this->EBO) {
-		glDeleteBuffers(1, &this->EBO);
-		this->EBO = 0;
-	}
-}
-
-void
-Mesh::pushMesh2GPU(int param)
-{
-	glGenVertexArrays(1, &this->VAO);
-	glGenBuffers(1, &this->VBO);
-	glGenBuffers(1, &this->EBO);
-
-	glBindVertexArray(this->VAO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint),
-		     &this->indices[0],
-		     GL_STATIC_DRAW);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-	glBufferData(GL_ARRAY_BUFFER, this->vertices.Positions.size() * (2 * sizeof(glm::vec3) + sizeof(glm::vec2)),
-		     NULL, GL_STATIC_DRAW);
-	size_t offset = 0;
-	glBufferSubData(GL_ARRAY_BUFFER, offset, this->vertices.Positions.size() * sizeof(glm::vec3),
-			&this->vertices.Positions[0]);
-	//Enable Attributes
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
-			      (GLvoid *)offset);
-	offset += this->vertices.Positions.size() * sizeof(glm::vec3);
-	
-	if (param & LOAD_NORMAL) {
-		glBufferSubData(GL_ARRAY_BUFFER, offset,
-				this->vertices.Normals.size() * sizeof(glm::vec3),
-				&this->vertices.Normals[0]);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
-				      (GLvoid *)offset);
-		offset += this->vertices.Normals.size() * sizeof(glm::vec3);
-	}
-	if (param & LOAD_TEX) {
-		glBufferSubData(GL_ARRAY_BUFFER,
-				offset, this->vertices.TexCoords.size() * sizeof(glm::vec2),
-				&this->vertices.TexCoords[0]);
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2),
-				      (GLvoid *)offset);
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void
-Mesh::draw(const ShaderMan *sm, const Model& model)
-{
-	GLuint prog = sm->getPid();
-	glUseProgram(prog);
-	const Material& mat = model.Materials[this->materialIndx];
-	// The 2D texture binding should be like this, although we have too loop.
-	//it is is at most 4*4 something
-
-	for (GLuint i = 0; i < sm->tex_uniforms.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
-		for (GLuint j = 0; j < model.Materials[this->materialIndx].size(); j++) {
-			if (sm->tex_uniforms[i] == mat[i].type) {
-				glBindTexture(GL_TEXTURE_2D, mat[j].id);
-				break;
-			}
-		}
-	}
-	glBindVertexArray(this->VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-	if (model.instanceVBO == 0) {
-		glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
-	}
-	else {
-//		std::cerr << model.get_ninstances() << std::endl;
-		glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, model.get_ninstances());
-	}
-
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-
-int
-Model::processNode(const aiScene *scene, aiNode *node)
-{
-	int count = node->mNumMeshes;
-	// Process all the node's meshes (if any)
-	for(GLuint i = 0; i < node->mNumMeshes; i++)
-	{
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		this->meshes.push_back(Mesh(scene, mesh));
-	}
-	// Then do the same for each of its children
-	for(GLuint i = 0; i < node->mNumChildren; i++)
-	{
-		count += this->processNode(scene, node->mChildren[i]);
-	}
-	return count;
-	
-}
-
 /**
  * @brief model constructor, loading meshes and textures, 
  * 
  * It does flags to the assimp, so we will get the triangluated mesh for sure
  * In terms of 
  */
-Model::Model(const std::string& file, Parameter param)
+Model::Model(const std::string& file, int param)
 {
 	//setup constant
 	this->instanceVBO = 0;
@@ -301,20 +104,33 @@ Model::Model(const std::string& file, Parameter param)
 		throw std::runtime_error(std::string("ERROR::ASSIMP") + import.GetErrorString());
 	this->root_path = file.substr(0, file.find_last_of('/'));
 
-	//processed mesh
-	int count = processNode(scene, scene->mRootNode);
+	for (uint i = 0; i < scene->mNumMeshes; i++) {
+		this->meshes.push_back(Mesh(scene, scene->mMeshes[i]));
+	}
+	if (param & LOAD_BONE) {
+		//load bone has to be walk through the nodes, because only mesh
+		//has bone data. Then we can use the mesh to load bone weight
+		this->loadBone(scene, scene->mRootNode);
+		for (uint i = 0; i < scene->mNumMeshes; i++)
+			this->meshes[i].loadBoneWeights(scene->mMeshes[i], *this);
+	}
+	//find the root bone. Then We can load the heirachy
+	root_bone = (Bone *)this->findRootBone(scene, scene->mRootNode);
+	processBoneNode(scene, scene->mRootNode->FindNode(root_bone->name().c_str()));
+	//then finally we can push the data to the GPU
 	for (GLuint i = 0; i < this->meshes.size(); i++)
 		this->meshes[i].pushMesh2GPU();
+
 	//setup the meshlayout
 	this->n_mesh_layouts = 3;
 	
 	std::map<std::string, GLuint> textures_cache;
-	//remember, every mesh has a material index
+	//material processing
 	if (param & NO_TEXTURE)
 		return;
 	this->Materials.resize(scene->mNumMaterials);
 	for (GLuint i = 0; i < scene->mNumMaterials; i++) {
-		std::cout << "material indx: " << i << std::endl;
+		std::cerr << "material indx: " << i << std::endl;
 		aiMaterial *mat = scene->mMaterials[i];
 		aiString path;
 		Material material;
@@ -323,6 +139,7 @@ Model::Model(const std::string& file, Parameter param)
 			if (mat->GetTextureCount(texture_types_supported[j].aiTextype) > 0) {
 				mat->GetTexture(texture_types_supported[j].aiTextype, 0, &path);
 				std::string full_path = this->root_path + "/" + std::string(path.C_Str());
+//				std::cerr << full_path << std::endl;
 				//check whether we loaded already
 				auto it = textures_cache.find(full_path);
 				if (it == textures_cache.end()) {
@@ -337,6 +154,72 @@ Model::Model(const std::string& file, Parameter param)
 		}
 		this->Materials[i] = material;
 	}
+	//TODO I think we need to import the bone, then connect the bone together
+}
+
+Bone*
+Model::processBoneNode(const aiScene *scene, const aiNode *node)
+{
+	//this will not work in the root node. Because it is not the bone
+	std::string node_name = node->mName.data;
+	std::string parent_name = node->mParent->mName.data;
+	int count = node->mNumMeshes;
+	Bone &bone = this->bones[node_name];
+	//this is not gonna work
+	auto parent_itr = this->bones.find(parent_name);
+	bone.childrens.clear();
+	
+	if (parent_itr != this->bones.end())
+		bone.parent = &parent_itr->second;
+	else
+		bone.parent = NULL;
+	// Then do the same for each of its children
+	for(GLuint i = 0; i < node->mNumChildren; i++)
+	{
+		bone.childrens.push_back(this->processBoneNode(scene, node->mChildren[i]));
+	}
+}
+
+
+const Bone*
+Model::findRootBone(const aiScene *scene, const aiNode *node)
+{
+	std::string node_name = node->mName.data;
+	auto itr = this->bones.find(node_name);
+	if (itr != this->bones.end())
+		return &itr->second;
+	for (uint i = 0; i < node->mNumChildren; i++) {
+		const Bone *child;
+		if ( (child = findRootBone(scene, node->mChildren[i])) != NULL)
+			return child;
+	}
+	return NULL;
+}
+
+
+int
+Model::loadBone(const aiScene *scene, const aiNode *node)
+{
+	int count = 0;
+	auto& all_bones = this->bones;
+	for(GLuint i = 0; i < node->mNumMeshes; i++)
+	{
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		for (GLuint j = 0; j < mesh->mNumBones; j++) {
+			std::string bone_name = mesh->mBones[j]->mName.data;
+			if (all_bones.find(bone_name) == all_bones.end()) {
+				Bone local_bone(bone_name);
+				local_bone.setInd(all_bones.size());
+				all_bones[bone_name] = local_bone;
+				count +=1;
+			}
+		}
+	}
+	for (GLuint i = 0; i < node->mNumChildren; i++) {
+		count += this->loadBone(scene, node->mChildren[i]);
+	}
+	//total number of bones
+	return count;
 }
 
 
