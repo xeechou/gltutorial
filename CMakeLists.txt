@@ -12,6 +12,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -g -fPIC")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/CMake")
 #set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build"), you cant have it
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 find_package(PkgConfig REQUIRED)
 
@@ -21,9 +22,12 @@ find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(assimp REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
+find_package(Eigen3 REQUIRED)
 #find_package(GLFW REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
+include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(include)
+include_directories(${GLM_INCLUDE_DIR})
 add_subdirectory(common)
 
 #tutorial folders
@@ -40,4 +44,4 @@ add_subdirectory(t10_blending)
 add_subdirectory(t11_framebuffer)
 add_subdirectory(t12_cubemaps)
 add_subdirectory(t13_lightmap)
-#add_subdirectory(t14_bonAnime)
+add_subdirectory(t14_boneAnime)
