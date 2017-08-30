@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <algorithm>
 #include <random>
+#include <queue>
+#include <string>
 
 #include <GL/glew.h>
 #ifdef __linux__
@@ -113,10 +115,14 @@ Model::Model(const std::string& file, int param)
 		this->loadBone(scene, scene->mRootNode);
 		for (uint i = 0; i < scene->mNumMeshes; i++)
 			this->meshes[i].loadBoneWeights(scene->mMeshes[i], *this);
+		root_bone = this->findRootBone(scene, scene->mRootNode);
+		assert(root_bone ==
+		       processBoneNode(scene,
+				       scene->mRootNode->FindNode(root_bone->name().c_str())));
+		std::cerr << root_bone->layout();
+
 	}
 	//find the root bone. Then We can load the heirachy
-	root_bone = (Bone *)this->findRootBone(scene, scene->mRootNode);
-	processBoneNode(scene, scene->mRootNode->FindNode(root_bone->name().c_str()));
 	//then finally we can push the data to the GPU
 	for (GLuint i = 0; i < this->meshes.size(); i++)
 		this->meshes[i].pushMesh2GPU();
@@ -160,14 +166,13 @@ Model::Model(const std::string& file, int param)
 Bone*
 Model::processBoneNode(const aiScene *scene, const aiNode *node)
 {
-	//this will not work in the root node. Because it is not the bone
+	//find the bone and parent_bone. if parent_bone is not set. then This is
+	//the root bone
 	std::string node_name = node->mName.data;
 	std::string parent_name = node->mParent->mName.data;
-	int count = node->mNumMeshes;
 	Bone &bone = this->bones[node_name];
-	//this is not gonna work
 	auto parent_itr = this->bones.find(parent_name);
-	bone.childrens.clear();
+	bone.children.clear();
 	
 	if (parent_itr != this->bones.end())
 		bone.parent = &parent_itr->second;
@@ -176,22 +181,34 @@ Model::processBoneNode(const aiScene *scene, const aiNode *node)
 	// Then do the same for each of its children
 	for(GLuint i = 0; i < node->mNumChildren; i++)
 	{
-		bone.childrens.push_back(this->processBoneNode(scene, node->mChildren[i]));
+		//but you are not sure if it is really a bone though
+		Bone *child_node;
+		if ((child_node = this->processBoneNode(scene, node->mChildren[i])) != NULL) {
+			bone.children.push_back(child_node);
+		}
 	}
+	return &bone;
 }
 
 
 const Bone*
 Model::findRootBone(const aiScene *scene, const aiNode *node)
 {
-	std::string node_name = node->mName.data;
-	auto itr = this->bones.find(node_name);
-	if (itr != this->bones.end())
-		return &itr->second;
-	for (uint i = 0; i < node->mNumChildren; i++) {
-		const Bone *child;
-		if ( (child = findRootBone(scene, node->mChildren[i])) != NULL)
-			return child;
+	//use the BFS searching
+	std::queue<aiNode *> node_queue;
+	node_queue.push(scene->mRootNode);
+	while(!node_queue.empty()) {
+		aiNode *current = node_queue.front();
+		node_queue.pop();
+		std::string potential_bone = current->mName.C_Str();
+		const auto itr = this->bones.find(potential_bone);
+		if (itr != this->bones.end()) {
+			return &itr->second;
+		}
+		for (uint i = 0; i < current->mNumChildren; i++) {
+			node_queue.push(current->mChildren[i]);
+		}
+
 	}
 	return NULL;
 }

@@ -103,7 +103,6 @@ public:
 	 * @param model The model that contains the materials
 	 */
 	void draw(const ShaderMan *sm, const Model& model);
-	
 	/**
 	 * @brief Loading the bone weights for current mesh
 	 * @param mesh The assimp mesh data that contains the bone info
@@ -167,7 +166,7 @@ protected:
 	// Data
 	//
 	//bones
-	Bone *root_bone;
+	const Bone *root_bone;
 	std::map<std::string, Bone> bones;
 	
 	std::vector<Mesh> meshes;

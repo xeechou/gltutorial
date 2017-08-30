@@ -7,21 +7,22 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <iostream>
+
 
 class TreeNode {
 public:
 	std::string id;
 	TreeNode *parent;
-	std::vector<TreeNode*> childrens;
+	std::vector<TreeNode*> children;
 	glm::mat4 _model_mat;
-	TreeNode(std::string id = "", const glm::mat4& m = glm::mat4(1.0f)) :
-		_model_mat(m) {
-		if (id == "")
-			this->id = "accun Nom";
-		}
-	const std::string name() {return id;}
+	TreeNode(const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
+	const std::string name() const {return id;}
 	glm::mat4 getModelMat() const {return _model_mat;}
 	void setModelMat(glm::mat4& model) {_model_mat = model;}
 	glm::mat4 getStackedTransformMat() const;
+	/**
+	 * @brief this node and all its decedents
+	 */
+	std::string layout() const;
 };
-

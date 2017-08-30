@@ -6,6 +6,7 @@ include_directories(
 
 add_library(common STATIC
   utils.cpp
+  tree.cpp  
   controls.cpp
   shaderman.cpp
   framebuffer.cpp

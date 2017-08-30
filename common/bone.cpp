@@ -25,7 +25,6 @@
 
 Bone::Bone(const std::string id, const glm::mat4& m) : TreeNode(id, m)
 {
-	
 }
 Bone::Bone(const Bone& bone) : TreeNode(bone) {
 	_offsetMat = bone._offsetMat;
