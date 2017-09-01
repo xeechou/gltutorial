@@ -199,8 +199,7 @@ public:
 	Model(void);
 	~Model(void);
 	//you should actually draw with the shaderMan
-	void draw();
-	void draw(const ShaderMan *differentShader);
+	void draw(const ShaderMan *differentShader=NULL);
 	void setShader(const ShaderMan*);
 	//bind, unbind shader
 	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}

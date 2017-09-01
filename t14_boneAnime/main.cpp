@@ -49,42 +49,37 @@ public:
 	typedef std::pair<glm::mat4, std::vector<Bone> > instance_t;
 private:
 	const Model* model;
-	//we have instances of that model, it will be a duplicated infomation in the model
-//	std::vector<instance_t> 
+	//we will uses the instance from the models.
+	std::vector<glm::mat4> instance_mats;
+	std::vector< std::vector<Bone> > bones;
 public:
 
 	Animation();
 	/**
 	 * @brief convinient constructor if you only have one model and one instance
 	 */
-	Animation(const Model* model, const glm::mat4 instance_mat = glm::mat4(1.0f));
+	Animation(const Model* model);
 	void setModel(const Model* model);
-	/**
-	 * @brief add an new instance
-	 *
-	 * This method will extract a set of bones from the original model then
-	 */
-	void appendInstance(const glm::mat4& initial_pos);
 };
 
-Animation::Animation(const Model* model, const glm::mat4 instance_mat)
+Animation::Animation(const Model* model)
 {
 	this->setModel(model);
-	this->appendInstance(instance_mat);
+//	this->appendInstance(instance_mat);
 }
 
 void
 Animation::setModel(const Model *model)
 {
 	this->model = model;
-
-}
-
-void
-Animation::appendInstance(const glm::mat4 &initial_pos)
-{
-	//
-	
+	//only one instance
+	if (!model->getNinstances()) {
+		//extract one bone
+		instance_mats.push_back(glm::mat4(1.0f));
+	}
+	for (int i = 0; i < model->getNinstances(); i++) {
+		//extract bones from the 
+	}
 }
 
 

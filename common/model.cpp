@@ -119,7 +119,7 @@ Model::Model(const std::string& file, int param)
 		assert(root_bone ==
 		       processBoneNode(scene,
 				       scene->mRootNode->FindNode(root_bone->name().c_str())));
-		std::cerr << root_bone->layout();
+//		std::cerr << root_bone->layout();
 
 	}
 	//find the root bone. Then We can load the heirachy
@@ -251,21 +251,11 @@ Model::~Model()
 }
 
 void
-Model::draw()
-{
-	const ShaderMan *sm = this->shader_to_draw;
-	if (!sm)
-		throw std::runtime_error("no shader to draw");
-	for (GLuint i = 0; i < this->meshes.size(); i++)
-		this->meshes[i].draw(sm, *this);
-}
-
-void
 Model::draw(const ShaderMan *different_shader)
 {
 //	const ShaderMan *sm = this->shader_to_draw;
 	if (!different_shader)
-		throw std::runtime_error("no shader to draw");
+		different_shader = this->shader_to_draw;
 	for (GLuint i = 0; i < this->meshes.size(); i++)
 		this->meshes[i].draw(different_shader, *this);
 }
