@@ -176,7 +176,8 @@ protected:
 	std::string root_path;
 	const ShaderMan *shader_to_draw;
 	//std::vector<Model *> children;
-	struct Instances instances;
+	//I should probaly copy the bone to the instance as well
+	struct Instances instances; 
 	//GL interfaces
 	GLuint instanceVBO = 0;
 	int n_mesh_layouts;
@@ -205,8 +206,8 @@ public:
 	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}
 	const ShaderMan* currentShader(void) {return this->shader_to_draw;}
 	//get methods
-	int get_layout_count() const {return this->n_mesh_layouts;}
-	int get_ninstances() const {return this->instances.translations.size(); }
+	int getLayoutCount() const {return this->n_mesh_layouts;}
+	int getNinstances() const {return this->instances.translations.size(); }
 	
 	void pushIntances2GPU(void);
 	void push2GPU(int param) {
@@ -226,7 +227,7 @@ public:
 		
 	}
 	//instancing interfaces
-	void append_instance(const glm::vec3 translation,
+	void appendInstance(const glm::vec3 translation,
 			     const glm::vec3 scale=glm::vec3(1.0f),
 			     const glm::quat rotation=glm::quat(glm::vec3(0.0f))) {
 		this->instances.translations.push_back(translation);
@@ -234,7 +235,7 @@ public:
 		this->instances.rotations.push_back(rotation);
 	}
 	//also call the instances2GPU 
-	void make_instances(const int n_instances, const InstanceINIT method =INIT_squares,
+	void makeInstances(const int n_instances, const InstanceINIT method =INIT_squares,
 			    //additional arguments maybe useful for different case, or ignored
 			    const glm::vec3 dscale=glm::vec3(1.0f),
 			    const glm::vec3 dtrans=glm::vec3(0.0f),
@@ -242,17 +243,6 @@ public:
 };
 
 
-/* this is actually a bad design. I can either write public functions:
-   makeCube, makeUVSphere, makeCylinder, makePyramid something like that */
-class CubeModel : public Model {
-	
-public:
-	//this will give you a one-by-one cube
-	CubeModel(const glm::vec3 translation = glm::vec3(0.0f),
-		  const glm::vec3 scale = glm::vec3(1.0f),
-		  const glm::quat rotation = glm::quat(glm::vec3(0.0f)));
-	//void SetColor(glm::vec4 color);
-};
 
 
 //now, define a bunch of functions

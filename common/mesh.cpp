@@ -222,7 +222,7 @@ Mesh::draw(const ShaderMan *sm, const Model& model)
 	}
 	else {
 //		std::cerr << model.get_ninstances() << std::endl;
-		glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, model.get_ninstances());
+		glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, model.getNinstances());
 	}
 
 	glBindVertexArray(0);

@@ -9,7 +9,7 @@
 #include <stack>
 #include <utility>
 #include <sstream>
-
+#include <cstdio>
 #include <tree.hpp>
 
 TreeNode::TreeNode(const std::string id, const glm::mat4& m) :
@@ -24,7 +24,6 @@ TreeNode::TreeNode(const std::string id, const glm::mat4& m) :
 }
 
 //we should define a static function here
-//static const std::string&
 std::string TreeNode::layout() const
 {
 	typedef std::pair<int, const TreeNode *> indent_node_t;
@@ -35,9 +34,10 @@ std::string TreeNode::layout() const
 	while(!nodes.empty()) {
 		int indent = nodes.top().first;
 		const TreeNode *node = nodes.top().second;
-		ss << std::string(" ", indent);
+		ss << std::string(indent, ' ');
 		ss << node->name() << std::endl;
 		nodes.pop();
+//		std::printf("this is the indent I have: %d\n", indent +2);
 		for (unsigned int i = 0; i < node->children.size(); i++)
 			nodes.push(std::make_pair(indent + 2, node->children[i]));
 	}

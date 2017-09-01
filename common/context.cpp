@@ -14,6 +14,20 @@
 
 #include <context.hpp>
 
+
+DrawObj::DrawObj()
+{
+	this->ctxt = NULL;
+}
+DrawObj::DrawObj(GLuint shader)
+{
+	this->prog = shader;
+}
+
+
+context::context(void) : context(1000, 1000, "window")
+{}
+
 //problem is, this is the boring code, nobody want to use it
 //you will have to setup your own window callback function
 context::context(int width, int height, const char *winname)
@@ -59,6 +73,33 @@ context::~context()
 {
 	glfwDestroyWindow(_win);
 	glfwTerminate();
+}
+
+void
+context::append_drawObj(DrawObj *dobj)
+{
+	dobj->set_context(this);
+	this->drawobjs.push_back(dobj);
+	dobj->setPosinContext(this->drawobjs.size()-1);
+};
+
+
+void
+context::sendMsg(const DrawObj& d, const msg_t msg)
+{
+	int indx = d.pos_in_context;
+	this->forward_msg_que.push(std::make_pair(indx+1, msg));
+}
+
+const msg_t
+context::retriveMsg(const DrawObj& d)
+{
+	int indx;
+	msg_t msg;
+	std::tie(indx, msg) = this->forward_msg_que.front();
+	if (indx == d.pos_in_context)
+		this->forward_msg_que.pop();
+	return msg;
 }
 
 

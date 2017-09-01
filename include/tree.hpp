@@ -20,6 +20,9 @@ public:
 	const std::string name() const {return id;}
 	glm::mat4 getModelMat() const {return _model_mat;}
 	void setModelMat(glm::mat4& model) {_model_mat = model;}
+	/**
+	 * @brief accumlate the transformation matrix from its accenster
+	 */
 	glm::mat4 getStackedTransformMat() const;
 	/**
 	 * @brief this node and all its decedents

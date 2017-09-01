@@ -271,7 +271,7 @@ Model::draw(const ShaderMan *different_shader)
 }
 
 void
-Model::make_instances(const int n_instances, const InstanceINIT flag,
+Model::makeInstances(const int n_instances, const InstanceINIT flag,
 		      //additional arguments, may get ignored
 			    const glm::vec3 default_scale,
 			    const glm::vec3 default_translation,
@@ -313,7 +313,7 @@ Model::make_instances(const int n_instances, const InstanceINIT flag,
 			}
 		}
 	}
-	//you don't know whether the meshes is uploaded to GPU
+	//also, we need a way to upload bone weights to instances
 }
 
 void Model::pushIntances2GPU()
@@ -341,7 +341,7 @@ void Model::pushIntances2GPU()
 		glBindVertexArray(meshes[i].VAO);
 //		glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
 
-		GLuint va = this->get_layout_count();
+		GLuint va = this->getLayoutCount();
 		glEnableVertexAttribArray(va);
 		glVertexAttribPointer(va, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)0);
 		glEnableVertexAttribArray(va+1);
@@ -364,27 +364,5 @@ void Model::pushIntances2GPU()
 
 
 //cpu based instancing
-CubeModel::CubeModel(const glm::vec3 translation, const glm::vec3 scale, const glm::quat rotation)
-{
-	this->instanceVBO = 0;
-	this->meshes.push_back(Mesh(CUBEVERTS, CUBENORMS, CUBETEXS, 36));
-	glm::quat default_rotation = glm::quat(glm::vec3(0.0f));
-	
-	glm::mat3 position_mat = glm::mat3_cast(rotation) * glm::mat3(glm::scale(scale));
-	glm::mat3 normal_mat   = glm::transpose(glm::inverse(position_mat));
-	
-	std::vector<glm::vec3>& positions = this->meshes[0].vertices.Positions;
-	std::vector<glm::vec3>& normals   = this->meshes[0].vertices.Normals;
-	//see if we need to do anything
-	if (translation == glm::vec3(0.0f) && scale == glm::vec3(1.0f) && rotation == default_rotation)
-		return;
-	
-	for (size_t i = 0; i < positions.size(); i++) {
-		positions[i] = translation + position_mat * positions[i];
-		if (!normals.empty())
-			normals[i] = normal_mat * normals[i];
-	}
-
-}
 
 

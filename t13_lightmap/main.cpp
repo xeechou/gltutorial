@@ -32,6 +32,7 @@
 #include <model.hpp>
 #include <fbobj.hpp>
 #include <context.hpp>
+#include <collections/geometry.hpp>
 
 
 const unsigned int width = 1024;
@@ -202,9 +203,9 @@ int main(int argc, char **argv)
 	
 	CubeModel cube;
 //	cube.make_instances(100, Model::INIT_squares);
-	cube.append_instance(glm::vec3(0.0f, 1.0f, 0.0f));
-	cube.append_instance(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(10.0f, 1.0f, 10.0f));
-	cube.append_instance(glm::vec3(-3.0f,  1.0f, 3.0f), glm::vec3(1.2f, 1.2f, 1.2f),
+	cube.appendInstance(glm::vec3(0.0f, 1.0f, 0.0f));
+	cube.appendInstance(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(10.0f, 1.0f, 10.0f));
+	cube.appendInstance(glm::vec3(-3.0f,  1.0f, 3.0f), glm::vec3(1.2f, 1.2f, 1.2f),
 			     glm::quat(glm::vec3(90.0, 0.0, 0.0)));
 	
 	cubes.append_model(&cube);

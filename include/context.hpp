@@ -45,21 +45,18 @@ class DrawObj {
 	friend class context;
 private:
 	int pos_in_context;
-	void set_context(context *c) {
-		this->ctxt = c;
-	}
-	void setPosinContext(size_t pos) {
-		this->pos_in_context = pos;
-	}
+	void set_context(context *c);
+	void setPosinContext(size_t pos);
 
 protected:
 	GLuint prog;
 	context *ctxt;
 public:
-	DrawObj() {this->ctxt = NULL;}
-	DrawObj(GLuint p) { this->prog = p;}
-	void set_shader(GLuint p) {this->prog = p;}
-	GLuint program(void) {return this->prog;}
+	DrawObj();
+	DrawObj(GLuint p);
+	void set_shader(GLuint p);
+	//we should have better shader interface next time
+	GLuint program(void);
 	//okay, this thing only context should called it
 	virtual int init_setup(void) = 0;
 	//this get called first
@@ -67,13 +64,10 @@ public:
 	//then this get called
 	virtual int itr_draw(void) = 0;
 	//write your own function for loading data
-	context * get_context(void) {
-		return this->ctxt;
-	}
-	const int getPosinContext(void) {
-		return this->pos_in_context;
-	}
+	context * get_context(void);
+	const int getPosinContext(void);
 };
+
 
 class context {
 protected:
@@ -85,14 +79,10 @@ protected:
 	std::queue<msg_t> _bcast_msg_que;
 public:
 	context(int width, int height, const char *winname);
-	context() : context(1000, 1000, "window") {}
+	context();
 	~context();
 	GLFWwindow * getGLFWwindow() {return _win;}
-	void append_drawObj(DrawObj *dobj) {
-		dobj->set_context(this);
-		this->drawobjs.push_back(dobj);
-		dobj->setPosinContext(this->drawobjs.size()-1);
-	};
+	void append_drawObj(DrawObj *dobj);
 	int init(void);
 	int run();
 	void (* init_pre_cb) (void *data);
@@ -100,22 +90,48 @@ public:
 	void (* itr_pre_cb) (void *data);
 	void (* itr_post_cb) (void *data);
 	//lets test if this shit works
-	void sendMsg(const DrawObj& d, const msg_t msg) {
-		int indx = d.pos_in_context;
-		this->forward_msg_que.push(std::make_pair(indx+1, msg));
-	}
-	const msg_t retriveMsg(const DrawObj& d) {
-		int indx;
-		msg_t msg;
-		std::tie(indx, msg) = this->forward_msg_que.front();
-		if (indx == d.pos_in_context)
-			this->forward_msg_que.pop();
-		return msg;
-	}
+	void sendMsg(const DrawObj& d, const msg_t msg);
+	const msg_t retriveMsg(const DrawObj& d);
 	//solution to eliminate the setTexShader, getTexShader calls: message
 	//queue. Basically I need a local message queue that send and retrieve
 	//information at every draw iteration. It should be empty and the end.
 };
+
+
+//////inline functions
+//DrawObj
+inline context *
+DrawObj::get_context()
+{
+	return this->ctxt;
+}
+inline void
+DrawObj::set_context(context *e)
+{
+	this->ctxt = e;
+}
+inline const int
+DrawObj::getPosinContext()
+{
+	return this->pos_in_context;
+}
+inline void
+DrawObj::setPosinContext(size_t pos)
+{
+	this->pos_in_context = pos;
+}
+inline void
+DrawObj::set_shader(GLuint p)
+{
+	this->prog = p;
+}
+inline GLuint
+DrawObj::program()
+{
+	return this->prog;
+}
+
+//
 
 
 
