@@ -42,34 +42,53 @@
 const unsigned int width = 1024;
 const unsigned int height = 1024;
 
+class KeyFrame {
+	//this vary from 0 to 1
+	float timeStamp;
+};
+
 //now I have to write the animator class
-//what I can do from here is instance with animator instead of models, but when you start to draw anything. you still calls model.draw?
+//what I can do from here is instance with animator instead of models, but when you start to draw anything. you still calls model.draw?1
 class Animation {
+	//we have keyframes
+	std::vector<KeyFrame> keyframes;
+public:
+//	Animation()
+	
+};
+
+class Animator {
 public:
 	typedef std::pair<glm::mat4, std::vector<Bone> > instance_t;
 private:
+	//it contains the animated model, 
 	const Model* model;
 	//we will uses the instance from the models.
 	std::vector<glm::mat4> instance_mats;
+	//the bone of that reference, maybe we don't need to copy that
 	std::vector< std::vector<Bone> > bones;
+	//and a reference to an animation
+	float animation_time;
+	//get previous frames and last frames
 public:
 
-	Animation();
+	Animator();
 	/**
 	 * @brief convinient constructor if you only have one model and one instance
 	 */
-	Animation(const Model* model);
+	Animator(const Model* model);
 	void setModel(const Model* model);
+	void doAnimation();//do a new animation.
+	void update();
 };
 
-Animation::Animation(const Model* model)
+Animator::Animator(const Model* model)
 {
 	this->setModel(model);
-//	this->appendInstance(instance_mat);
 }
 
 void
-Animation::setModel(const Model *model)
+Animator::setModel(const Model *model)
 {
 	this->model = model;
 	//only one instance

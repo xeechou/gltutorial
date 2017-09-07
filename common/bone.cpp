@@ -26,7 +26,14 @@
 Bone::Bone(const std::string id, const glm::mat4& m) : TreeNode(id, m)
 {
 }
+
 Bone::Bone(const Bone& bone) : TreeNode(bone) {
 	_offsetMat = bone._offsetMat;
 }
 
+void
+Bone::setStackedTransformMat()
+{
+	TreeNode::setStackedTransformMat();
+	this->_invTransform = glm::inverse(this->_cascade_transform);
+}

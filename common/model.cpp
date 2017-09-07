@@ -168,20 +168,25 @@ Model::processBoneNode(const aiScene *scene, const aiNode *node)
 {
 	//find the bone and parent_bone. if parent_bone is not set. then This is
 	//the root bone
+
 	std::string node_name = node->mName.data;
 	std::string parent_name = node->mParent->mName.data;
 	Bone &bone = this->bones[node_name];
 	auto parent_itr = this->bones.find(parent_name);
 	bone.children.clear();
 	
-	if (parent_itr != this->bones.end())
+	glm::mat4 parent_transform;	
+	glm::mat4 local_transform;
+	if (parent_itr != this->bones.end()) 
 		bone.parent = &parent_itr->second;
 	else
 		bone.parent = NULL;
-	// Then do the same for each of its children
+	
+	bone.setModelMat(aiMat2glmMat(node->mTransformation));
+	bone.setStackedTransformMat();
+	
 	for(GLuint i = 0; i < node->mNumChildren; i++)
 	{
-		//but you are not sure if it is really a bone though
 		Bone *child_node;
 		if ((child_node = this->processBoneNode(scene, node->mChildren[i])) != NULL) {
 			bone.children.push_back(child_node);

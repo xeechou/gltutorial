@@ -121,12 +121,16 @@ public:
 class Bone : public TreeNode {
 	///matrix that transfer the vertices from mesh(world) space to bone space.
 	glm::mat4 _offsetMat;
+	//the index of the bone
 	int _index;
+	glm::mat4 _invTransform;
 public:
 	Bone(const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
 	Bone(const Bone& bone);
 	int getInd() const {return _index;}
 	void setInd(int ind) {_index = ind;}
+	void setStackedTransformMat() override;
+	
 };
 
 

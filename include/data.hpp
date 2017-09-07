@@ -14,8 +14,8 @@ extern float CUBETEXS[72];
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-static inline aiMatrix4x4
-glmMat2aiMat(glm::mat4& mat)
+static inline const aiMatrix4x4
+glmMat2aiMat(const glm::mat4& mat)
 {
      return aiMatrix4x4(mat[0][0],mat[0][1],mat[0][2],mat[0][3],
                         mat[1][0],mat[1][1],mat[1][2],mat[1][3],
@@ -23,8 +23,8 @@ glmMat2aiMat(glm::mat4& mat)
                         mat[3][0],mat[3][1],mat[3][2],mat[3][3]);	
 }
 
-static inline glm::mat4
-aiMat2glmMat(aiMatrix4x4& in_mat)
+static inline const glm::mat4
+aiMat2glmMat(const aiMatrix4x4& in_mat)
 {
       glm::mat4 tmp;
       tmp[0][0] = in_mat.a1;

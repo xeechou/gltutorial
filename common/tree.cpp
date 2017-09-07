@@ -44,3 +44,31 @@ std::string TreeNode::layout() const
 	std::string s;
 	return ss.str();
 }
+
+const glm::mat4
+TreeNode::getModelMat() const
+{
+	return _model_mat;
+}
+
+void
+TreeNode::setModelMat(const glm::mat4& model)
+{
+	_model_mat = model;
+}
+
+const glm::mat4
+TreeNode::getStackedTransformMat() const
+{
+	return this->_cascade_transform;
+}
+
+void
+TreeNode::setStackedTransformMat()
+{
+	if (!this->parent)
+		this->_cascade_transform = this->_model_mat;
+	else {
+		this->_cascade_transform = this->_model_mat * this->parent->getStackedTransformMat();
+	}
+}

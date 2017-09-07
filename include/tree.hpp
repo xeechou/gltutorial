@@ -16,14 +16,20 @@ public:
 	TreeNode *parent;
 	std::vector<TreeNode*> children;
 	glm::mat4 _model_mat;
+	glm::mat4 _cascade_transform;
+	
 	TreeNode(const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
 	const std::string name() const {return id;}
-	glm::mat4 getModelMat() const {return _model_mat;}
-	void setModelMat(glm::mat4& model) {_model_mat = model;}
+	const glm::mat4 getModelMat() const;
+	void setModelMat(const glm::mat4& model);
 	/**
-	 * @brief accumlate the transformation matrix from its accenster
+	 * @brief accumlate the transformation matrix from its accenster, setModelMat has to call first
 	 */
-	glm::mat4 getStackedTransformMat() const;
+	const glm::mat4 getStackedTransformMat() const;
+	/**
+	 * @brief set the cascade transformation and its inverse for the this node. It will prove useful
+	 */
+	virtual void setStackedTransformMat();
 	/**
 	 * @brief this node and all its decedents
 	 */
