@@ -68,22 +68,70 @@ loadTexture2GPU(const std::string fname)
 	return tid;
 }
 
-/**
- * @brief model constructor, loading meshes and textures, 
- * 
- * It does flags to the assimp, so we will get the triangluated mesh for sure
- * In terms of 
- */
 Model::Model(const std::string& file, int param)
 {
 	//setup constant
 	this->instanceVBO = 0;
 	
+	aiScene *scene = this->readModel(file);
+	this->root_path = file.substr(0, file.find_last_of('/'));
+
+	//definitly load the mesh
+	for (uint i = 0; i < scene->mNumMeshes; i++) {
+		this->meshes.push_back(Mesh(scene, scene->mMeshes[i]));
+	}
+	//load the bone, TODO; make it in a wrapper
+	if (param & LOAD_BONE) {
+		//load bone has to be walk through the nodes, because only mesh
+		//has bone data. Then we can use the mesh to load bone weight
+		this->loadBone(scene, scene->mRootNode);
+		for (uint i = 0; i < scene->mNumMeshes; i++)
+			this->meshes[i].loadBoneWeights(scene->mMeshes[i], *this);
+		root_bone = this->findRootBone(scene, scene->mRootNode);
+		assert(root_bone ==
+		       processBoneNode(scene,
+				       scene->mRootNode->FindNode(root_bone->name().c_str())));
+
+	}
+	//find the root bone. Then We can load the heirachy
+	//then finally we can push the data to the GPU
+	for (GLuint i = 0; i < this->meshes.size(); i++)
+		this->meshes[i].pushMesh2GPU();
+
+	//setup the meshlayout
+	this->n_mesh_layouts = 3;
+	//if load texture
+	if (!(param & NO_TEXTURE))
+		this->loadMaterials(scene);
+
+	if (param & LOAD_ANIM && scene->HasAnimations())
+		this->loadAnimations(scene);
+	//TODO, updload verything to GPU should be here
+
+	//TODO cleanup scene
+	delete scene;
+	//TODO Delete maybe we should delete the CPU data
+}
+
+
+Model::Model()
+{
+}
+
+Model::~Model()
+{
+	if (this->instanceVBO)
+		glDeleteBuffers(1, &this->instanceVBO);
+}
+
+aiScene*
+Model::readModel(const std::string& file)
+{
 	Assimp::Importer import;
 	import.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
 	//import.SetPropertyInteger(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80.0f);
 	import.SetPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
-	
+
 	unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bitangents 
 		aiProcess_JoinIdenticalVertices    | // join identical vertices/ optimize indexing
 		aiProcess_ValidateDataStructure    | // perform a full validation of the loader's output
@@ -103,65 +151,13 @@ Model::Model(const std::string& file, int param)
 	
 	const aiScene *scene = import.ReadFile(file, ppsteps);
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		throw std::runtime_error(std::string("ERROR::ASSIMP") + import.GetErrorString());
-	this->root_path = file.substr(0, file.find_last_of('/'));
-
-	for (uint i = 0; i < scene->mNumMeshes; i++) {
-		this->meshes.push_back(Mesh(scene, scene->mMeshes[i]));
-	}
-	if (param & LOAD_BONE) {
-		//load bone has to be walk through the nodes, because only mesh
-		//has bone data. Then we can use the mesh to load bone weight
-		this->loadBone(scene, scene->mRootNode);
-		for (uint i = 0; i < scene->mNumMeshes; i++)
-			this->meshes[i].loadBoneWeights(scene->mMeshes[i], *this);
-		root_bone = this->findRootBone(scene, scene->mRootNode);
-		assert(root_bone ==
-		       processBoneNode(scene,
-				       scene->mRootNode->FindNode(root_bone->name().c_str())));
-//		std::cerr << root_bone->layout();
-
-	}
-	//find the root bone. Then We can load the heirachy
-	//then finally we can push the data to the GPU
-	for (GLuint i = 0; i < this->meshes.size(); i++)
-		this->meshes[i].pushMesh2GPU();
-
-	//setup the meshlayout
-	this->n_mesh_layouts = 3;
-	
-	std::map<std::string, GLuint> textures_cache;
-	//material processing
-	if (param & NO_TEXTURE)
-		return;
-	this->Materials.resize(scene->mNumMaterials);
-	for (GLuint i = 0; i < scene->mNumMaterials; i++) {
-		std::cerr << "material indx: " << i << std::endl;
-		aiMaterial *mat = scene->mMaterials[i];
-		aiString path;
-		Material material;
-		GLuint gpu_handle;
-		for (GLuint j = 0; j < TEX_NTexType; j++) {
-			if (mat->GetTextureCount(texture_types_supported[j].aiTextype) > 0) {
-				mat->GetTexture(texture_types_supported[j].aiTextype, 0, &path);
-				std::string full_path = this->root_path + "/" + std::string(path.C_Str());
-//				std::cerr << full_path << std::endl;
-				//check whether we loaded already
-				auto it = textures_cache.find(full_path);
-				if (it == textures_cache.end()) {
-					gpu_handle = loadTexture2GPU(full_path);
-					textures_cache.insert(std::make_pair(full_path, gpu_handle));
-				} else
-					gpu_handle = it->second;
-				material.push_back(
-					Texture(gpu_handle,
-						texture_types_supported[j].ourTextype));
-			}
-		}
-		this->Materials[i] = material;
-	}
-	//TODO I think we need to import the bone, then connect the bone together
+		throw std::runtime_error(std::string("ERROR::ASSIMP") + import.GetErrorString());\
+	//this code
+	aiScene *orph_scene = import.GetOrphanedScene();
+	return orph_scene;
 }
+
+
 
 Bone*
 Model::processBoneNode(const aiScene *scene, const aiNode *node)
@@ -245,16 +241,6 @@ Model::loadBone(const aiScene *scene, const aiNode *node)
 }
 
 
-Model::Model()
-{
-}
-
-Model::~Model()
-{
-	if (this->instanceVBO)
-		glDeleteBuffers(1, &this->instanceVBO);
-}
-
 void
 Model::draw(const ShaderMan *different_shader)
 {
@@ -311,7 +297,19 @@ Model::makeInstances(const int n_instances, const InstanceINIT flag,
 	//also, we need a way to upload bone weights to instances
 }
 
-void Model::pushIntances2GPU()
+void
+Model::appendInstance(const glm::vec3 translation,
+		      const glm::vec3 scale,
+		      const glm::quat rotation)
+{
+	this->instances.translations.push_back(translation);
+	this->instances.scales.push_back(scale);
+	this->instances.rotations.push_back(rotation);
+}
+
+
+void
+Model::pushIntances2GPU()
 {
 	if (this->instanceVBO)
 		glDeleteBuffers(1, &this->instanceVBO);
@@ -355,9 +353,83 @@ void Model::pushIntances2GPU()
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
+
+void
+Model::push2GPU(int param)
+{
+	//get the proper texture 
+	this->n_mesh_layouts = 1;
+	if (param & Mesh::LOAD_NORMAL)
+		this->n_mesh_layouts += 1;
+	if (param & Mesh::LOAD_TEX)
+		this->n_mesh_layouts += 1;
 		
+	for (unsigned int i = 0; i < this->meshes.size(); i++)
+		this->meshes[i].pushMesh2GPU(param);
+		
+	//We can do it here or 
+	if (this->instances.translations.size() > 0 && instanceVBO == 0)
+		this->pushIntances2GPU();
+}
+
+int
+Model::loadMaterials(const aiScene *scene)
+{
+	std::map<std::string, GLuint> textures_cache;
+
+	this->Materials.resize(scene->mNumMaterials);
+	for (GLuint i = 0; i < scene->mNumMaterials; i++) {
+		std::cerr << "material indx: " << i << std::endl;
+		aiMaterial *mat = scene->mMaterials[i];
+		aiString path;
+		Material material;
+		GLuint gpu_handle;
+		for (GLuint j = 0; j < TEX_NTexType; j++) {
+			if (mat->GetTextureCount(texture_types_supported[j].aiTextype) > 0) {
+				mat->GetTexture(texture_types_supported[j].aiTextype, 0, &path);
+				std::string full_path = this->root_path + "/" + std::string(path.C_Str());
+//				std::cerr << full_path << std::endl;
+				//check whether we loaded already
+				auto it = textures_cache.find(full_path);
+				if (it == textures_cache.end()) {
+					gpu_handle = loadTexture2GPU(full_path);
+					textures_cache.insert(std::make_pair(full_path, gpu_handle));
+				} else
+					gpu_handle = it->second;
+				material.push_back(
+					Texture(gpu_handle,
+						texture_types_supported[j].ourTextype));
+			}
+		}
+		this->Materials[i] = material;
+	}
+	return scene->mNumMaterials;
+}
 
 
-//cpu based instancing
+int
+Model::loadAnimations(const aiScene* scene)
+{
+	std::cout << "I am here, with " << scene->mNumAnimations << " animations" << std::endl;
+	this->animations.resize(scene->mNumAnimations);
+	for (uint i = 0; i < scene->mNumAnimations; i++) {
+		this->animations[i].keyframes.resize(this->bones.size());
+		aiAnimation *anim = scene->mAnimations[i];
+		size_t total_frames = anim->mTicksPerSecond * anim->mDuration;
+		
+		for (uint j = 0; j > anim->mNumChannels; j++) {
+			aiNodeAnim *bone_anim = anim->mChannels[j];
+			//find the bone
+			std::string name = bone_anim->mNodeName.C_Str();
+			int ind = this->bones[name].getInd();
+			std::cout << "anim bone name: " << name << std::endl;
+			(void)bone_anim->mNumPositionKeys;
+			(void)bone_anim->mNumRotationKeys;
+			(void)bone_anim->mNumScalingKeys;
+		}
+	}
+	
+}
 
 

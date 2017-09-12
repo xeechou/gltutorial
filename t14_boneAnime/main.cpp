@@ -42,30 +42,7 @@
 const unsigned int width = 1024;
 const unsigned int height = 1024;
 
-//now I have to write the animator class
-//what I can do from here is instance with animator instead of models, but when you start to draw anything. you still calls model.draw?1
-class Animation {
-	//Animation class is in charge of one animation sequence, so it has a
-	//series of keyframes.
-	class KeyFrame {
-		//this vary from 0 to 1
-		float timeStamp;
-		glm::vec3 translation;
-		glm::quat rotation;
-		glm::vec3 scale;
-	};
-	//per bone. per frames
-	std::vector< std::vector<KeyFrame> > keyframes;
-	//we have times.
-
-	//so what we are gonna do?
-public:
-	//it should have the ability to start the sequence, intenpolate between last keyframe and this
-	//at every frame, we should calculate the bone sequence
-	Animation();
-	void allocateBones(int);
-	void allocateFrames(int);
-};
+//series of keyframes.
 
 class Animator {
 	//animator is in charge of switching between a few of animations
@@ -82,6 +59,7 @@ private:
 	//and a reference to an animation
 	float animation_time;
 
+	//we may just keep the reference
 	std::vector<Animation> animations;
 public:
 
@@ -93,7 +71,7 @@ public:
 	void setModel(const Model* model);
 	void doAnimation();//do a new animation.
 	void update();
-	void loadAnmiations(aiScene *scene);
+//	void loadAnmiations(aiScene *scene);
 };
 
 
@@ -107,7 +85,7 @@ int main(int argc, char **argv)
 //	ShaderMan cubeShader("vs.glsl", "fs.glsl");
 //	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
 	
-	Model charactor(argv[1], Model::Parameter::LOAD_BONE);
+	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
 	
 	cont.init();
 	cont.run();
@@ -130,31 +108,5 @@ Animator::setModel(const Model *model)
 	}
 	for (int i = 0; i < model->getNinstances(); i++) {
 		//extract bones from the 
-	}
-}
-
-void
-Animator::loadAnmiations(aiScene *scene)
-{
-	this->animations.resize(scene->mNumAnimations);
-	for (uint i = 0; i < scene->mNumAnimations; i++) {
-		//it will allocate nbones.
-		//you don't necessary have it.
-		this->animations[i].allocateBones(this->bones.size());
-		aiAnimation *anim = scene->mAnimations[i];
-		size_t total_frames = anim->mTicksPerSecond * anim->mDuration;
-		//now we need to get number of ticks
-		for (uint j = 0; j > anim->mNumChannels; j++) {
-			aiNodeAnim *bone_anim = anim->mChannels[j];
-			//find the bone
-			std::string name = bone_anim->mNodeName.C_Str();
-			int ind = this->bones[name].getInd();
-			this->animations[i].allocateFrames(total_frames);
-			(void)bone_anim->mNumPositionKeys;
-			(void)bone_anim->mNumRotationKeys;
-			(void)bone_anim->mNumScalingKeys;
-//			bone_anim->
-				
-		}
 	}
 }

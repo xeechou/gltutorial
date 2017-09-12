@@ -133,11 +133,32 @@ public:
 	
 };
 
+struct KeyFrame {
+	//this vary from 0 to 1
+	float timeStamp;
+	glm::vec3 translation;
+	glm::quat rotation;
+	glm::vec3 scale;
+};
+
+struct Animation {
+	//for our convience
+	std::vector< std::vector<KeyFrame> > keyframes;
+
+public:
+};
+
 
 class Model {
 //it is too late for me to switch to template	
 	friend Mesh;
 protected:
+	/**
+	 * 
+	 * @brief read the model with importer, then disconnect the scene from the importer.
+	 *
+	 */
+	aiScene* readModel(const std::string& filename);
 	/**
 	 *
 	 * @brief find the heirachy
@@ -152,6 +173,11 @@ protected:
 	 * start with.
 	 */
 	Bone *processBoneNode(const aiScene *scene, const aiNode *node);
+	
+	/**
+	 * @brief use naive BFS method to find the root node
+	 */
+	const Bone *findRootBone(const aiScene *scene, const aiNode *node);	
 	/**
 	 *
 	 * @brief load every bone into bones
@@ -165,23 +191,31 @@ protected:
 	 *
 	 * Use BFS search to find the first bone
 	 */
-	const Bone *findRootBone(const aiScene *scene, const aiNode *node);
+	
+	/**
+	 * @brief load animation if exists return how many animations available
+	 */
+	int loadAnimations(const aiScene *scene);
+	
+	/**
+	 * @brief load materials
+	 */
+	int loadMaterials(const aiScene *scene);
+		
 	//
 	// Data
 	//
-	//bones
+	std::string root_path;
+	const ShaderMan *shader_to_draw;	
+
 	const Bone *root_bone;
 	std::map<std::string, Bone> bones;
-	
 	std::vector<Mesh> meshes;
-	//materials is a vector of vector
 	std::vector<Material> Materials;
-	
-	std::string root_path;
-	const ShaderMan *shader_to_draw;
-	//std::vector<Model *> children;
-	//I should probaly copy the bone to the instance as well
-	struct Instances instances; 
+	struct Instances instances;
+	std::vector<Animation> animations;
+
+
 	//GL interfaces
 	GLuint instanceVBO = 0;
 	int n_mesh_layouts;
@@ -197,8 +231,12 @@ public:
 		NO_TEXTURE  = 1,
 		AUTO_NORMAL = 2,
 		LOAD_BONE   = 4,
+		LOAD_ANIM   = 8,
        };
-	//Model *modelFromFile(const std::string& file), we could loaded instance nodes from here
+        /**
+	 * @brief model constructor, loading meshes and textures, 
+	 * 
+	 */
 	Model(const std::string& file, int params = NO_PARAMS);
 	Model(void);
 	~Model(void);
@@ -213,31 +251,13 @@ public:
 	int getNinstances() const {return this->instances.translations.size(); }
 	
 	void pushIntances2GPU(void);
-	void push2GPU(int param) {
-		//get the proper texture 
-		this->n_mesh_layouts = 1;
-		if (param & Mesh::LOAD_NORMAL)
-			this->n_mesh_layouts += 1;
-		if (param & Mesh::LOAD_TEX)
-			this->n_mesh_layouts += 1;
-		
-		for (unsigned int i = 0; i < this->meshes.size(); i++)
-			this->meshes[i].pushMesh2GPU(param);
-		
-		//We can do it here or 
-		if (this->instances.translations.size() > 0 && instanceVBO == 0)
-			this->pushIntances2GPU();
-		
-	}
+	void push2GPU(int param);
+  
 	//instancing interfaces
 	void appendInstance(const glm::vec3 translation,
-			     const glm::vec3 scale=glm::vec3(1.0f),
-			     const glm::quat rotation=glm::quat(glm::vec3(0.0f))) {
-		this->instances.translations.push_back(translation);
-		this->instances.scales.push_back(scale);
-		this->instances.rotations.push_back(rotation);
-	}
-	//also call the instances2GPU 
+			    const glm::vec3 scale=glm::vec3(1.0f),
+			    const glm::quat rotation=glm::quat(glm::vec3(0.0f)));
+	//make many instance
 	void makeInstances(const int n_instances, const InstanceINIT method =INIT_squares,
 			    //additional arguments maybe useful for different case, or ignored
 			    const glm::vec3 dscale=glm::vec3(1.0f),
