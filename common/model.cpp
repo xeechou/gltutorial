@@ -414,19 +414,22 @@ Model::loadAnimations(const aiScene* scene)
 	std::cout << "I am here, with " << scene->mNumAnimations << " animations" << std::endl;
 	this->animations.resize(scene->mNumAnimations);
 	for (uint i = 0; i < scene->mNumAnimations; i++) {
-		this->animations[i].keyframes.resize(this->bones.size());
-		aiAnimation *anim = scene->mAnimations[i];
+		aiAnimation *anim = scene->mAnimations[i];		
+//		this->animations[i].keyframes.resize(this->bones.size());
+		//I am so confused... only one mTickPerSecond???
 		size_t total_frames = anim->mTicksPerSecond * anim->mDuration;
-		
-		for (uint j = 0; j > anim->mNumChannels; j++) {
-			aiNodeAnim *bone_anim = anim->mChannels[j];
+		for (int k = 0; k < anim->mNumChannels; k++) {
+//			std::cout << "here"  << std::endl;
+			aiNodeAnim *bone_anim = anim->mChannels[k];
 			//find the bone
 			std::string name = bone_anim->mNodeName.C_Str();
-			int ind = this->bones[name].getInd();
-			std::cout << "anim bone name: " << name << std::endl;
-			(void)bone_anim->mNumPositionKeys;
-			(void)bone_anim->mNumRotationKeys;
-			(void)bone_anim->mNumScalingKeys;
+			std::cout << bone_anim->mNumPositionKeys << " translations, ";
+//			int ind = this->bones[name].getInd();
+			std::cout << bone_anim->mNumRotationKeys << " rotations, and ";
+			std::cout << bone_anim->mNumScalingKeys << " scales\n";
+//			(void)bone_anim->mNumPositionKeys;
+//			(void)bone_anim->mNumRotationKeys;
+//			(void)bone_anim->mNumScalingKeys;
 		}
 	}
 	

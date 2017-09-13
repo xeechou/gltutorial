@@ -31,11 +31,14 @@ class Mesh;
 class Texture;
 class Model;
 
-struct Instances {
+struct RSTs {
 	std::vector<glm::vec3> translations;
 	std::vector<glm::quat> rotations;
 	std::vector<glm::vec3> scales;
 };
+
+typedef struct RSTs Instances;
+typedef struct RSTs KeyFrame;
 
 struct Vertex {
 	glm::vec3 pos;
@@ -143,7 +146,10 @@ struct KeyFrame {
 
 struct Animation {
 	//for our convience
-	std::vector< std::vector<KeyFrame> > keyframes;
+	//this is just for one bone.
+	std::vector<glm::vec3> translations;
+	std::vector<glm::quat> rotations;
+	std::vector<glm::vec3> scales;
 
 public:
 };
@@ -212,7 +218,7 @@ protected:
 	std::map<std::string, Bone> bones;
 	std::vector<Mesh> meshes;
 	std::vector<Material> Materials;
-	struct Instances instances;
+	Instances instances;
 	std::vector<Animation> animations;
 
 
