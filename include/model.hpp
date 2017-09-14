@@ -38,7 +38,6 @@ struct RSTs {
 };
 
 typedef struct RSTs Instances;
-typedef struct RSTs KeyFrame;
 
 struct Vertex {
 	glm::vec3 pos;
@@ -136,12 +135,26 @@ public:
 	
 };
 
-struct KeyFrame {
-	//this vary from 0 to 1
-	float timeStamp;
+
+
+class JointTransform {
+public:
 	glm::vec3 translation;
 	glm::quat rotation;
 	glm::vec3 scale;
+	const glm::mat4 getLocalTransform();
+	static JointTransform interpolate(const JointTransform& a, const JointTransform& b, float progression);
+	static glm::vec3 interpolate(const glm::vec3& a, const glm::vec3& b, float progression);
+};
+
+
+
+
+struct KeyFrame {
+	//this vary from 0 to 1
+	float timeStamp;
+	
+	
 };
 
 struct Animation {
