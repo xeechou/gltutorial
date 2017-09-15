@@ -411,28 +411,41 @@ Model::loadMaterials(const aiScene *scene)
 int
 Model::loadAnimations(const aiScene* scene)
 {
-	std::cout << "I am here, with " << scene->mNumAnimations << " animations" << std::endl;
-	this->animations.resize(scene->mNumAnimations);
+//	std::cout << "I am here, with " << scene->mNumAnimations << " animations" << std::endl;
+//	this->animations.resize(scene->mNumAnimations);
 	for (uint i = 0; i < scene->mNumAnimations; i++) {
-		aiAnimation *anim = scene->mAnimations[i];		
-//		this->animations[i].keyframes.resize(this->bones.size());
-		//I am so confused... only one mTickPerSecond???
-		size_t total_frames = anim->mTicksPerSecond * anim->mDuration;
+		aiAnimation *anim = scene->mAnimations[i];
+		Animation local_anim;
+		local_anim.seconds = anim->mTicksPerSecond * anim->mDuration;
+		
 		for (int k = 0; k < anim->mNumChannels; k++) {
-//			std::cout << "here"  << std::endl;
+			//generally I think this is heavy, when copy contructor
+			//is called, it calls at every element on 
+			std::vector<struct KeyFrame> keyframes;
+
 			aiNodeAnim *bone_anim = anim->mChannels[k];
-			//find the bone
-			std::string name = bone_anim->mNodeName.C_Str();
-			std::cout << bone_anim->mNumPositionKeys << " translations, ";
-//			int ind = this->bones[name].getInd();
-			std::cout << bone_anim->mNumRotationKeys << " rotations, and ";
-			std::cout << bone_anim->mNumScalingKeys << " scales\n";
+			std::string bone_name = bone_anim->mNodeName.C_Str();
+
+			//now I need to interpolate keyframes
+			uint nr, ns, nt;
+			nt = bone_anim->mNumPositionKeys;
+			nr = bone_anim->mNumRotationKeys;
+			ns = bone_anim->mNumScalingKeys;
+			//or, go from the begining of the duration
+			while(nt + nr + ns > 0) {
+				
+			}
+//			std::cout << bone_anim->mNumPositionKeys << " translations, ";
+
+//			std::cout << bone_anim->mNumRotationKeys << " rotations, and ";
+//			std::cout << bone_anim->mNumScalingKeys << " scales\n";
 //			(void)bone_anim->mNumPositionKeys;
 //			(void)bone_anim->mNumRotationKeys;
 //			(void)bone_anim->mNumScalingKeys;
+			local_anim.keyframes[bone_name] = keyframes;
 		}
+		//copy constructor is called
+		this->animations[std::string(anim->mName.C_Str())] = local_anim;
 	}
 	
 }
-
-

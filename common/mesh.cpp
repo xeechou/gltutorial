@@ -23,7 +23,6 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#include <Eigen/Core>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
@@ -251,3 +250,5 @@ Mesh::loadBoneWeights(aiMesh *mesh, const Model &model)
 	this->boneWeights.setFromTriplets(vertexWeight.begin(), vertexWeight.end());
 //	std::cout << "weights of the mesh" << this->boneWeights.nonZeros() << std::endl;
 }
+
+

@@ -41,4 +41,15 @@ typedef union {
 	const char *name;
 } msg_t;
 
+
+class OBJproperty {
+//this class will be the plugins in the model class and mesh class, if the model
+//added the property, the mesh should
+public:
+	OBJproperty();
+	//return success or not
+	bool load(const aiScene *scene);
+	bool push2GPU(void);
+};
+
 #endif /* EOF */

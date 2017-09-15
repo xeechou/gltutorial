@@ -142,31 +142,25 @@ public:
 	glm::vec3 translation;
 	glm::quat rotation;
 	glm::vec3 scale;
+
+	JointTransform(const glm::vec3& t = glm::vec3(0.0f),
+		       const glm::quat& r = glm::quat(glm::vec3(0.0f)),
+		       const glm::vec3& s = glm::vec3(1.0f));
 	const glm::mat4 getLocalTransform();
 	static JointTransform interpolate(const JointTransform& a, const JointTransform& b, float progression);
-	static glm::vec3 interpolate(const glm::vec3& a, const glm::vec3& b, float progression);
 };
-
-
 
 
 struct KeyFrame {
-	//this vary from 0 to 1
+	//the keyFrames has the keyframes 
 	float timeStamp;
-	
-	
+	JointTransform jtransform;
 };
 
 struct Animation {
-	//for our convience
-	//this is just for one bone.
-	std::vector<glm::vec3> translations;
-	std::vector<glm::quat> rotations;
-	std::vector<glm::vec3> scales;
-
-public:
+	double seconds;
+	std::map<std::string, std::vector<KeyFrame> > keyframes;
 };
-
 
 class Model {
 //it is too late for me to switch to template	
@@ -232,7 +226,8 @@ protected:
 	std::vector<Mesh> meshes;
 	std::vector<Material> Materials;
 	Instances instances;
-	std::vector<Animation> animations;
+	//In case we have different animations
+	std::map<std::string, struct Animation> animations;
 
 
 	//GL interfaces
