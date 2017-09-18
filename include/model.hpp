@@ -132,34 +132,39 @@ public:
 	int getInd() const {return _index;}
 	void setInd(int ind) {_index = ind;}
 	void setStackedTransformMat() override;
-	
 };
 
 
 
+//gota decide whether to 
 class JointTransform {
 public:
 	glm::vec3 translation;
 	glm::quat rotation;
 	glm::vec3 scale;
+	std::string joint_name;
 
-	JointTransform(const glm::vec3& t = glm::vec3(0.0f),
-		       const glm::quat& r = glm::quat(glm::vec3(0.0f)),
-		       const glm::vec3& s = glm::vec3(1.0f));
+	JointTransform(const std::string& name = "",
+		const glm::vec3& t = glm::vec3(0.0f),
+		const glm::quat& r = glm::quat(glm::vec3(0.0f)),
+		const glm::vec3& s = glm::vec3(1.0f));
 	const glm::mat4 getLocalTransform();
 	static JointTransform interpolate(const JointTransform& a, const JointTransform& b, float progression);
+	static glm::vec3 interpolate(const glm::vec3& a, const glm::vec3& b, float progression);
 };
 
 
 struct KeyFrame {
-	//the keyFrames has the keyframes 
+	//for the animation's convience, we need the datatype cooperates with time
 	float timeStamp;
-	JointTransform jtransform;
+	std::map<std::string, JointTransform> transforms;
+//	std::vector<JointTransform> transforms;
 };
 
 struct Animation {
 	double seconds;
-	std::map<std::string, std::vector<KeyFrame> > keyframes;
+	//you r gonna have memory problem with it.
+	std::vector<KeyFrame> keyframes;
 };
 
 class Model {
@@ -205,6 +210,7 @@ protected:
 	 * Use BFS search to find the first bone
 	 */
 	
+//	std::pair<>
 	/**
 	 * @brief load animation if exists return how many animations available
 	 */
