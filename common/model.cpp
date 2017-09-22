@@ -7,6 +7,7 @@
 #include <queue>
 #include <string>
 #include <set>
+#include <cmath>
 
 #include <GL/glew.h>
 #ifdef __linux__
@@ -35,6 +36,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <utils.h>
 #include <model.hpp>
 #include <data.hpp>
 
@@ -409,6 +411,23 @@ Model::loadMaterials(const aiScene *scene)
 }
 
 
+static bool need_interpolate(const double current_time, double& prev_frame, double& next_frame,
+			     const std::set<double>& timestamps)
+{
+	std::set<double>::const_iterator itr = timestamps.lower_bound(current_time);
+	if (itr == timestamps.end() || *itr == current_time)
+		return false;
+	next_frame = *itr;
+	//this only happens when we don't have 0 frame and we inserted 0. We also want avoid this
+	prev_frame = (itr != timestamps.begin()) ? (*(--itr)) : current_time;
+	if (prev_frame == current_time)
+		return false;
+	else if (next_frame > current_time && current_time > prev_frame)
+		return true;
+	else
+		return false;
+}
+
 int
 Model::loadAnimations(const aiScene* scene)
 {
@@ -437,7 +456,8 @@ Model::loadAnimations(const aiScene* scene)
 			std::string bone_name = bone_anim->mNodeName.C_Str();
 			//now I need to interpolate keyframes
 			for (uint itt = 0; itt < bone_anim->mNumPositionKeys; itt++) {
-				double current_time = bone_anim->mPositionKeys[itt].mTime;
+//				double current_time = bone_anim->mPositionKeys[itt].mTime;
+				double current_time = value_at_precision(bone_anim->mPositionKeys[itt].mTime, 2);
 				aiVector3D value = bone_anim->mPositionKeys[itt].mValue;
 				KeyFrame& keyframe = all_keyframes[current_time];
 				keyframe.timeStamp = current_time;
@@ -447,56 +467,45 @@ Model::loadAnimations(const aiScene* scene)
 				timestamps.insert(current_time);
 			}
 			for (uint itr = 0; itr < bone_anim->mNumRotationKeys; itr++) {
-				double current_time = bone_anim->mRotationKeys[itr].mTime;
+//				double current_time = bone_anim->mPositionKeys[itr].mTime;				
+				double current_time = value_at_precision(bone_anim->mPositionKeys[itr].mTime, 2);				
 				aiQuaternion value = bone_anim->mRotationKeys[itr].mValue;
 				KeyFrame& keyframe = all_keyframes[current_time];
 				keyframe.timeStamp = current_time;
 				JointTransform& batframe = keyframe.transforms[bone_name];
 				batframe.joint_name = bone_name;
 				batframe.rotation = glm::quat(value.w, value.x, value.y ,value.z);
-				
-				//interpolate the translation at this point,
+
 				double next_tstamp, prev_tstamp;
-				auto litr = timestamps.lower_bound(current_time);
-				if (litr == timestamps.end()) {}
-				next_tstamp = *litr;
-				prev_tstamp = (litr != timestamps.begin()) ? (*(--litr)) : current_time;
-				if (next_tstamp > prev_tstamp && next_tstamp > current_time) {
+				if (need_interpolate(current_time, prev_tstamp, next_tstamp, timestamps)) {
 					glm::vec3 last_transform = all_keyframes[prev_tstamp].transforms[bone_name].translation;
 					glm::vec3 next_transform = all_keyframes[next_tstamp].transforms[bone_name].translation;
 					batframe.translation = JointTransform::interpolate(last_transform, next_transform,
 											   (current_time - prev_tstamp)/(next_tstamp - prev_tstamp) );
 					if (glm::isnan(batframe.translation)[0])
 						std::cerr << "lol, found a bug" << std::endl;
+					
 				}
 				global_timestamps.insert(current_time);
 				timestamps.insert(current_time);
 			}
 			for (uint its = 0; its < bone_anim->mNumScalingKeys; its++) {
-				bool need_interpolate = false;
-				double current_time = bone_anim->mScalingKeys[its].mTime;
+//				double current_time = bone_anim->mPositionKeys[its].mTime;
+				double current_time = value_at_precision(bone_anim->mPositionKeys[its].mTime, 2);
 				aiVector3D value = bone_anim->mScalingKeys[its].mValue;
 				KeyFrame& keyframe = all_keyframes[current_time];
 				keyframe.timeStamp = current_time;
 				JointTransform& batframe = keyframe.transforms[bone_name];
-				if (batframe.joint_name.empty())
-					need_interpolate = true;
 				batframe.joint_name = bone_name;
 				batframe.scale = glm::vec3(value.x, value.y, value.z);
-				if (!need_interpolate)
-					continue;
 
-				double next_trstamp, prev_trstamp;
-				auto litr = timestamps.lower_bound(current_time);
-				next_trstamp = *litr;
-				prev_trstamp = (litr != timestamps.begin()) ? (*(--litr)) : current_time;
-				if (next_trstamp > prev_trstamp) {
-					JointTransform& last_one = all_keyframes[prev_trstamp].transforms[bone_name];
-					JointTransform& next_one = all_keyframes[next_trstamp].transforms[bone_name];
-					batframe = JointTransform::interpolate(last_one, next_one,
-									       (current_time-prev_trstamp)/(next_trstamp - prev_trstamp));
-				}//or we do nothing?
-				//interpolate both translation and rotation
+				double next_tstamp, prev_tstamp;
+				if (need_interpolate(current_time, prev_tstamp, next_tstamp, timestamps)) {
+					JointTransform& last_transform = all_keyframes[prev_tstamp].transforms[bone_name];
+					JointTransform& next_transform = all_keyframes[next_tstamp].transforms[bone_name];
+					batframe = JointTransform::interpolate(last_transform, next_transform,
+											   (current_time - prev_tstamp)/(next_tstamp - prev_tstamp) );
+				}
 				global_timestamps.insert(current_time);
 				timestamps.insert(current_time);
 			}
@@ -519,3 +528,5 @@ Model::loadAnimations(const aiScene* scene)
 		this->animations[std::string(anim->mName.C_Str())] = local_anim;
 	}
 }
+
+
