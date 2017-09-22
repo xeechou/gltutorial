@@ -12,6 +12,7 @@ include_directories(
 
 add_executable(t13
   main.cpp
+  shadow.cpp
   )
 
 target_link_libraries(t13

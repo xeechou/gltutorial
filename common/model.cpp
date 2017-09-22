@@ -440,9 +440,9 @@ Model::loadAnimations(const aiScene* scene)
 		
 		std::map<double, KeyFrame> all_keyframes;
 
-		//The first frame sometimes are inserted
+		//it is harmless to insert the 0 timestamp
 //		KeyFrame first_frame;
-		//fuck sometimes there are 
+		//fuck sometimes there are harmless.
 //		first_frame.timeStamp = 0;
 //		for (auto bone_itr = this->bones.cbegin(); bone_itr != this->bones.end(); bone_itr++)
 //			first_frame.transforms[bone_itr->first] = JointTransform(bone_itr->first);
@@ -468,7 +468,7 @@ Model::loadAnimations(const aiScene* scene)
 			}
 			for (uint itr = 0; itr < bone_anim->mNumRotationKeys; itr++) {
 //				double current_time = bone_anim->mPositionKeys[itr].mTime;				
-				double current_time = value_at_precision(bone_anim->mPositionKeys[itr].mTime, 2);				
+				double current_time = value_at_precision(bone_anim->mRotationKeys[itr].mTime, 2);				
 				aiQuaternion value = bone_anim->mRotationKeys[itr].mValue;
 				KeyFrame& keyframe = all_keyframes[current_time];
 				keyframe.timeStamp = current_time;
@@ -491,7 +491,7 @@ Model::loadAnimations(const aiScene* scene)
 			}
 			for (uint its = 0; its < bone_anim->mNumScalingKeys; its++) {
 //				double current_time = bone_anim->mPositionKeys[its].mTime;
-				double current_time = value_at_precision(bone_anim->mPositionKeys[its].mTime, 2);
+				double current_time = value_at_precision(bone_anim->mScalingKeys[its].mTime, 2);
 				aiVector3D value = bone_anim->mScalingKeys[its].mValue;
 				KeyFrame& keyframe = all_keyframes[current_time];
 				keyframe.timeStamp = current_time;
@@ -516,6 +516,7 @@ Model::loadAnimations(const aiScene* scene)
 //			(void)bone_anim->mNumRotationKeys;
 //			(void)bone_anim->mNumScalingKeys;
 		}
+		/*
 		std::cerr << "number of keyframes for this model: " << all_keyframes.size() << std::endl;
 		for (auto itr = all_keyframes.begin(); itr != all_keyframes.end(); itr++) {
 			std::cerr << "current timestamp" << itr->first << std::endl;
@@ -524,9 +525,8 @@ Model::loadAnimations(const aiScene* scene)
 				std::cerr << '\t' << glm::to_string(itj->second.rotation) <<'\t' << glm::to_string(itj->second.scale) << std::endl;
 			}
 		}
+		*/
 		//copy constructor is called
 		this->animations[std::string(anim->mName.C_Str())] = local_anim;
 	}
 }
-
-

@@ -25,6 +25,7 @@
 //now it becomes the second place where we use the
 class ShaderMan
 {
+protected:
 	typedef boost::filesystem::path path_t;
 	
 	enum STYPE {VERTEX, FRAGMENT, GEOMETRY, COMPUTE};
@@ -54,6 +55,8 @@ public:
 	//we need two callback
 	virtual void setupTexUniform(void)  {};
 };
+
+//modulelize the shader
 
 
 

@@ -1,6 +1,7 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
+#include <set>
 #include <utility>
 
 #include <assimp/scene.h>
@@ -51,5 +52,8 @@ public:
 	bool load(const aiScene *scene);
 	bool push2GPU(void);
 };
+
+//what else I wantted to do again?
+typedef std::set<double> timestamps_t;
 
 #endif /* EOF */
