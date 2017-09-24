@@ -32,10 +32,6 @@ protected:
 	std::vector<GLuint> shaders;
 	GLuint pid; //program id
 
-	//I will call the static_callback first 
-	int (* static_cb) (GLuint program);
-	int (* perframe_cb) (GLuint program);
-	//To shaders its only uniforms
 public:
 	//so, we have a brunch of aiSupported texture, for texture like CUBEMAP...
 	//I need to figure out later how to support it.
@@ -48,12 +44,15 @@ public:
 	//add shader from string
 	int addShader(const char *, STYPE type);
 	int addShader(const path_t&, STYPE type);
-	//int loadShader(boost::filesystem::path& p, STYPE shader_type);
 	~ShaderMan();
 	GLuint getPid(void) const {return pid;}
 	void useProgram(void) {glUseProgram(pid);}
 	//we need two callback
 	virtual void setupTexUniform(void)  {};
+	
+	static std::string getShaderName(GLenum shader);
+	static GLuint createShaderFromString(const std::string& string, GLenum);
+	static GLuint loadShaderProgram(GLuint *shaders, int len);
 };
 
 //modulelize the shader

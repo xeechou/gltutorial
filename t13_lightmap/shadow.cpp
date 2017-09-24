@@ -39,9 +39,15 @@ static glm::mat4 LP, LV;
 static glm::vec3 LtP;
 
 
-class shaderShadowMap : ShaderMan {
+class shaderShadowMap : public ShaderMan {
 public:
 	shaderShadowMap(void);
+};
+
+
+class phongWithShadowMap : public ShaderMan {
+public:
+	phongWithShadowMap(void);
 };
 
 //ha, this is weirdest impl I've ever seen
@@ -53,15 +59,30 @@ shaderShadowMap::shaderShadowMap(void)
 	const std::string fs_source =
 #include <collections/shaders/shadowmapfs.glsl>
 		;
+	this->shaders.resize(2);
+	shaders[0] = ShaderMan::createShaderFromString(vs_source, GL_VERTEX_SHADER);
+	shaders[1] = ShaderMan::createShaderFromString(fs_source, GL_FRAGMENT_SHADER);
+	this->pid = ShaderMan::loadShaderProgram(&shaders[0], shaders.size());
+}
 
-	
+phongWithShadowMap::phongWithShadowMap(void)
+{
+	const std::string vs_source =
+#include <collections/shaders/phongvs.glsl>
+		;
+	const std::string fs_source =
+#include <collections/shaders/phongfs.glsl>
+		;
+	this->shaders.resize(2);
+	shaders[0] = ShaderMan::createShaderFromString(vs_source, GL_VERTEX_SHADER);
+	shaders[1] = ShaderMan::createShaderFromString(fs_source, GL_FRAGMENT_SHADER);
+	this->pid = ShaderMan::loadShaderProgram(&shaders[0], shaders.size());
 }
 
 
-
-AfterShadow::AfterShadow(ShaderMan *shader)
+AfterShadow::AfterShadow(void)
 {
-	this->shader = shader;
+	this->shader = std::make_shared<phongWithShadowMap>();
 	this->prog = shader->getPid();
 }
 
@@ -81,7 +102,7 @@ int AfterShadow::init_setup(void)
 	
 	for (unsigned int i = 0; i < cubes.size(); i++) {
 		this->cubes[i]->push2GPU(Mesh::LOAD_POS | Mesh::LOAD_NORMAL | Mesh::LOAD_TEX);
-		this->cubes[i]->bindShader(this->shader);
+		this->cubes[i]->bindShader(this->shader.get());
 	}
 	this->p = glm::perspective(glm::radians(90.0f), (float)1.0/(float)1.0, 1.0f, 100.0f);
 
@@ -139,9 +160,9 @@ AfterShadow::append_model(Model *cube)
 }
 
 
-shadowMap::shadowMap(ShaderMan *shader)
+shadowMap::shadowMap(void)
 {
-	this->shader = shader;
+	this->shader = std::make_shared<shaderShadowMap>();
 	this->prog = shader->getPid();
 	//put it here so we can render the 
 	this->width = 1024; this->height = 1024;
@@ -175,7 +196,7 @@ shadowMap::itr_draw()
 	glEnable(GL_DEPTH_TEST);
 
 	for (unsigned int i = 0; i < cubes.size(); i++)
-		cubes[i]->draw(this->shader);
+		cubes[i]->draw(this->shader.get());
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return 0;
 }
@@ -187,7 +208,7 @@ int shadowMap::init_setup(void)
 	for (unsigned int i = 0; i < cubes.size(); i++) {
 		//the problem is here, the mesh data get saved twice, somehow this caused no drawing problem
 		//this->cubes[i]->push2GPU(Mesh::LOAD_POS);
-		this->cubes[i]->bindShader(this->shader);
+		this->cubes[i]->bindShader(this->shader.get());
 	}
 	glm::mat4 lpv = LP * LV;
 	glUniformMatrix4fv(glGetUniformLocation(this->prog, "lightMatrix"),

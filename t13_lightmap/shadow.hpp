@@ -1,6 +1,8 @@
 #ifndef DR_SHADOW_HPP
 #define DR_SHADOW_HPP
 
+#include <memory>
+
 #include <utils.h>
 #include <shaderman.h>
 #include <controls.h>
@@ -14,11 +16,13 @@ class AfterShadow : public DrawObj {
 protected:
 	std::vector<Model *> cubes;
 	glm::mat4 p;
-	const ShaderMan *shader;
+	std::shared_ptr<ShaderMan> shader;
+//	const ShaderMan *shader;
 	//FBobject depth_frambuffer;
 	GLuint depthTex, cubeTex;
 public:
-	AfterShadow(ShaderMan *shader);
+//	AfterShadow(ShaderMan *shader);
+	AfterShadow(void);
 	void setCubeTex(GLuint tex_id);
 	int init_setup(void) override;
 	int itr_setup(void) override;
@@ -30,11 +34,13 @@ public:
 class shadowMap : public DrawObj {
 protected:
 	std::vector<Model *> cubes;
-	const ShaderMan *shader;
+	std::shared_ptr<ShaderMan> shader;
+//	const ShaderMan *shader;
 	GLuint fbo, depthTex;
 	size_t width, height;
 public:
-	shadowMap(ShaderMan *shader);
+//	shadowMap(ShaderMan *shader);
+	shadowMap(void);
 	
 	GLuint getShadowTex() const;
 	int init_setup(void) override;

@@ -38,9 +38,12 @@ GLuint load_shader(const char *fname, GLenum type)
 	}
 	return sid;
 }
+
+
 //the interface may change
-static
-GLuint load_shader_program(GLuint *shaders, int len)
+
+GLuint
+ShaderMan::loadShaderProgram(GLuint *shaders, int len)
 {
 	GLint result;
 	int loglen;
@@ -75,10 +78,63 @@ ShaderMan::loadShaders(const char *vshader , const char *fshader)
 	if (!(fs = load_shader(fshader, GL_FRAGMENT_SHADER)))
 		return -1;
 	shaders.push_back(fs);
-	if (!(p = load_shader_program(&shaders[0], 2)))
+	if (!(p = ShaderMan::loadShaderProgram(&shaders[0], 2)))
 		return -1;
 	pid = p;
 	return 0;
+}
+
+std::string
+ShaderMan::getShaderName(GLenum shader)
+{
+	switch (shader) {
+	case GL_VERTEX_SHADER:
+		return "vertex shader";
+		break;
+	case GL_GEOMETRY_SHADER:
+		return "geometry shader";
+		break;
+	case GL_FRAGMENT_SHADER:
+		return "fragment shader";
+		break;
+	case GL_TESS_CONTROL_SHADER:
+		return "tessellation control shader";
+		break;
+	case GL_TESS_EVALUATION_SHADER:
+		return "tessellation evaluation shader";
+		break;
+	case GL_COMPUTE_SHADER:
+		return "compute shader";
+		break;
+	default:
+		return "unknown shader";
+		break;
+	}
+}
+
+
+GLuint
+ShaderMan::createShaderFromString(const std::string& content, GLenum shadertype)
+{
+	int loglen;
+	GLint result = GL_FALSE;
+	GLuint sid = glCreateShader(shadertype);
+	const char *shader_code_pointer = content.c_str();
+	glShaderSource(sid, 1, &shader_code_pointer, NULL);
+	glCompileShader(sid);
+	
+	//check compile statues
+	glGetShaderiv(sid, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(sid, GL_INFO_LOG_LENGTH, &loglen);
+	if (result != GL_TRUE) {
+		std::vector<char> err_msg(loglen+1);
+		glGetShaderInfoLog(sid, loglen, NULL, &err_msg[0]);
+		std::cerr << ShaderMan::getShaderName(shadertype) << " Compile info";
+		std::cerr << &err_msg << std::endl;
+		return 0;
+	}
+	return sid;
+	
 }
 
 
