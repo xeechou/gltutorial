@@ -46,11 +46,11 @@ int main(int argc, char **argv)
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 	GLuint cubeTex = loadTexture2GPU("../imgs/container.jpg");
 
-	ShaderMan cubeShader("vs.glsl", "fs.glsl");
-	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
+//	ShaderMan cubeShader("vs.glsl", "fs.glsl");
+//	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
 	
-	shadowMap shadow(&shadowShader);
-	AfterShadow cubes(&cubeShader);
+	shadowMap shadow;
+	AfterShadow cubes;
 	cubes.setCubeTex(cubeTex);
 	
 	CubeModel cube;

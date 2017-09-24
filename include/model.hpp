@@ -168,7 +168,7 @@ struct Animation {
 };
 
 class Model {
-//it is too late for me to switch to template	
+	//TODO add properties to Model, you probably need the template friend for this
 	friend Mesh;
 protected:
 	/**

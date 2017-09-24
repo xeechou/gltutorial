@@ -450,7 +450,7 @@ Model::loadAnimations(const aiScene* scene)
 //		local_anim.seconds = anim->mTicksPerSecond * anim->mDuration;
 //		global_timestamps.insert(0);
 		
-		for (int k = 0; k < anim->mNumChannels; k++) {
+		for (uint k = 0; k < anim->mNumChannels; k++) {
 			std::set<double> timestamps;
 			aiNodeAnim *bone_anim = anim->mChannels[k];
 			std::string bone_name = bone_anim->mNodeName.C_Str();

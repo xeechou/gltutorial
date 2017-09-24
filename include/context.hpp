@@ -7,6 +7,7 @@
 #include <iostream>
 #include <queue>
 #include <utility>
+#include <memory>
 
 #include <GL/glew.h>
 #ifdef __linux__
@@ -21,7 +22,7 @@
 
 class context;
 class DrawObj;
-
+class ShaderMan;
 
 /**
  * @brief skeleton class for setup one type of data 
@@ -42,13 +43,8 @@ class DrawObj;
  * guy can do it.
  */
 class DrawObj {
-	friend class context;
-private:
-	int pos_in_context;
-	void set_context(context *c);
-	void setPosinContext(size_t pos);
-
 protected:
+	int pos_in_context;	
 	GLuint prog;
 	context *ctxt;
 public:
@@ -56,7 +52,7 @@ public:
 	DrawObj(GLuint p);
 	void set_shader(GLuint p);
 	//we should have better shader interface next time
-	GLuint program(void);
+	GLuint program(void) const;
 	//okay, this thing only context should called it
 	virtual int init_setup(void) = 0;
 	//this get called first
@@ -64,10 +60,23 @@ public:
 	//then this get called
 	virtual int itr_draw(void) = 0;
 	//write your own function for loading data
-	context * get_context(void);
-	const int getPosinContext(void);
+	context * get_context(void) const;
+	const int getPosinContext(void) const;
+	void set_context(context *c);
+	void setPosinContext(size_t pos);
 };
 
+class MultiPassDrawObj : public DrawObj {
+	//this class is created to run multiple shader path at same time
+protected:
+	//It is better to declare as shared_ptr. Because We don't know if we are
+	//the only object uses that shader program or not, personally I think it
+	//is really stupid to just have one object uses the shader
+	std::vector<std::shared_ptr<ShaderMan> > shaders;
+public:
+	MultiPassDrawObj(void);
+	void appendShader(std::shared_ptr<ShaderMan>& shader);
+};
 
 class context {
 protected:
@@ -101,7 +110,7 @@ public:
 //////inline functions
 //DrawObj
 inline context *
-DrawObj::get_context()
+DrawObj::get_context() const
 {
 	return this->ctxt;
 }
@@ -111,7 +120,7 @@ DrawObj::set_context(context *e)
 	this->ctxt = e;
 }
 inline const int
-DrawObj::getPosinContext()
+DrawObj::getPosinContext() const
 {
 	return this->pos_in_context;
 }
@@ -126,7 +135,7 @@ DrawObj::set_shader(GLuint p)
 	this->prog = p;
 }
 inline GLuint
-DrawObj::program()
+DrawObj::program() const
 {
 	return this->prog;
 }

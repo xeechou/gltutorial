@@ -86,6 +86,7 @@ int main(int argc, char **argv)
 //	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
 	
 	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
+	//the general shader, 
 	
 	cont.init();
 	cont.run();

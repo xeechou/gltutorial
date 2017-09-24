@@ -8,8 +8,6 @@ include_directories(
   )
 
 
-
-
 add_executable(t13
   main.cpp
   shadow.cpp
@@ -23,4 +21,5 @@ target_link_libraries(t13
   ${OpenCV_LIBS}
   ${assimp_LIBRARIES}
   common
+  shadercollect
   )

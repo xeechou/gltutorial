@@ -88,7 +88,7 @@ context::append_drawObj(DrawObj *dobj)
 void
 context::sendMsg(const DrawObj& d, const msg_t msg)
 {
-	int indx = d.pos_in_context;
+	int indx = d.getPosinContext();
 	this->forward_msg_que.push(std::make_pair(indx+1, msg));
 }
 
@@ -98,7 +98,7 @@ context::retriveMsg(const DrawObj& d)
 	int indx;
 	msg_t msg;
 	std::tie(indx, msg) = this->forward_msg_que.front();
-	if (indx == d.pos_in_context)
+	if (indx == d.getPosinContext())
 		this->forward_msg_que.pop();
 	return msg;
 }

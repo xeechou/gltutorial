@@ -46,7 +46,7 @@ public:
 	int addShader(const path_t&, STYPE type);
 	~ShaderMan();
 	GLuint getPid(void) const {return pid;}
-	void useProgram(void) {glUseProgram(pid);}
+	void useProgram(void) const {glUseProgram(pid);}
 	//we need two callback
 	virtual void setupTexUniform(void)  {};
 	

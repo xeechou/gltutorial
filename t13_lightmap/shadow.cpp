@@ -31,54 +31,15 @@
 #include <fbobj.hpp>
 #include <context.hpp>
 #include <collections/geometry.hpp>
+#include <collections/shaders.hpp>
+
 
 #include "shadow.hpp"
+
 
 //I think it is okay, since these two always come together
 static glm::mat4 LP, LV;
 static glm::vec3 LtP;
-
-
-class shaderShadowMap : public ShaderMan {
-public:
-	shaderShadowMap(void);
-};
-
-
-class phongWithShadowMap : public ShaderMan {
-public:
-	phongWithShadowMap(void);
-};
-
-//ha, this is weirdest impl I've ever seen
-shaderShadowMap::shaderShadowMap(void)
-{
-	const std::string vs_source =
-#include <collections/shaders/shadowmapvs.glsl>
-		;
-	const std::string fs_source =
-#include <collections/shaders/shadowmapfs.glsl>
-		;
-	this->shaders.resize(2);
-	shaders[0] = ShaderMan::createShaderFromString(vs_source, GL_VERTEX_SHADER);
-	shaders[1] = ShaderMan::createShaderFromString(fs_source, GL_FRAGMENT_SHADER);
-	this->pid = ShaderMan::loadShaderProgram(&shaders[0], shaders.size());
-}
-
-phongWithShadowMap::phongWithShadowMap(void)
-{
-	const std::string vs_source =
-#include <collections/shaders/phongvs.glsl>
-		;
-	const std::string fs_source =
-#include <collections/shaders/phongfs.glsl>
-		;
-	this->shaders.resize(2);
-	shaders[0] = ShaderMan::createShaderFromString(vs_source, GL_VERTEX_SHADER);
-	shaders[1] = ShaderMan::createShaderFromString(fs_source, GL_FRAGMENT_SHADER);
-	this->pid = ShaderMan::loadShaderProgram(&shaders[0], shaders.size());
-}
-
 
 AfterShadow::AfterShadow(void)
 {
