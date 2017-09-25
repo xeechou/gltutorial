@@ -41,6 +41,7 @@ public:
 	ShaderMan(void) {pid = 0;};
 	//old interface
 	ShaderMan(const char *vshader, const char *fshader);
+	int loadProgramFromString(const std::string&, const std::string&);
 	//add shader from string
 	int addShader(const char *, STYPE type);
 	int addShader(const path_t&, STYPE type);

@@ -84,6 +84,22 @@ ShaderMan::loadShaders(const char *vshader , const char *fshader)
 	return 0;
 }
 
+int
+ShaderMan::loadProgramFromString(const std::string &vs, const std::string &fs)
+{
+	GLuint hvs, hfs, p;
+	if (!(hvs = ShaderMan::createShaderFromString(vs, GL_VERTEX_SHADER)))
+		return -1;
+	shaders.push_back(hvs);
+	if (!(hfs = ShaderMan::createShaderFromString(fs, GL_FRAGMENT_SHADER)))
+		return -1;
+	shaders.push_back(hfs);
+	if (!(p = ShaderMan::loadShaderProgram(&shaders[0], 2)))
+		return -1;
+	pid = p;
+	return 0;
+}
+
 std::string
 ShaderMan::getShaderName(GLenum shader)
 {

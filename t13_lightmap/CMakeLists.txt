@@ -21,5 +21,5 @@ target_link_libraries(t13
   ${OpenCV_LIBS}
   ${assimp_LIBRARIES}
   common
-  shadercollect
+  shadercollects
   )

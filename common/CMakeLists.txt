@@ -29,10 +29,10 @@ target_link_libraries(common
   )
 
 
-add_library(shadercollect STATIC
+add_library(shadercollects STATIC
   collections/basic_shaders.cpp)
 
-target_link_libraries(shadercollect
+target_link_libraries(shadercollects
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${assimp_LIBRARIES}
@@ -40,3 +40,6 @@ target_link_libraries(shadercollect
   ${GLEW_LIBRARIES}
   ${GLFW_LIBRARIES}
   )
+
+
+

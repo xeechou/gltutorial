@@ -103,7 +103,14 @@ int main(void)
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	//Step 1: loading shaders
-	ShaderMan shader_man("vs.glsl", "fs.glsl");
+	std::string svs =
+#include "vs.glsl"
+		;
+	std::string sfs =
+#include "fs.glsl"
+		;
+	ShaderMan shader_man;
+	shader_man.loadProgramFromString(svs, sfs);
 	GLuint prog_id = shader_man.getPid();
 	glUseProgram(prog_id);
 	//create vertex array and vertex buffer

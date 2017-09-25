@@ -9,7 +9,8 @@ include_directories(
 
 
 add_executable(t14
-  main.cpp)
+  main.cpp
+  shadow.cpp)
 
 target_link_libraries(t14
   ${GLFW_LIBRARIES}
@@ -19,4 +20,5 @@ target_link_libraries(t14
   ${OpenCV_LIBS}
   ${assimp_LIBRARIES}
   common
+  shadercollects
   )

@@ -37,6 +37,8 @@
 #include <model.hpp>
 #include <fbobj.hpp>
 #include <context.hpp>
+#include <collections/shaders.hpp>
+#include "shadow.hpp"
 
 
 const unsigned int width = 1024;
@@ -82,10 +84,18 @@ int main(int argc, char **argv)
 	GLFWwindow *window = cont.getGLFWwindow();
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
+
+	shadowMap shadow;
+	AfterShadow cubes;
 //	ShaderMan cubeShader("vs.glsl", "fs.glsl");
 //	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
 	
 	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
+	cubes.append_model(&charactor);
+	shadow.append_model(&charactor);
+	cont.append_drawObj(&shadow);
+	cont.append_drawObj(&cubes);
+
 	//the general shader, 
 	
 	cont.init();
