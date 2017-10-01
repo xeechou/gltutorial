@@ -41,5 +41,14 @@ target_link_libraries(shadercollects
   ${GLFW_LIBRARIES}
   )
 
+add_library(drawobjcollects STATIC
+  collections/cubemap.cpp)
 
-
+target_link_libraries(shadercollects
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${assimp_LIBRARIES}
+  ${OPENGL_gl_LIBRARY}
+  ${GLEW_LIBRARIES}
+  ${GLFW_LIBRARIES}
+  )

@@ -22,4 +22,5 @@ target_link_libraries(tt12
   ${OpenCV_LIBS}
   ${assimp_LIBRARIES}
   common
+  drawobjcollects
   )

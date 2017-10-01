@@ -33,19 +33,22 @@ protected:
 	GLuint pid; //program id
 
 public:
+	ShaderMan(void) {pid = 0;};	
+	ShaderMan(const char *vshader, const char *fshader);
+	~ShaderMan(void);
+	
 	//so, we have a brunch of aiSupported texture, for texture like CUBEMAP...
 	//I need to figure out later how to support it.
+	//this maybe really useless
 	std::vector<TEX_TYPE> tex_uniforms;
 	//default, vertex shader and fragment shader	
 	int loadShaders(const char *, const char *);
-	ShaderMan(void) {pid = 0;};
 	//old interface
-	ShaderMan(const char *vshader, const char *fshader);
-	int loadProgramFromString(const std::string&, const std::string&);
+
+	void loadProgramFromString(const std::string&, const std::string&);
 	//add shader from string
 	int addShader(const char *, STYPE type);
 	int addShader(const path_t&, STYPE type);
-	~ShaderMan();
 	GLuint getPid(void) const {return pid;}
 	void useProgram(void) const {glUseProgram(pid);}
 	//we need two callback

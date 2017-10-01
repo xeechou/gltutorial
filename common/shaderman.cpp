@@ -84,20 +84,22 @@ ShaderMan::loadShaders(const char *vshader , const char *fshader)
 	return 0;
 }
 
-int
+void
 ShaderMan::loadProgramFromString(const std::string &vs, const std::string &fs)
 {
 	GLuint hvs, hfs, p;
 	if (!(hvs = ShaderMan::createShaderFromString(vs, GL_VERTEX_SHADER)))
-		return -1;
+		goto err_loadShader;
 	shaders.push_back(hvs);
 	if (!(hfs = ShaderMan::createShaderFromString(fs, GL_FRAGMENT_SHADER)))
-		return -1;
+		goto err_loadShader;
 	shaders.push_back(hfs);
 	if (!(p = ShaderMan::loadShaderProgram(&shaders[0], 2)))
-		return -1;
+		goto err_loadShader;
 	pid = p;
-	return 0;
+	return;
+err_loadShader:
+	throw std::runtime_error("failed to load shaders");
 }
 
 std::string
@@ -160,6 +162,7 @@ ShaderMan::ShaderMan(const char *vshader, const char *fshader)
 }
 ShaderMan::~ShaderMan(void)
 {
+	std::cerr << "called destructor" << std::endl;
 	glDeleteProgram(pid);
 }
 
