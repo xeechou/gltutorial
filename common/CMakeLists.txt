@@ -28,7 +28,6 @@ target_link_libraries(common
   ${GLFW_LIBRARIES}
   )
 
-
 add_library(shadercollects STATIC
   collections/basic_shaders.cpp)
 

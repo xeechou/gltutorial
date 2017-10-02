@@ -38,6 +38,16 @@ include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(include)
 
+
+set(LIB_3rdParties
+  ${GLFW_LIBRARIES}
+  ${GLEW_LIBRARIES}
+  ${GLM_LIBRARIES}
+  ${OPENGL_LIBRARY}
+  ${OpenCV_LIBS}
+  ${assimp_LIBRARIES}
+  )
+
 #message("the opengl gl libraries" ${OPENGL_gl_LIBRARY})
 add_subdirectory(common)
 

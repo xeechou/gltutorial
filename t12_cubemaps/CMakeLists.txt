@@ -7,20 +7,12 @@ include_directories(
   ${assimp_INCLUDE_DIRS}
   )
 
-
-
-
 add_executable(tt12
   maintest.cpp
   )
 
 target_link_libraries(tt12
-  ${GLFW_LIBRARIES}
-  ${GLEW_LIBRARIES}
-  ${GLM_LIBRARIES}
-  ${OPENGL_LIBRARY}
-  ${OpenCV_LIBS}
-  ${assimp_LIBRARIES}
+  ${LIB_3rdParties}
   common
   drawobjcollects
   )
