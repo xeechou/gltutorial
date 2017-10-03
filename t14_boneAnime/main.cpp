@@ -76,7 +76,26 @@ public:
 //	void loadAnmiations(aiScene *scene);
 };
 
+//okay, forget about that shadertexture
 
+class staticOBJ : DrawObj {
+	//one object or instanced
+private:
+	std::shared_ptr<Model> model;
+	glm::vec3 lightdir;
+	glm::mat4 mvp;
+	ShaderMan shader_program;
+public:
+	staticOBJ(void);
+	//make it static, call before init_setup
+	//Don't delete it.
+	void setModel(std::shared_ptr<Model> model);
+	void setLight(glm::vec3 origin);
+	
+	int init_setup(void) override;
+	int itr_setup(void) override;
+	int itr_draw(void) override;
+};
 
 int main(int argc, char **argv)
 {
@@ -91,15 +110,44 @@ int main(int argc, char **argv)
 //	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
 	
 	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
-	cubes.append_model(&charactor);
-	shadow.append_model(&charactor);
-	cont.append_drawObj(&shadow);
-	cont.append_drawObj(&cubes);
 
 	//the general shader, 
 	
 	cont.init();
 	cont.run();
+}
+
+//I am supossing rightnow you should add shaders
+staticOBJ::staticOBJ()
+{
+	std::string vs_source =
+#include "vs.glsl"
+		;
+	std::string fs_source =
+#include "fs.glsl"
+		;
+	//we can even forget about the specular for now
+	this->shader_program.loadProgramFromString(vs_source, vs_source);
+	//alright
+}
+
+
+void
+staticOBJ::setModel(std::shared_ptr<Model> model)
+{
+	this->model = model;
+}
+
+void
+staticOBJ::setLight(glm::vec3 origin)
+{
+	this->lightdir = origin;
+}
+
+int
+staticOBJ::init_setup()
+{
+	
 }
 
 
