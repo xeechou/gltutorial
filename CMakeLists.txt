@@ -11,10 +11,16 @@ add_definitions(
 if(MSYS)
   add_definitions(-D_GLEW_STATIC)
 endif()
+
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -g -fPIC")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
-#set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build"), you cant have it
+set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) 
 
 find_package(PkgConfig REQUIRED)
 
