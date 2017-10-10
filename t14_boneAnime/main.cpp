@@ -106,8 +106,6 @@ int main(int argc, char **argv)
 
 	shadowMap shadow;
 	AfterShadow cubes;
-//	ShaderMan cubeShader("vs.glsl", "fs.glsl");
-//	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
 	
 	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
 
@@ -128,7 +126,6 @@ staticOBJ::staticOBJ()
 		;
 	//we can even forget about the specular for now
 	this->shader_program.loadProgramFromString(vs_source, vs_source);
-	//alright
 }
 
 
@@ -145,9 +142,10 @@ staticOBJ::setLight(glm::vec3 origin)
 }
 
 int
+
 staticOBJ::init_setup()
 {
-	
+	//basically you need to setup the uniforms and stuff
 }
 
 
