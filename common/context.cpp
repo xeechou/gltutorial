@@ -10,10 +10,19 @@
 #elif __MINGW32__
 #include <GLFW/glfw3.h>
 #elif __WIN32
+
 #include <GL/glfw3.h>
 #endif
 
 #include <context.hpp>
+
+void
+context_winSizeChange(GLFWwindow *win, int width, int height)
+{
+	context *ctxt = (context *)glfwGetWindowUserPointer(win);
+	ctxt->height = height;
+	ctxt->width  = width;
+}
 
 
 DrawObj::DrawObj()
@@ -24,6 +33,8 @@ DrawObj::DrawObj(GLuint shader)
 {
 	this->prog = shader;
 }
+
+
 
 
 context::context(void) : context(1000, 1000, "window")
@@ -45,6 +56,8 @@ context::context(int width, int height, const char *winname)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL
 
+	this->width = width;
+	this->height = height;
 	//create windows
 	_win = glfwCreateWindow(width, height, winname, NULL, NULL);
 
@@ -53,7 +66,12 @@ context::context(int width, int height, const char *winname)
 		glfwTerminate();
 		return;
 	}
+	//time to set userData
+	glfwSetWindowUserPointer(_win, this);
+	glfwSetWindowSizeCallback(_win, context_winSizeChange);
+	
 	glfwMakeContextCurrent(_win);
+	//TODO: replace glew with glad
 	glewExperimental = true;
 	
 	if (glewInit() != GLEW_OK) {
@@ -103,6 +121,11 @@ context::retriveMsg(const DrawObj& d)
 	return msg;
 }
 
+const glm::vec2
+context::retriveWinsize() const
+{
+	return glm::vec2(this->width, this->height);
+}
 
 
 int

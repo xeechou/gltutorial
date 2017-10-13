@@ -376,6 +376,7 @@ Model::push2GPU(int param)
 		this->pushIntances2GPU();
 }
 
+
 int
 Model::loadMaterials(const aiScene *scene)
 {
@@ -442,7 +443,6 @@ Model::loadAnimations(const aiScene* scene)
 
 		//it is harmless to insert the 0 timestamp
 //		KeyFrame first_frame;
-		//fuck sometimes there are harmless.
 //		first_frame.timeStamp = 0;
 //		for (auto bone_itr = this->bones.cbegin(); bone_itr != this->bones.end(); bone_itr++)
 //			first_frame.transforms[bone_itr->first] = JointTransform(bone_itr->first);

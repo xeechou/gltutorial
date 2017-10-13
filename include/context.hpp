@@ -9,6 +9,10 @@
 #include <utility>
 #include <memory>
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
@@ -78,6 +82,8 @@ public:
 	void appendShader(std::shared_ptr<ShaderMan>& shader);
 };
 
+
+
 class context {
 protected:
 	typedef void (*cb_t) (GLuint, void *data);
@@ -86,6 +92,7 @@ protected:
 	//local que is better defined, use this first
 	std::queue<std::pair<int, msg_t> > forward_msg_que;
 	std::queue<msg_t> _bcast_msg_que;
+	int width, height;
 public:
 	context(int width, int height, const char *winname);
 	context();
@@ -101,6 +108,9 @@ public:
 	//lets test if this shit works
 	void sendMsg(const DrawObj& d, const msg_t msg);
 	const msg_t retriveMsg(const DrawObj& d);
+	const glm::vec2 retriveWinsize() const;
+	//friend declarations
+	friend void context_winSizeChange(GLFWwindow *win, int width, int height);
 	//solution to eliminate the setTexShader, getTexShader calls: message
 	//queue. Basically I need a local message queue that send and retrieve
 	//information at every draw iteration. It should be empty and the end.

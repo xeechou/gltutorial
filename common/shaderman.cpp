@@ -28,10 +28,11 @@ GLuint load_shader(const char *fname, GLenum type)
 	glGetShaderiv(sid, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(sid, GL_INFO_LOG_LENGTH, &loglen);
 	if (result != GL_TRUE) {
+
 //		std::cout<<"there shoud be something" << glGetError()<<std::endl;
 		std::vector<char> err_msg(loglen+1);
 		glGetShaderInfoLog(sid, loglen, NULL, &err_msg[0]);
-		fprintf(stderr, "%s shader Compile info: %s\n",
+		fprintf(stderr, "%s shader Compile info:  %s\n",
 			(type == GL_FRAGMENT_SHADER) ? "fragment" : "vertex",
 			&err_msg[0]);
 		return 0;
@@ -145,10 +146,12 @@ ShaderMan::createShaderFromString(const std::string& content, GLenum shadertype)
 	glGetShaderiv(sid, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(sid, GL_INFO_LOG_LENGTH, &loglen);
 	if (result != GL_TRUE) {
-		std::vector<char> err_msg(loglen+1);
+		std::string err_msg;
+		err_msg.resize(loglen+1, ' ');
+//		std::vector<char> err_msg(loglen+1);
 		glGetShaderInfoLog(sid, loglen, NULL, &err_msg[0]);
-		std::cerr << ShaderMan::getShaderName(shadertype) << " Compile info";
-		std::cerr << &err_msg << std::endl;
+		std::cerr << ShaderMan::getShaderName(shadertype) << " Compile info: ";
+		std::cerr << err_msg << std::endl;
 		return 0;
 	}
 	return sid;

@@ -92,7 +92,7 @@ public:
 		return 0;
 	}
 	int itr_draw(void) override {
-//			std::cout << "nano suit" << count++ << std::endl;
+//		std::cout << "nano suit" << count++ << std::endl;
 		glUseProgram(prog);
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

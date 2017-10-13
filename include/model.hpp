@@ -66,7 +66,7 @@ public:
 
 typedef std::vector<Texture> Material;
 
-class Mesh {
+class Mesh : public OBJProperty {
 public:
 	enum PARAMS {LOAD_POS=1, LOAD_NORMAL=2, LOAD_TEX=4};
 	//a mesh contains the material
@@ -134,8 +134,6 @@ public:
 	void setStackedTransformMat() override;
 };
 
-
-
 //gota decide whether to 
 class JointTransform {
 public:
@@ -168,7 +166,6 @@ struct Animation {
 };
 
 class Model {
-	//TODO add properties to Model, you probably need the template friend for this
 	friend Mesh;
 protected:
 	/**
@@ -234,7 +231,8 @@ protected:
 	Instances instances;
 	//In case we have different animations
 	std::map<std::string, struct Animation> animations;
-
+	std::map< std::string, std::shared_ptr<OBJproperty> > properties;
+	//TODO: implement mesh, animation, material as properties
 
 	//GL interfaces
 	GLuint instanceVBO = 0;
@@ -284,9 +282,6 @@ public:
 			    const glm::vec3 dtrans=glm::vec3(0.0f),
 			    const glm::quat drotat=glm::quat(glm::vec3(0.0f)));
 };
-
-
-
 
 //now, define a bunch of functions
 GLint loadTexture2GPU(const std::string fname);

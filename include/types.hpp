@@ -49,8 +49,8 @@ class OBJproperty {
 public:
 	OBJproperty();
 	//return success or not
-	bool load(const aiScene *scene);
-	bool push2GPU(void);
+	virtual bool load(const aiScene *scene) {}
+	virtual bool push2GPU(void) {}
 };
 
 //what else I wantted to do again?

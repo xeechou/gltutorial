@@ -195,15 +195,17 @@ Mesh::pushMesh2GPU(int param)
 	glBindVertexArray(0);
 }
 
+//this is one of the confusing point, where you bindtextures
 void
 Mesh::draw(const ShaderMan *sm, const Model& model)
 {
 	GLuint prog = sm->getPid();
 	glUseProgram(prog);
 	const Material& mat = model.Materials[this->materialIndx];
-	// The 2D texture binding should be like this, although we have too loop.
-	//it is is at most 4*4 something
-
+	// The 2D texture binding should be like this, although we have too
+	//loop. it is is at most 4*4 something I don't like this implementation
+	//like at all!!! You sitll need to call glUniform somewhere, otherwise
+	//nothing will draw
 	for (GLuint i = 0; i < sm->tex_uniforms.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		for (GLuint j = 0; j < model.Materials[this->materialIndx].size(); j++) {
