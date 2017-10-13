@@ -29,7 +29,6 @@
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-
 //my headers
 #include <utils.h>
 #include <shaderman.h>
@@ -39,6 +38,7 @@
 #include <context.hpp>
 #include <collections/shaders.hpp>
 #include "shadow.hpp"
+//#include "animator.hpp"
 
 
 const unsigned int width = 1024;
@@ -46,44 +46,11 @@ const unsigned int height = 1024;
 
 //series of keyframes.
 
-class Animator {
-	//animator is in charge of switching between a few of animations
-public:
-	typedef std::pair<glm::mat4, std::vector<Bone> > instance_t;
-private:
-	//it contains the animated model, 
-	const Model* model;
-	//we will uses the instance from the models.
-	std::vector<glm::mat4> instance_mats;
-	//the bone of that reference, maybe we don't need to copy that
-	std::map<std::string, Bone> bones; //we may doesnt have it though	
-//	std::vector< std::vector<Bone> > bones;
-	//and a reference to an animation
-	float animation_time;
-
-	//we may just keep the reference
-	std::vector<Animation> animations;
-public:
-
-	Animator();
-	/**
-	 * @brief convinient constructor if you only have one model and one instance
-	 */
-	Animator(const Model* model);
-	void setModel(const Model* model);
-	void doAnimation();//do a new animation.
-	void update();
-//	void loadAnmiations(aiScene *scene);
-};
-
-//okay, forget about that shadertexture
-
-class staticOBJ : DrawObj {
+class staticOBJ : public DrawObj {
 	//one object or instanced
 private:
 	std::shared_ptr<Model> model;
 	glm::vec3 lightdir;
-	glm::mat4 mvp;
 	ShaderMan shader_program;
 public:
 	staticOBJ(void);
@@ -91,6 +58,7 @@ public:
 	//Don't delete it.
 	void setModel(std::shared_ptr<Model> model);
 	void setLight(glm::vec3 origin);
+	//there should be other callbacks insertted in
 	
 	int init_setup(void) override;
 	int itr_setup(void) override;
@@ -104,13 +72,15 @@ int main(int argc, char **argv)
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 
-	shadowMap shadow;
-	AfterShadow cubes;
+//	shadowMap shadow;
+//	AfterShadow cubes;
 	
-	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
-
-	//the general shader, 
-	
+//	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
+	std::shared_ptr<Model> small_guy = std::make_shared<Model>(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
+	staticOBJ model;
+	model.setModel(small_guy);
+	model.setLight(glm::vec3(0, 100, 0));
+	cont.append_drawObj(&model);
 	cont.init();
 	cont.run();
 }
@@ -125,7 +95,8 @@ staticOBJ::staticOBJ()
 #include "fs.glsl"
 		;
 	//we can even forget about the specular for now
-	this->shader_program.loadProgramFromString(vs_source, vs_source);
+	this->shader_program.loadProgramFromString(vs_source, fs_source);
+	this->prog = this->shader_program.getPid();
 }
 
 
@@ -142,28 +113,56 @@ staticOBJ::setLight(glm::vec3 origin)
 }
 
 int
-
 staticOBJ::init_setup()
 {
-	//basically you need to setup the uniforms and stuff
+	this->model->bindShader(&this->shader_program);
+	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
+
+	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
+	GLuint lightDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
+	GLuint lightSpecularLoc = glGetUniformLocation(this->prog, "light.specular");
+	GLuint lightposLoc      = glGetUniformLocation(this->prog, "light.position");
+	glUniform1f(lightAmbientLoc, 0.3f);
+	glUniform1f(lightDiffuseLoc, 0.5f);
+	glUniform1f(lightSpecularLoc, 0.5f);
+	glUniform3f(lightposLoc, 0,100,3);
+	//now setup the texture
+	//okay, forget about the texture, they are done by bindTexture
+	//also, we need to bind the texture to uniforms
+	GLuint diffuse_id  = glGetUniformLocation(this->prog, "diffuse");
+	glUniform1i(diffuse_id, 0);
+	glUniform3f(glGetUniformLocation(this->prog, "viewPos"), 4.0,3.0,3.0);
+	return 0;
 }
 
-
-Animator::Animator(const Model* model)
+int
+staticOBJ::itr_setup()
 {
-	this->setModel(model);
+	glm::vec2 wh = this->ctxt->retriveWinsize();
+	glm::mat4 m = glm::mat4(1.0f);
+	glm::mat4 v = unity_like_get_camera_mat();
+	glm::mat4 p = glm::perspective(glm::radians(90.0f), (float)wh[0] / (float)wh[1],
+				       0.1f, 100.0f);
+	glm::mat4 mvp = p * v * m;
+	//uniforms
+	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &mvp[0][0]);
+	return 0;
 }
 
-void
-Animator::setModel(const Model *model)
+int
+staticOBJ::itr_draw()
 {
-	this->model = model;
-	//only one instance
-	if (!model->getNinstances()) {
-		//extract one bone
-		instance_mats.push_back(glm::mat4(1.0f));
-	}
-	for (int i = 0; i < model->getNinstances(); i++) {
-		//extract bones from the 
-	}
+	//again, reminds you the purpose of the itr_draw
+	glUseProgram(this->program());
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+
+	glActiveTexture(GL_TEXTURE0);
+	//now we can draw
+	this->model->draw();
+	glUseProgram(0);
+	return 0;
 }
+
+
