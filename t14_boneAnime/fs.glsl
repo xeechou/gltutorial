@@ -1,3 +1,4 @@
+R"(
 #version 330 core
 
 
@@ -86,3 +87,5 @@ void main(void)
 //	color = vec4(ambient, 1.0f);
 	color = vec4(ambient+diffu+spec, 1.0f);
 }
+
+)"
