@@ -31,25 +31,6 @@ class Mesh;
 class Texture;
 class Model;
 
-struct RSTs {
-	std::vector<glm::vec3> translations;
-	std::vector<glm::quat> rotations;
-	std::vector<glm::vec3> scales;
-};
-
-typedef struct RSTs Instances;
-
-struct Vertex {
-	glm::vec3 pos;
-	glm::vec3 normal;
-	glm::vec2 tex;
-};
-
-struct Vertices {
-	std::vector<glm::vec3> Positions;
-	std::vector<glm::vec3> Normals;
-	std::vector<glm::vec2> TexCoords;
-};
 
 /** UV mapping **/
 class Texture {
@@ -66,7 +47,7 @@ public:
 
 typedef std::vector<Texture> Material;
 
-class Mesh : public OBJProperty {
+class Mesh : public OBJproperty {
 public:
 	enum PARAMS {LOAD_POS=1, LOAD_NORMAL=2, LOAD_TEX=4};
 	//a mesh contains the material

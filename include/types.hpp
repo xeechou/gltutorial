@@ -1,9 +1,13 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
+#include <vector>
 #include <set>
 #include <utility>
 
+
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
@@ -48,12 +52,41 @@ class OBJproperty {
 //added the property, the mesh should
 public:
 	OBJproperty();
+	virtual ~OBJproperty(){}
 	//return success or not
-	virtual bool load(const aiScene *scene) {}
-	virtual bool push2GPU(void) {}
+	virtual bool load(const aiScene *scene) {return true;}
+	virtual bool push2GPU(void) {return true;}
+	//some of the property has control to the input of shaders. But not all
+	//of them, in that case. It occupies a band of 
+	virtual int getEndLayout(void);
+	
 };
 
-//what else I wantted to do again?
+//Other more specific types
 typedef std::set<double> timestamps_t;
+
+struct RSTs {
+	std::vector<glm::vec3> translations;
+	std::vector<glm::quat> rotations;
+	std::vector<glm::vec3> scales;
+};
+
+typedef struct RSTs Instances;
+
+struct Vertex {
+	glm::vec3 pos;
+	glm::vec3 normal;
+	glm::vec2 tex;
+};
+
+struct Vertices {
+	std::vector<glm::vec3> Positions;
+	std::vector<glm::vec3> Normals;
+	std::vector<glm::vec2> TexCoords;
+};
+
+
+typedef std::vector<glm::u32vec3> Faces;
+
 
 #endif /* EOF */
