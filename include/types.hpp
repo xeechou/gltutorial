@@ -46,22 +46,6 @@ typedef union {
 	const char *name;
 } msg_t;
 
-
-class OBJproperty {
-//this class will be the plugins in the model class and mesh class, if the model
-//added the property, the mesh should
-public:
-	OBJproperty();
-	virtual ~OBJproperty(){}
-	//return success or not
-	virtual bool load(const aiScene *scene) {return true;}
-	virtual bool push2GPU(void) {return true;}
-	//some of the property has control to the input of shaders. But not all
-	//of them, in that case. It occupies a band of 
-	virtual int getEndLayout(void);
-	
-};
-
 //Other more specific types
 typedef std::set<double> timestamps_t;
 

@@ -530,3 +530,10 @@ Model::loadAnimations(const aiScene* scene)
 		this->animations[std::string(anim->mName.C_Str())] = local_anim;
 	}
 }
+
+
+void
+Model::addProperty(const std::string &name, std::shared_ptr<OBJproperty> data)
+{
+	this->properties[name] = data;
+}

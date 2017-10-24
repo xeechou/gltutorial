@@ -1,6 +1,7 @@
 #ifndef PROPERTY_HPP
 #define PROPERTY_HPP
 
+#include <utility>
 #include <tuple>
 
 #include <GL/glew.h>
@@ -22,7 +23,42 @@ struct mesh_GPU_handle {
 	~mesh_GPU_handle();
 };
 
-class Mesh : public OBJproperty {
+class OBJproperty {
+//this class will be the plugins in the model class and mesh class, if the model
+//added the property, the mesh should
+protected:
+	//some of the property has access to GPU
+	std::pair<int, int> shader_layouts;
+public:
+	OBJproperty() {
+		this->shader_layouts.first = 0;
+		this->shader_layouts.second = 0;
+	}
+	virtual ~OBJproperty();
+	//return success or not
+	virtual bool load(const aiScene *scene) {return true;}
+	virtual bool push2GPU(void) {return true;}
+	//some of the property has control to the input of shaders. But not all
+	//of them, in that case. It occupies a band of
+	void alloc_shader_layout(unsigned int start_point, unsigned int span);
+	int getLayoutsEnd(void);
+};
+
+inline void
+OBJproperty::alloc_shader_layout(unsigned int start, unsigned int span)
+{
+	this->shader_layouts.first = start;
+	this->shader_layouts.second = start + span;
+}
+
+inline int
+OBJproperty::getLayoutsEnd(void)
+{
+	return this->shader_layouts.second;
+}
+
+
+class Mesh1 : public OBJproperty {
 protected:
 	int init_options;
 	int layout_position, layout_normal, layout_tex;
@@ -39,8 +75,8 @@ public:
 		LOAD_NORM = 0,
 		LOAD_TEX = 1,
 	};
-	Mesh(int option = OPTION::LOAD_NORM | OPTION::LOAD_TEX, int layout_start = 0);
-	virtual ~Mesh() override;
+	Mesh1(int option = OPTION::LOAD_NORM | OPTION::LOAD_TEX, int layout_start = 0);
+	virtual ~Mesh1() override;
 	virtual bool load(const aiScene *scene) override;
 	virtual bool push2GPU(void) override;
 	

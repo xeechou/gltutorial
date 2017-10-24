@@ -24,7 +24,7 @@ mesh_GPU_handle::~mesh_GPU_handle()
 	}
 }
 
-Mesh::Mesh(int option, int layout)
+Mesh1::Mesh1(int option, int layout)
 {
 	this->init_options = option;
 	this->layout_position = layout;
@@ -35,13 +35,13 @@ Mesh::Mesh(int option, int layout)
 }
 
 
-Mesh::~Mesh()
+Mesh1::~Mesh1()
 {
 }
 
 
 bool
-Mesh::load(const aiScene *scene)
+Mesh1::load(const aiScene *scene)
 {
 	int has_tex = 0;
 	int has_norm = 0;
@@ -93,7 +93,7 @@ Mesh::load(const aiScene *scene)
 }
 
 bool
-Mesh::push2GPU()
+Mesh1::push2GPU()
 {
 	this->gpu_handles.resize(this->meshes_vertices.size());
 	int stride = sizeof(glm::vec3) +
@@ -149,7 +149,7 @@ Mesh::push2GPU()
 }
 
 std::tuple<Vertices*, size_t *, Faces *>
-Mesh::select_mesh(size_t i)
+Mesh1::select_mesh(size_t i)
 {
 	
 }

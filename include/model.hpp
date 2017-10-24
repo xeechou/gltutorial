@@ -25,6 +25,7 @@
 #include "types.hpp"
 #include "tree.hpp"
 #include "shaderman.h"
+#include "property.hpp"
 
 
 class Mesh;
@@ -47,7 +48,7 @@ public:
 
 typedef std::vector<Texture> Material;
 
-class Mesh : public OBJproperty {
+class Mesh {
 public:
 	enum PARAMS {LOAD_POS=1, LOAD_NORMAL=2, LOAD_TEX=4};
 	//a mesh contains the material
@@ -151,8 +152,8 @@ class Model {
 protected:
 	/**
 	 * 
-	 * @brief read the model with importer, then disconnect the scene from the importer.
-	 *
+	 * @brief read the model with importer, then disconnect the scene from
+	 * the importer, this is however, very important
 	 */
 	aiScene* readModel(const std::string& filename);
 	/**
@@ -203,21 +204,24 @@ protected:
 	// Data
 	//
 	std::string root_path;
-	const ShaderMan *shader_to_draw;	
+	const ShaderMan *shader_to_draw;
 
-	const Bone *root_bone;
+	Instances instances;
+	std::map< std::string, std::shared_ptr<OBJproperty> > properties;
+	//TODO: implement mesh, animation, material as properties, and remove
+	//the one below
+	const Bone *root_bone;	
 	std::map<std::string, Bone> bones;
 	std::vector<Mesh> meshes;
 	std::vector<Material> Materials;
-	Instances instances;
+
 	//In case we have different animations
 	std::map<std::string, struct Animation> animations;
-	std::map< std::string, std::shared_ptr<OBJproperty> > properties;
-	//TODO: implement mesh, animation, material as properties
-
 	//GL interfaces
 	GLuint instanceVBO = 0;
 	int n_mesh_layouts;
+	//TODO: remove the ones above
+	
 public:
 	enum InstanceINIT {
 		INIT_random, //randomly initialize n 
@@ -239,16 +243,23 @@ public:
 	Model(const std::string& file, int params = NO_PARAMS);
 	Model(void);
 	~Model(void);
+
+	void load(const std::string& file);
+	void push2GPU(void);
 	//you should actually draw with the shaderMan
 	void draw(const ShaderMan *differentShader=NULL);
 	void setShader(const ShaderMan*);
 	//bind, unbind shader
 	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}
 	const ShaderMan* currentShader(void) {return this->shader_to_draw;}
+
+	void addProperty(const std::string& name, std::shared_ptr<OBJproperty> data);
 	//get methods
+	//TODO: remove this layout
 	int getLayoutCount() const {return this->n_mesh_layouts;}
 	int getNinstances() const {return this->instances.translations.size(); }
-	
+
+	//and those too, we could also implement instance as properties, as they are no special at all.
 	void pushIntances2GPU(void);
 	void push2GPU(int param);
   
