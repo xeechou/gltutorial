@@ -24,14 +24,16 @@ mesh_GPU_handle::~mesh_GPU_handle()
 	}
 }
 
-Mesh1::Mesh1(int option, int layout)
+Mesh1::Mesh1(int option)
 {
+	int layout_span = 1;
 	this->init_options = option;
-	this->layout_position = layout;
-	if (option & OPTION::LOAD_NORM)
-		this->layout_normal = ++layout;
-	if (option & OPTION::LOAD_TEX)
-		this->layout_tex = ++layout;
+//	this->layout_position = layout;
+	if (option & OPTION::LOAD_NORM) {
+		layout_span += 1;
+	} if (option & OPTION::LOAD_TEX) {
+		layout_span += 1;
+	}
 }
 
 
@@ -95,6 +97,14 @@ Mesh1::load(const aiScene *scene)
 bool
 Mesh1::push2GPU()
 {
+	//okay, figure out the layout
+	this->layout_position = this->shader_layouts.first;
+	if (this->shader_layouts.second > 1)
+		this->layout_normal = this->shader_layouts.first + 1;
+	if (this->shader_layouts.second > 2)
+		this->layout_tex = this->shader_layouts.first + 2;
+
+	
 	this->gpu_handles.resize(this->meshes_vertices.size());
 	int stride = sizeof(glm::vec3) +
 		(this->init_options & OPTION::LOAD_NORM) ? sizeof(glm::vec3) : 0 +

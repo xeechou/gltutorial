@@ -78,6 +78,8 @@ int main(int argc, char **argv)
 //	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
 	std::shared_ptr<Model> small_guy = std::make_shared<Model>(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
 	staticOBJ model;
+
+	
 	model.setModel(small_guy);
 	model.setLight(glm::vec3(0, 100, 0));
 	cont.append_drawObj(&model);

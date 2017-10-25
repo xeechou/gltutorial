@@ -206,10 +206,12 @@ protected:
 	std::string root_path;
 	const ShaderMan *shader_to_draw;
 
-	Instances instances;
-	std::map< std::string, std::shared_ptr<OBJproperty> > properties;
+	std::vector< std::pair<std::string, std::shared_ptr<OBJproperty> > > properties;
+//	std::map< std::string, std::shared_ptr<OBJproperty> > properties;
+	
 	//TODO: implement mesh, animation, material as properties, and remove
 	//the one below
+	Instances instances;
 	const Bone *root_bone;	
 	std::map<std::string, Bone> bones;
 	std::vector<Mesh> meshes;
@@ -246,14 +248,16 @@ public:
 
 	void load(const std::string& file);
 	void push2GPU(void);
+	void addProperty(const std::string& name, std::shared_ptr<OBJproperty> data);
+	
 	//you should actually draw with the shaderMan
 	void draw(const ShaderMan *differentShader=NULL);
 	void setShader(const ShaderMan*);
 	//bind, unbind shader
 	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}
 	const ShaderMan* currentShader(void) {return this->shader_to_draw;}
+	
 
-	void addProperty(const std::string& name, std::shared_ptr<OBJproperty> data);
 	//get methods
 	//TODO: remove this layout
 	int getLayoutCount() const {return this->n_mesh_layouts;}

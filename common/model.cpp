@@ -111,7 +111,6 @@ Model::Model(const std::string& file, int param)
 		this->loadAnimations(scene);
 	//TODO, updload verything to GPU should be here
 
-	//TODO cleanup scene
 	delete scene;
 	//TODO Delete maybe we should delete the CPU data
 }
@@ -535,5 +534,27 @@ Model::loadAnimations(const aiScene* scene)
 void
 Model::addProperty(const std::string &name, std::shared_ptr<OBJproperty> data)
 {
-	this->properties[name] = data;
+	this->properties.push_back(std::make_pair(name, data));
+}
+
+
+void
+Model::load(const std::string &file)
+{
+	//I don't think you really need to sort it
+//	std::vector<std::shared_ptr<OBJproperty> > sorted_properted;
+	aiScene *scene = this->readModel(file);
+
+	int layout_start = 0;
+	for (auto it = this->properties.begin(); it != this->properties.end(); it++) {
+		//in this case, every oproperty has layout
+		it->second->alloc_shader_layout(layout_start);
+		layout_start = it->second->getLayoutsEnd();
+		it->second->load(scene);
+	}
+	//I don't think this requires an order for GPU, keep it simple unless it is required, maybe draw indeed need the order
+	for (auto it = this->properties.begin(); it != this->properties.end(); it++)
+		it->second->push2GPU();
+	
+	delete scene;
 }

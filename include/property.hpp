@@ -27,7 +27,7 @@ class OBJproperty {
 //this class will be the plugins in the model class and mesh class, if the model
 //added the property, the mesh should
 protected:
-	//some of the property has access to GPU
+	//some of the property has access to GPU, the second is the span
 	std::pair<int, int> shader_layouts;
 public:
 	OBJproperty() {
@@ -40,21 +40,20 @@ public:
 	virtual bool push2GPU(void) {return true;}
 	//some of the property has control to the input of shaders. But not all
 	//of them, in that case. It occupies a band of
-	void alloc_shader_layout(unsigned int start_point, unsigned int span);
+	void alloc_shader_layout(unsigned int start_point);
 	int getLayoutsEnd(void);
 };
 
 inline void
-OBJproperty::alloc_shader_layout(unsigned int start, unsigned int span)
+OBJproperty::alloc_shader_layout(unsigned int start)
 {
 	this->shader_layouts.first = start;
-	this->shader_layouts.second = start + span;
 }
 
 inline int
 OBJproperty::getLayoutsEnd(void)
 {
-	return this->shader_layouts.second;
+	return this->shader_layouts.first + this->shader_layouts.second;
 }
 
 
@@ -75,7 +74,7 @@ public:
 		LOAD_NORM = 0,
 		LOAD_TEX = 1,
 	};
-	Mesh1(int option = OPTION::LOAD_NORM | OPTION::LOAD_TEX, int layout_start = 0);
+	Mesh1(int option = OPTION::LOAD_NORM | OPTION::LOAD_TEX);
 	virtual ~Mesh1() override;
 	virtual bool load(const aiScene *scene) override;
 	virtual bool push2GPU(void) override;
