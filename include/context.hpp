@@ -45,12 +45,16 @@ class ShaderMan;
  * The other type is the global message system. So you send the message to a
  * global queue. It get cleared out at the end of the iteration, and only one
  * guy can do it.
+ * 
+ * Since most times it has one, we could setup here
  */
 class DrawObj {
 protected:
 	int pos_in_context;	
 	GLuint prog;
 	context *ctxt;
+
+	
 public:
 	DrawObj();
 	DrawObj(GLuint p);

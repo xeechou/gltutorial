@@ -26,6 +26,7 @@
 #include "tree.hpp"
 #include "shaderman.h"
 #include "property.hpp"
+#include "context.hpp"
 
 
 class Mesh;
@@ -279,6 +280,18 @@ public:
 			    const glm::quat drotat=glm::quat(glm::vec3(0.0f)));
 };
 
+
+class drawModel : public  DrawObj {
+	
+};
+
+//we should have this as default. Since if the only on shader is attached. The
+//Behavior is supposed to the same as drawModel
+class multiPassDrawModel : public MultiPassDrawObj {
+public:
+	void addModel(std::shared_ptr<Model>& model, const std::string="");
+	
+};
 //now, define a bunch of functions
 GLint loadTexture2GPU(const std::string fname);
 
