@@ -77,6 +77,8 @@ OBJproperty::isdrawPoint(void)
 	return this->drawpoint;
 }
 
+
+
 class Mesh1 : public OBJproperty {
 protected:
 	int init_options;
@@ -101,12 +103,10 @@ public:
 	virtual void draw(const msg_t) override;
 
 	uint howmanyMeshes(void) const;
-	
+	void activeIthMesh(uint i) const;
 	//after loading, this provide a way to exam the meshes
-	std::tuple<Vertices*, size_t *, Faces *> select_mesh(size_t i);
+//	std::tuple<Vertices*, size_t *, Faces *> select_mesh(size_t i);
 };
-
-
 
 class Material1 : public OBJproperty {
 	
@@ -114,7 +114,7 @@ protected:
 	std::vector<Material> Materials;
 public:
 //	Material()
-	virtual ~Material1();
+	virtual ~Material1() override;
 	virtual bool load(const aiScene *scene) override;
 	virtual void draw(const msg_t) override;
 };
@@ -123,20 +123,23 @@ class Instancing : public OBJproperty {
 protected:
 	RSTs rsts;
 	GLuint instanceVBO;
+
 public:
 	enum OPTION {
 		random_instances,
 		square_instances,
 	};
+	
 	Instancing(const RSTs& instances);
 	Instancing(const int n, const OPTION opt=OPTION::square_instances,
 		   const glm::vec3 dscale=glm::vec3(1.0f),
 		   const glm::vec3 dtrans=glm::vec3(0.0f),
 		   const glm::quat droate=glm::quat(glm::vec3(0.0f)));
-	~Instancing();
+	virtual ~Instancing() override;
 	//so our instancing doesn't need to have a loading function	
 	virtual bool push2GPU(void) override;
 	virtual void draw(const msg_t) override;
 };
+
 
 #endif /* EOF */

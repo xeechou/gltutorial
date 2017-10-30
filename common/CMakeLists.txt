@@ -19,6 +19,7 @@ add_library(common STATIC
   geometry.cpp
   collections/mesh.cpp
   collections/material.cpp
+  collections/instancing.cpp
   )
 
 target_link_libraries(common

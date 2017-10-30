@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 #include <map>
+#include <set>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -191,7 +192,7 @@ protected:
 	std::string root_path;
 	const ShaderMan *shader_to_draw;
 	std::shared_ptr<OBJproperty> drawproperty;
-	std::vector< std::pair<std::string, std::shared_ptr<OBJproperty> > > properties;
+	std::map<uint, std::pair<std::string, std::shared_ptr<OBJproperty> > > properties;
 //	std::map< std::string, std::shared_ptr<OBJproperty> > properties;
 	
 	//TODO: implement mesh, animation, material as properties, and remove
@@ -234,7 +235,7 @@ public:
 	const std::string getRootPath(void) const;
 	void load(const std::string& file);
 	void push2GPU(void);
-	void addProperty(const std::string& name, std::shared_ptr<OBJproperty> data);
+	bool addProperty(const std::string& name, std::shared_ptr<OBJproperty> data);
 	OBJproperty *searchProperty(const std::string name) const;
 	
 	//you should actually draw with the shaderMan
