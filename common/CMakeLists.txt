@@ -17,6 +17,8 @@ add_library(common STATIC
   mesh.cpp
   bone.cpp
   geometry.cpp
+  collections/mesh.cpp
+  collections/material.cpp
   )
 
 target_link_libraries(common

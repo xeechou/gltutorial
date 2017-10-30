@@ -1,5 +1,11 @@
-#include <property.hpp>
+
+#include <iostream>
 #include <tuple>
+#include <types.hpp>
+#include <model.hpp>
+#include <property.hpp>
+
+
 
 mesh_GPU_handle::mesh_GPU_handle()
 {
@@ -26,21 +32,20 @@ mesh_GPU_handle::~mesh_GPU_handle()
 
 Mesh1::Mesh1(int option)
 {
+	this->drawpoint=true;
 	int layout_span = 1;
 	this->init_options = option;
-//	this->layout_position = layout;
 	if (option & OPTION::LOAD_NORM) {
 		layout_span += 1;
 	} if (option & OPTION::LOAD_TEX) {
 		layout_span += 1;
 	}
+	this->shader_layouts.second=layout_span;
 }
 
 
 Mesh1::~Mesh1()
-{
-}
-
+{}
 
 bool
 Mesh1::load(const aiScene *scene)
@@ -54,11 +59,13 @@ Mesh1::load(const aiScene *scene)
 	
 	for (size_t j = 0; j < scene->mNumMeshes; j++) {
 		aiMesh *mesh = scene->mMeshes[j];
+		this->material_indices[j] = (int)mesh->mMaterialIndex;
+		//geometry data
 		std::vector<glm::vec3> &poses = this->meshes_vertices[j].Positions;
 		std::vector<glm::vec3> &norms = this->meshes_vertices[j].Normals;
 		std::vector<glm::vec2> &texuvs= this->meshes_vertices[j].TexCoords;
-		this->material_indices[j] = (int)mesh->mMaterialIndex;
 		Faces  &faces =  this->meshes_faces[j];
+		
 		poses.resize(mesh->mNumVertices);
 		if (this->init_options & OPTION::LOAD_NORM) {
 			norms.resize(mesh->mNumVertices);
@@ -107,8 +114,8 @@ Mesh1::push2GPU()
 	
 	this->gpu_handles.resize(this->meshes_vertices.size());
 	int stride = sizeof(glm::vec3) +
-		(this->init_options & OPTION::LOAD_NORM) ? sizeof(glm::vec3) : 0 +
-		(this->init_options & OPTION::LOAD_TEX) ? sizeof(glm::vec2) : 0;
+		((this->init_options & OPTION::LOAD_NORM) ? sizeof(glm::vec3) : 0) +
+		((this->init_options & OPTION::LOAD_TEX) ? sizeof(glm::vec2) : 0);
 	
 	for (size_t j = 0; j < this->gpu_handles.size(); j++) {
 		mesh_GPU_handle &handle = this->gpu_handles[j];
@@ -156,6 +163,26 @@ Mesh1::push2GPU()
 
 	}
 	return true;
+}
+
+void
+Mesh1::draw(const msg_t arg)
+{
+	(void)arg;
+	Material1 *material = (Material1*)this->model->searchProperty(std::string("material"));
+
+	for (uint i = 0; i < this->gpu_handles.size(); i++) {
+		if (material)
+			material->draw( msg_t((uint32_t)this->material_indices[i]) );
+		
+		mesh_GPU_handle &handle = this->gpu_handles[i];
+		Faces& faces = this->meshes_faces[i];
+		glBindVertexArray(handle.VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, handle.VBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle.EBO);
+		glDrawElements(GL_TRIANGLES, faces.size() * 3, GL_UNSIGNED_INT, 0);
+		//other drawing function may also need to work, like animations and instancing.
+	}
 }
 
 std::tuple<Vertices*, size_t *, Faces *>

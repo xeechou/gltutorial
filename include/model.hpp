@@ -33,29 +33,13 @@ class Mesh;
 class Texture;
 class Model;
 
-
-/** UV mapping **/
-class Texture {
-public:
-	//GPU representation
-	GLuint id;
-	TEX_TYPE type;
-
-	Texture(GLuint gpu_handle, TEX_TYPE type) {
-		this->id = gpu_handle;
-		this->type = type;
-	}
-};
-
-typedef std::vector<Texture> Material;
-
 class Mesh {
 public:
 	enum PARAMS {LOAD_POS=1, LOAD_NORMAL=2, LOAD_TEX=4};
 	//a mesh contains the material
 	//this may not be a good constructor
 	Mesh(const aiScene *scene, aiMesh *mesh);
-	//the constructor for non-texture mesh
+	//the constructor for nont-exture mesh
 	Mesh(const std::vector<glm::vec3>& vertxs,
 	     const std::vector<glm::vec3>& norms,
 	     const std::vector<float>& indices,
@@ -206,7 +190,7 @@ protected:
 	//
 	std::string root_path;
 	const ShaderMan *shader_to_draw;
-
+	std::shared_ptr<OBJproperty> drawproperty;
 	std::vector< std::pair<std::string, std::shared_ptr<OBJproperty> > > properties;
 //	std::map< std::string, std::shared_ptr<OBJproperty> > properties;
 	
@@ -220,7 +204,7 @@ protected:
 
 	//In case we have different animations
 	std::map<std::string, struct Animation> animations;
-	//GL interfaces
+//GL interfaces
 	GLuint instanceVBO = 0;
 	int n_mesh_layouts;
 	//TODO: remove the ones above
@@ -247,17 +231,18 @@ public:
 	Model(void);
 	~Model(void);
 
+	const std::string getRootPath(void) const;
 	void load(const std::string& file);
 	void push2GPU(void);
 	void addProperty(const std::string& name, std::shared_ptr<OBJproperty> data);
+	OBJproperty *searchProperty(const std::string name) const;
 	
 	//you should actually draw with the shaderMan
 	void draw(const ShaderMan *differentShader=NULL);
-	void setShader(const ShaderMan*);
+	void drawProperty(const ShaderMan *differentShader=NULL);
 	//bind, unbind shader
 	void bindShader(const ShaderMan *sm) {this->shader_to_draw = sm;}
-	const ShaderMan* currentShader(void) {return this->shader_to_draw;}
-	
+	const ShaderMan* currentShader(void) const {return this->shader_to_draw;}
 
 	//get methods
 	//TODO: remove this layout
@@ -280,19 +265,56 @@ public:
 			    const glm::quat drotat=glm::quat(glm::vec3(0.0f)));
 };
 
+/*
+A draw Obj can have more model to draw. One model can also bind to multiple
+shaders. So you don't really know which to which to which. So maybe next time
 
-class drawModel : public  DrawObj {
-	
-};
-
-//we should have this as default. Since if the only on shader is attached. The
-//Behavior is supposed to the same as drawModel
-class multiPassDrawModel : public MultiPassDrawObj {
+template<class Derived>
+class DrawModel : public DrawObj {
+protected:
+	std::string model_file;
+	std::shared_ptr<Model> model;
 public:
 	void addModel(std::shared_ptr<Model>& model, const std::string="");
-	
+	virtual int init_setup(void) override;
+	virtual int itr_setup(void) override;
+	virtual int itr_draw(void) override;
+	//you want to get
+	void model_init(void);
+	void model_itrsetup(void);
+	void model_itrdraw(void);
+
 };
+
+template<class Derived> int
+DrawModel<Derived>::init_setup(void)
+{
+	if (model_file.size())
+		model->load(model_file);
+	static_cast<Derived*>(this)->model_init();
+}
+
+template<class Derived> int
+DrawModel<Derived>::itr_setup()
+{
+	static_cast<Derived*>(this)->model_itrsetup();
+}
+
+template<class Derived> int
+DrawModel<Derived>::itr_draw()
+{
+	model->draw();
+}
+
+template<class Derived> void
+DrawModel<Derived>::addModel(std::shared_ptr<Model> &m, const std::string mf)
+{
+	this->model = m;
+	this->model_file = mf;
+}
+*/
+
 //now, define a bunch of functions
-GLint loadTexture2GPU(const std::string fname);
+
 
 #endif /* EOF */

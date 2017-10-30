@@ -85,6 +85,7 @@ void main(void)
 	//so the problem is light struct doesn't work...
 //	color = vec4(ambient, 1.0f);
 	color = vec4(ambient+diffu, 1.0f);
+//	color = vec4(1.0f);
 }
 
 )"

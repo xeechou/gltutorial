@@ -15,6 +15,7 @@
 #endif
 
 #include <context.hpp>
+#include <shaderman.h>
 
 void
 context_winSizeChange(GLFWwindow *win, int width, int height)
@@ -33,7 +34,6 @@ DrawObj::DrawObj(GLuint shader)
 {
 	this->prog = shader;
 }
-
 
 
 
@@ -166,4 +166,3 @@ context::run()
 		 !glfwWindowShouldClose(_win));
 	return 0;
 }
-

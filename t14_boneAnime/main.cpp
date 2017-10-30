@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <map>
 
 #include <mutex>
 #include <memory>
@@ -49,16 +50,17 @@ const unsigned int height = 1024;
 class staticOBJ : public DrawObj {
 	//one object or instanced
 private:
-	std::shared_ptr<Model> model;
+	std::vector<std::pair<std::string, std::shared_ptr<Model> > > draw_objects;
+	std::shared_ptr<Model> drawobj;
+	std::string file;
 	glm::vec3 lightdir;
 	ShaderMan shader_program;
 public:
 	staticOBJ(void);
 	//make it static, call before init_setup
 	//Don't delete it.
-	void setModel(std::shared_ptr<Model> model);
+	void addModel(std::shared_ptr<Model> model, std::string toload="");
 	void setLight(glm::vec3 origin);
-	//there should be other callbacks insertted in
 	
 	int init_setup(void) override;
 	int itr_setup(void) override;
@@ -72,16 +74,12 @@ int main(int argc, char **argv)
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 
-//	shadowMap shadow;
-//	AfterShadow cubes;
-	
-//	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
-	std::shared_ptr<Model> small_guy = std::make_shared<Model>(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
-	//okay, it works actually, but here is the akward part. we don't really know the file to load
+	std::shared_ptr<Model> small_guy = std::make_shared<Model>();
 	small_guy->addProperty("mesh", std::make_shared<Mesh1>());
+	small_guy->addProperty("material", std::make_shared<Material1>());
 	staticOBJ model;
 	
-	model.setModel(small_guy);
+	model.addModel(small_guy, std::string(argv[1]));
 	model.setLight(glm::vec3(0, 100, 0));
 	cont.append_drawObj(&model);
 	cont.init();
@@ -102,12 +100,14 @@ staticOBJ::staticOBJ()
 	this->prog = this->shader_program.getPid();
 }
 
-
 void
-staticOBJ::setModel(std::shared_ptr<Model> model)
+staticOBJ::addModel(std::shared_ptr<Model> model, std::string toload)
 {
-	this->model = model;
+	this->drawobj = model;
+	this->drawobj->bindShader(&this->shader_program);
+	this->file = toload;
 }
+
 
 void
 staticOBJ::setLight(glm::vec3 origin)
@@ -118,9 +118,10 @@ staticOBJ::setLight(glm::vec3 origin)
 int
 staticOBJ::init_setup()
 {
-	this->model->bindShader(&this->shader_program);
+	if (!this->file.empty())
+		this->drawobj->load(this->file);
+		
 	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
-
 	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
 	GLuint lightDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
 	GLuint lightSpecularLoc = glGetUniformLocation(this->prog, "light.specular");
@@ -132,8 +133,7 @@ staticOBJ::init_setup()
 	//now setup the texture
 	//okay, forget about the texture, they are done by bindTexture
 	//also, we need to bind the texture to uniforms
-	GLuint diffuse_id  = glGetUniformLocation(this->prog, "diffuse");
-	glUniform1i(diffuse_id, 0);
+	this->shader_program.addTextureUniform("diffuse", TEX_Diffuse);
 	glUniform3f(glGetUniformLocation(this->prog, "viewPos"), 4.0,3.0,3.0);
 	return 0;
 }
@@ -160,12 +160,9 @@ staticOBJ::itr_draw()
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-
-	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE2D, 0);
 	//now we can draw
-	this->model->draw();
+	this->drawobj->drawProperty();
 	glUseProgram(0);
 	return 0;
 }
-
-

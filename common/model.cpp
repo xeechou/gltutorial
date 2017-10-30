@@ -36,43 +36,15 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <shaderman.h>
 #include <utils.h>
 #include <model.hpp>
 #include <data.hpp>
 
-sprt_tex2d_t texture_types_supported[TEX_NTexType] = {
-	{aiTextureType_AMBIENT, TEX_Ambient},
-	{aiTextureType_DIFFUSE, TEX_Diffuse},
-	{aiTextureType_NORMALS, TEX_Normal},
-	{aiTextureType_SPECULAR, TEX_Specular}
-};
-
-GLint
-loadTexture2GPU(const std::string fname)
-{
-	GLuint tid;
-
-	glGenTextures(1, &tid);
-	glBindTexture(GL_TEXTURE_2D, tid);
-	cv::Mat img = cv::imread(fname, CV_LOAD_IMAGE_COLOR);
-	if (!img.data) {
-		std::cerr << "not valid image" << std::endl;
-		return -1;
-	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.cols, img.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, img.data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	//Paramaters
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	return tid;
-}
 
 Model::Model(const std::string& file, int param)
 {
+	this->drawproperty = nullptr;
 	//setup constant
 	this->instanceVBO = 0;
 	
@@ -118,6 +90,7 @@ Model::Model(const std::string& file, int param)
 
 Model::Model()
 {
+	this->drawproperty = nullptr;
 }
 
 Model::~Model()
@@ -129,6 +102,7 @@ Model::~Model()
 aiScene*
 Model::readModel(const std::string& file)
 {
+
 	Assimp::Importer import;
 	import.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
 	//import.SetPropertyInteger(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80.0f);
@@ -242,6 +216,12 @@ Model::loadBone(const aiScene *scene, const aiNode *node)
 	return count;
 }
 
+
+const std::string
+Model::getRootPath(void) const
+{
+	return this->root_path;
+}
 
 void
 Model::draw(const ShaderMan *different_shader)
@@ -388,7 +368,7 @@ Model::loadMaterials(const aiScene *scene)
 		aiString path;
 		Material material;
 		GLuint gpu_handle;
-		for (GLuint j = 0; j < TEX_NTexType; j++) {
+		for (GLuint j = 0; j < TEX_TYPE::TEX_NASSIMP_TYPE; j++) {
 			if (mat->GetTextureCount(texture_types_supported[j].aiTextype) > 0) {
 				mat->GetTexture(texture_types_supported[j].aiTextype, 0, &path);
 				std::string full_path = this->root_path + "/" + std::string(path.C_Str());
@@ -396,7 +376,7 @@ Model::loadMaterials(const aiScene *scene)
 				//check whether we loaded already
 				auto it = textures_cache.find(full_path);
 				if (it == textures_cache.end()) {
-					gpu_handle = loadTexture2GPU(full_path);
+					gpu_handle = load2DTexture2GPU(full_path);
 					textures_cache.insert(std::make_pair(full_path, gpu_handle));
 				} else
 					gpu_handle = it->second;
@@ -535,16 +515,39 @@ void
 Model::addProperty(const std::string &name, std::shared_ptr<OBJproperty> data)
 {
 	this->properties.push_back(std::make_pair(name, data));
+	data->bindModel(this);
+	if (data->isdrawPoint()) {
+		assert(this->drawproperty == nullptr);
+		this->drawproperty = data;
+	}
+}
+
+OBJproperty*
+Model::searchProperty(const std::string name) const
+{
+	for (uint i = 0; i < this->properties.size(); i++)
+		if (properties[i].first == name)
+			return properties[i].second.get();
+	return NULL;
+}
+
+void
+Model::drawProperty(const ShaderMan *differentShader)
+{
+	const ShaderMan *origin_shader = this->shader_to_draw;
+	if (differentShader)
+		this->bindShader(differentShader);
+	this->drawproperty->draw(msg_t());
+	this->bindShader(origin_shader);
 }
 
 
 void
 Model::load(const std::string &file)
 {
-	//I don't think you really need to sort it
-//	std::vector<std::shared_ptr<OBJproperty> > sorted_properted;
+	this->root_path = file.substr(0, file.find_last_of('/'));	
 	aiScene *scene = this->readModel(file);
-
+	
 	int layout_start = 0;
 	for (auto it = this->properties.begin(); it != this->properties.end(); it++) {
 		//in this case, every oproperty has layout
@@ -558,3 +561,5 @@ Model::load(const std::string &file)
 	
 	delete scene;
 }
+
+

@@ -11,8 +11,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-
 #include "types.hpp"
+
+class Model;
 
 struct mesh_GPU_handle {
 	GLuint VAO;
@@ -29,20 +30,34 @@ class OBJproperty {
 protected:
 	//some of the property has access to GPU, the second is the span
 	std::pair<int, int> shader_layouts;
+	//the span is determined by the subclasses, you have to write it yourself
+	int drawpoint;
+	const Model* model;
+
 public:
-	OBJproperty() {
+	OBJproperty()  {
 		this->shader_layouts.first = 0;
 		this->shader_layouts.second = 0;
+		this->drawpoint = false;
 	}
-	virtual ~OBJproperty();
+	virtual ~OBJproperty() {}
 	//return success or not
 	virtual bool load(const aiScene *scene) {return true;}
 	virtual bool push2GPU(void) {return true;}
+	virtual void draw(const msg_t) {}
+	void bindModel(const Model *model);
 	//some of the property has control to the input of shaders. But not all
 	//of them, in that case. It occupies a band of
 	void alloc_shader_layout(unsigned int start_point);
 	int getLayoutsEnd(void);
+	bool isdrawPoint();
 };
+
+inline void
+OBJproperty::bindModel(const Model *model)
+{
+	this->model = model;
+}
 
 inline void
 OBJproperty::alloc_shader_layout(unsigned int start)
@@ -56,6 +71,11 @@ OBJproperty::getLayoutsEnd(void)
 	return this->shader_layouts.first + this->shader_layouts.second;
 }
 
+inline bool
+OBJproperty::isdrawPoint(void)
+{
+	return this->drawpoint;
+}
 
 class Mesh1 : public OBJproperty {
 protected:
@@ -71,18 +91,30 @@ protected:
 	std::vector<Faces> meshes_faces;
 public:
 	enum OPTION {
-		LOAD_NORM = 0,
-		LOAD_TEX = 1,
+		LOAD_NORM = 1,
+		LOAD_TEX = 2,
 	};
 	Mesh1(int option = OPTION::LOAD_NORM | OPTION::LOAD_TEX);
 	virtual ~Mesh1() override;
 	virtual bool load(const aiScene *scene) override;
 	virtual bool push2GPU(void) override;
+	virtual void draw(const msg_t) override;
 	
 	//after loading, this provide a way to exam the meshes
 	std::tuple<Vertices*, size_t *, Faces *> select_mesh(size_t i);
 };
 
 
+
+class Material1 : public OBJproperty {
+	
+protected:
+	std::vector<Material> Materials;
+public:
+//	Material()
+	virtual ~Material1();
+	virtual bool load(const aiScene *scene) override;
+	virtual void draw(const msg_t) override;
+};
 
 #endif /* EOF */

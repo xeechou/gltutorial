@@ -32,7 +32,9 @@ class ShaderMan;
  * @brief skeleton class for setup one type of data 
  *
  * this thing should clean up the drawing process. There are some common
- * paradigms like framebuffers.  
+ * paradigms like framebuffers. Only one shader is limited on one DrawObj,
+ * because otherwise you dont really know which shader to deal with.
+ * 
  * 
  * A message system design for this system. Two types of communications need to
  * be done: 1) local communication and 2) broadcasting.  Usually message queue
@@ -50,17 +52,16 @@ class ShaderMan;
  */
 class DrawObj {
 protected:
-	int pos_in_context;	
+	int pos_in_context;
 	GLuint prog;
 	context *ctxt;
-
-	
 public:
 	DrawObj();
 	DrawObj(GLuint p);
 	void set_shader(GLuint p);
 	//we should have better shader interface next time
 	GLuint program(void) const;
+	//okay, we cannot really do anything on init_setup and itr_setup
 	//okay, this thing only context should called it
 	virtual int init_setup(void) = 0;
 	//this get called first
@@ -73,19 +74,6 @@ public:
 	void set_context(context *c);
 	void setPosinContext(size_t pos);
 };
-
-class MultiPassDrawObj : public DrawObj {
-	//this class is created to run multiple shader path at same time
-protected:
-	//It is better to declare as shared_ptr. Because We don't know if we are
-	//the only object uses that shader program or not, personally I think it
-	//is really stupid to just have one object uses the shader
-	std::vector<std::shared_ptr<ShaderMan> > shaders;
-public:
-	MultiPassDrawObj(void);
-	void appendShader(std::shared_ptr<ShaderMan>& shader);
-};
-
 
 
 class context {
