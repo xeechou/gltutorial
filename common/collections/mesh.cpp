@@ -185,6 +185,12 @@ Mesh1::draw(const msg_t arg)
 	}
 }
 
+uint
+Mesh1::howmanyMeshes() const
+{
+	return this->gpu_handles.size();
+}
+
 std::tuple<Vertices*, size_t *, Faces *>
 Mesh1::select_mesh(size_t i)
 {

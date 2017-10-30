@@ -76,7 +76,20 @@ struct RSTs {
 	std::vector<glm::vec3> translations;
 	std::vector<glm::quat> rotations;
 	std::vector<glm::vec3> scales;
+
+	void addInstance(const glm::vec3 p,
+			 const glm::quat r=glm::quat(glm::vec3(0.0)),
+			 const glm::vec3 s=glm::vec3(1.0f));
 };
+
+inline void
+RSTs::addInstance(const glm::vec3 p, const glm::quat r, const glm::vec3 s)
+{
+	this->translations.push_back(p);
+	this->rotations.push_back(r);
+	this->scales.push_back(s);
+}
+
 
 typedef struct RSTs Instances;
 
