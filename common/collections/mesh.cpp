@@ -30,17 +30,71 @@ mesh_GPU_handle::~mesh_GPU_handle()
 	}
 }
 
-Mesh1::Mesh1(int option)
+void
+Mesh1::layout_count(void)
 {
-	this->drawpoint=true;
 	int layout_span = 1;
-	this->init_options = option;
-	if (option & OPTION::LOAD_NORM) {
+	if (this->init_options & OPTION::LOAD_NORM) {
 		layout_span += 1;
-	} if (option & OPTION::LOAD_TEX) {
+	} if (this->init_options & OPTION::LOAD_TEX) {
 		layout_span += 1;
 	}
 	this->shader_layouts.second=layout_span;
+	
+}
+
+
+Mesh1::Mesh1(int option)
+{
+	this->drawpoint=true;
+	this->init_options = option;
+	layout_count();
+}
+
+
+
+Mesh1::Mesh1(const float *vertx, const float *norms, const float *uvs, const int nnodes,
+	     const float *indices, const int nfaces)
+{
+	this->drawpoint = true;
+	this->init_options = OPTION::LOAD_NORM | OPTION::LOAD_TEX;
+	
+	const int size_vn = 3;
+	const int size_uv = 2;
+	
+	this->meshes_vertices.resize(1);
+	this->meshes_faces.resize(1);
+	std::vector<glm::vec3> &poses   = this->meshes_vertices[0].Positions;
+	std::vector<glm::vec3> &normals = this->meshes_vertices[0].Normals;
+	std::vector<glm::vec2> &texuvs  = this->meshes_vertices[0].TexCoords;
+	Faces &faces = this->meshes_faces[0];
+	
+	poses.resize(nnodes);
+	normals.resize(nnodes);
+	texuvs.resize(nnodes);
+	for (int i = 0; i < nnodes; i++) {
+		poses[i]   = glm::make_vec3(i*size_vn + vertx);
+		normals[i] = glm::make_vec3(i*size_vn + norms);
+		texuvs[i]  = glm::make_vec2(i*size_uv + uvs);
+	}
+	//deal with indices
+	uint nnfaces;
+	std::vector<float> indx;
+	if (indices) {
+		nnfaces = nfaces;
+		faces.resize(nfaces);
+		std::copy(indices, indices + nfaces *3, indx.begin());
+	} else {
+		nnfaces = nnodes /3;		
+		faces.resize(nnfaces);
+		int n = {0};
+		indx.resize(nnodes);
+		std::generate(indx.begin(), indx.end(), [&] {return n++;});
+	}
+	for (uint i = 0; i < nnfaces; i++)
+		faces[i] = glm::u32vec3(indx[3*i], indx[3*i+1], indx[3*i+2]);
+	layout_count();
+	
 }
 
 
@@ -75,6 +129,11 @@ Mesh1::load(const aiScene *scene)
 		if (mesh->mTextureCoords[0] && (this->init_options & OPTION::LOAD_TEX)) {
 			texuvs.resize(mesh->mNumVertices);
 			has_tex = 1;
+		} else if (this->init_options & OPTION::LOAD_TEX) {
+			//disable it
+			this->init_options |= ~OPTION::LOAD_TEX;
+			//and we need cancel the span
+			this->shader_layouts.second--;
 		}
 	
 		for (GLuint i = 0; i < mesh->mNumVertices; i++) {
@@ -170,6 +229,7 @@ Mesh1::draw(const msg_t arg)
 {
 	(void)arg;
 	Material1 *material = (Material1*)this->model->searchProperty(std::string("material"));
+	Instancing *instancing = (Instancing *)this->model->searchProperty("instancing");
 
 	for (uint i = 0; i < this->gpu_handles.size(); i++) {
 		if (material)
@@ -180,8 +240,10 @@ Mesh1::draw(const msg_t arg)
 		glBindVertexArray(handle.VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, handle.VBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle.EBO);
-		glDrawElements(GL_TRIANGLES, faces.size() * 3, GL_UNSIGNED_INT, 0);
-		//other drawing function may also need to work, like animations and instancing.
+		if (instancing)
+			instancing->draw(msg_t((uint32_t)(faces.size() *3)));
+		else
+			glDrawElements(GL_TRIANGLES, faces.size() * 3, GL_UNSIGNED_INT, 0);
 	}
 }
 

@@ -46,19 +46,19 @@ int main(int argc, char **argv)
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 	GLuint cubeTex = load2DTexture2GPU(argv[1]);
 
-//	ShaderMan cubeShader("vs.glsl", "fs.glsl");
-//	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
-	
 	shadowMap shadow;
 	AfterShadow cubes;
 	cubes.setCubeTex(cubeTex);
 	
 	CubeModel cube;
-//	cube.make_instances(100, Model::INIT_squares);
-	cube.appendInstance(glm::vec3(0.0f, 1.0f, 0.0f));
-	cube.appendInstance(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(10.0f, 1.0f, 10.0f));
-	cube.appendInstance(glm::vec3(-3.0f,  1.0f, 3.0f), glm::vec3(1.2f, 1.2f, 1.2f),
-			     glm::quat(glm::vec3(90.0, 0.0, 0.0)));
+	RSTs instances;
+	instances.addInstance(glm::vec3(0.0f, 1.0f, 0.0f));
+	instances.addInstance(glm::vec3(0.0f, -1.0f, 0.0f), glm::quat(glm::vec3(0.0f)), glm::vec3(10.0f, 1.0f, 10.0f));
+	instances.addInstance(glm::vec3(-3.0f,  1.0f, 3.0f),
+			      glm::quat(glm::vec3(90.0, 0.0, 0.0)),
+			      glm::vec3(1.2f, 1.2f, 1.2f));
+	cube.addProperty("instancing", std::make_shared<Instancing>(instances));
+	cube.push2GPU();
 	
 	cubes.append_model(&cube);
 	shadow.append_model(&cube);

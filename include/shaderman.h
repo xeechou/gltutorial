@@ -37,7 +37,7 @@ protected:
 	GLuint pid; //program id
 
 	//this is specificly for texture
-	std::vector<std::pair<TEX_TYPE, std::string> > texure_uniforms;
+	std::vector<std::pair<TEX_TYPE, std::string> > texture_uniforms;
 	//including texture
 	std::map<std::string, GLuint> uniforms;
 	
@@ -61,7 +61,7 @@ public:
 	GLuint getPid(void) const {return pid;}
 	void useProgram(void) const {glUseProgram(pid);}
 	//we need two callback
-	virtual void setupTexUniform(void)  {};
+//	virtual void setupTexUniform(void)  {};
 	//since we only support one texture per tex-type, we just need to query by the type
 	bool addTextureUniform(const std::string name, const TEX_TYPE);
 	//return texture id

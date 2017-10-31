@@ -62,7 +62,7 @@ int AfterShadow::init_setup(void)
 	LtP = glm::vec3(1.0, 3.0, 0.0);
 	
 	for (unsigned int i = 0; i < cubes.size(); i++) {
-		this->cubes[i]->push2GPU(Mesh::LOAD_POS | Mesh::LOAD_NORMAL | Mesh::LOAD_TEX);
+		this->cubes[i]->push2GPU();
 		this->cubes[i]->bindShader(this->shader.get());
 	}
 	this->p = glm::perspective(glm::radians(90.0f), (float)1.0/(float)1.0, 1.0f, 100.0f);
@@ -109,7 +109,7 @@ AfterShadow::itr_draw(void)
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, this->depthTex);
 	for (unsigned int i = 0; i < cubes.size(); i++)
-		cubes[i]->draw();
+		cubes[i]->drawProperty();
 	return 0;
 }
 
@@ -156,8 +156,9 @@ shadowMap::itr_draw()
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-	for (unsigned int i = 0; i < cubes.size(); i++)
-		cubes[i]->draw(this->shader.get());
+	for (unsigned int i = 0; i < cubes.size(); i++) {
+		cubes[i]->drawProperty(this->shader.get());
+	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return 0;
 }

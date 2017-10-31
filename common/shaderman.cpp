@@ -53,8 +53,8 @@ ShaderMan::addTextureUniform(const std::string name, const TEX_TYPE type)
 {
 	glUseProgram(this->pid);
 	//since the first texture is always texture0
-	GLuint new_texture = this->texure_uniforms.size();
-	this->texure_uniforms.push_back(std::make_pair(type, name));
+	GLuint new_texture = this->texture_uniforms.size();
+	this->texture_uniforms.push_back(std::make_pair(type, name));
 	GLuint loc = glGetUniformLocation(this->pid, name.c_str());
 	glUniform1i(loc, new_texture);
 	this->uniforms[name] = loc;
@@ -74,8 +74,8 @@ ShaderMan::getUniform(const std::string name) const
 GLint
 ShaderMan::getTexUniform(const TEX_TYPE type) const
 {
-	for (uint i = 0; i < this->texure_uniforms.size(); i++)
-		if (this->texure_uniforms[i].first == type)
+	for (uint i = 0; i < this->texture_uniforms.size(); i++)
+		if (this->texture_uniforms[i].first == type)
 			return i;
 	return -1;
 }

@@ -91,12 +91,17 @@ protected:
 	std::vector<Vertices> meshes_vertices;
 	std::vector<size_t> material_indices;
 	std::vector<Faces> meshes_faces;
+
+	void layout_count(void);
 public:
 	enum OPTION {
 		LOAD_NORM = 1,
 		LOAD_TEX = 2,
 	};
 	Mesh1(int option = OPTION::LOAD_NORM | OPTION::LOAD_TEX);
+	Mesh1(const float *vertx, const float *norms, const float *uvs, const int nnodes,
+	     const float *indices = NULL, const int nfaces = 0);
+
 	virtual ~Mesh1() override;
 	virtual bool load(const aiScene *scene) override;
 	virtual bool push2GPU(void) override;

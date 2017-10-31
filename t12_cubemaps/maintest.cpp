@@ -144,6 +144,7 @@ int main(int argc, char **argv)
 	model.addProperty("instancing",
 			  std::make_shared<Instancing>(10, Instancing::OPTION::square_instances, glm::vec3(0.1f)));
 	model.load(argv[1]);
+	model.push2GPU();
 
 	nanoobj nsuit(&model);
 	nsuit.setCubeMapTex(skybox.getCubeTex());

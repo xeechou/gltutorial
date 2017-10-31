@@ -9,8 +9,7 @@ include_directories(
 
 
 add_executable(t14
-  main.cpp
-  shadow.cpp)
+  main.cpp)
 
 target_link_libraries(t14
   ${GLFW_LIBRARIES}

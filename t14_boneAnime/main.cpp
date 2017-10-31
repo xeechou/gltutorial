@@ -38,7 +38,7 @@
 #include <fbobj.hpp>
 #include <context.hpp>
 #include <collections/shaders.hpp>
-#include "shadow.hpp"
+//#include "shadow.hpp"
 //#include "animator.hpp"
 
 
@@ -118,8 +118,11 @@ staticOBJ::setLight(glm::vec3 origin)
 int
 staticOBJ::init_setup()
 {
-	if (!this->file.empty())
+	if (!this->file.empty()) {
 		this->drawobj->load(this->file);
+		this->drawobj->push2GPU();
+	}
+	
 		
 	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
 	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
