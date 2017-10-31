@@ -58,7 +58,6 @@ int main(int argc, char **argv)
 			      glm::quat(glm::vec3(90.0, 0.0, 0.0)),
 			      glm::vec3(1.2f, 1.2f, 1.2f));
 	cube.addProperty("instancing", std::make_shared<Instancing>(instances));
-	cube.push2GPU();
 	
 	cubes.append_model(&cube);
 	shadow.append_model(&cube);
