@@ -1,5 +1,5 @@
+R"(
 #version 330 core
-
 
 struct Light {
        vec3 position;//setted
@@ -30,34 +30,6 @@ in vec2 TexCoords;
 in vec3 fragPos;
 out vec4 color;
 
-/* 
- * this set of functions can be really helpful to avoid branches
- *
-vec4 when_eq(vec4 x, vec4 y) {
-  return 1.0 - abs(sign(x - y));
-  }
-
-vec4 when_neq(vec4 x, vec4 y) {
-  return abs(sign(x - y));
-  }
-
-vec4 when_gt(vec4 x, vec4 y) {
-  return max(sign(x - y), 0.0);
-  }
-
-vec4 when_lt(vec4 x, vec4 y) {
-  return max(sign(y - x), 0.0);
-  }
-
-vec4 when_ge(vec4 x, vec4 y) {
-  return 1.0 - when_lt(x, y);
-  }
-
-vec4 when_le(vec4 x, vec4 y) {
-  return 1.0 - when_gt(x, y);
-  }
-*/
-
 /* here we have a blin-phone model */
 void main(void)
 {
@@ -86,3 +58,5 @@ void main(void)
 //	color = vec4(ambient, 1.0f);
 	color = vec4(ambient+diffu+spec, 1.0f);
 }
+
+)"

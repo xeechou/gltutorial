@@ -3,9 +3,17 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <stdio.h>
-//#include <shaderman.h>
-#include "../include/shaderman.h"
-#include "../include/utils.h"
+#include <types.hpp>
+#include <shaderman.h>
+#include <utils.h>
+
+
+sprt_tex2d_t texture_types_supported[TEX_TYPE::TEX_NASSIMP_TYPE] = {
+	{aiTextureType_AMBIENT, TEX_Ambient},
+	{aiTextureType_DIFFUSE, TEX_Diffuse},
+	{aiTextureType_NORMALS, TEX_Normal},
+	{aiTextureType_SPECULAR, TEX_Specular},
+};
 
 
 static
@@ -28,10 +36,11 @@ GLuint load_shader(const char *fname, GLenum type)
 	glGetShaderiv(sid, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(sid, GL_INFO_LOG_LENGTH, &loglen);
 	if (result != GL_TRUE) {
+
 //		std::cout<<"there shoud be something" << glGetError()<<std::endl;
 		std::vector<char> err_msg(loglen+1);
 		glGetShaderInfoLog(sid, loglen, NULL, &err_msg[0]);
-		fprintf(stderr, "%s shader Compile info: %s\n",
+		fprintf(stderr, "%s shader Compile info:  %s\n",
 			(type == GL_FRAGMENT_SHADER) ? "fragment" : "vertex",
 			&err_msg[0]);
 		return 0;
@@ -39,6 +48,37 @@ GLuint load_shader(const char *fname, GLenum type)
 	return sid;
 }
 
+bool
+ShaderMan::addTextureUniform(const std::string name, const TEX_TYPE type)
+{
+	glUseProgram(this->pid);
+	//since the first texture is always texture0
+	GLuint new_texture = this->texture_uniforms.size();
+	this->texture_uniforms.push_back(std::make_pair(type, name));
+	GLuint loc = glGetUniformLocation(this->pid, name.c_str());
+	glUniform1i(loc, new_texture);
+	this->uniforms[name] = loc;
+
+	return true;
+}
+
+GLint
+ShaderMan::getUniform(const std::string name) const
+{
+	auto it = this->uniforms.find(name);
+	return (it != this->uniforms.end()) ? it->second : -1;
+	
+	return -1;
+}
+
+GLint
+ShaderMan::getTexUniform(const TEX_TYPE type) const
+{
+	for (uint i = 0; i < this->texture_uniforms.size(); i++)
+		if (this->texture_uniforms[i].first == type)
+			return i;
+	return -1;
+}
 
 //the interface may change
 
@@ -145,10 +185,12 @@ ShaderMan::createShaderFromString(const std::string& content, GLenum shadertype)
 	glGetShaderiv(sid, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(sid, GL_INFO_LOG_LENGTH, &loglen);
 	if (result != GL_TRUE) {
-		std::vector<char> err_msg(loglen+1);
+		std::string err_msg;
+		err_msg.resize(loglen+1, ' ');
+//		std::vector<char> err_msg(loglen+1);
 		glGetShaderInfoLog(sid, loglen, NULL, &err_msg[0]);
-		std::cerr << ShaderMan::getShaderName(shadertype) << " Compile info";
-		std::cerr << &err_msg << std::endl;
+		std::cerr << ShaderMan::getShaderName(shadertype) << " Compile info: ";
+		std::cerr << err_msg << std::endl;
 		return 0;
 	}
 	return sid;
@@ -200,4 +242,30 @@ TextureMan::loadTexture(const char *img_fname, const char *ind)
 	textures[ind] = texture_handler;
 	curr_texture+= 1;
 	return true;
+}
+
+
+//this is actually just 2DTexture
+GLint
+load2DTexture2GPU(const std::string fname)
+{
+	GLuint tid;
+
+	glGenTextures(1, &tid);
+	glBindTexture(GL_TEXTURE_2D, tid);
+	cv::Mat img = cv::imread(fname, CV_LOAD_IMAGE_COLOR);
+	if (!img.data) {
+		std::cerr << "not valid image" << std::endl;
+		return -1;
+	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.cols, img.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, img.data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	//Paramaters
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return tid;
 }

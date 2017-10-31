@@ -1,47 +1,142 @@
 [
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/common",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include    -o CMakeFiles/common.dir/utils.cpp.o -c /home/developer/Courses/cpp/mysamples/common/utils.cpp",
-  "file": "/home/developer/Courses/cpp/mysamples/common/utils.cpp"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/drawobjcollects.dir/collections/cubemap.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/collections/cubemap.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/collections/cubemap.cpp"
 },
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/common",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include    -o CMakeFiles/common.dir/controls.cpp.o -c /home/developer/Courses/cpp/mysamples/common/controls.cpp",
-  "file": "/home/developer/Courses/cpp/mysamples/common/controls.cpp"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/utils.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/utils.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/utils.cpp"
 },
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/common",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include    -o CMakeFiles/common.dir/shaderman.cpp.o -c /home/developer/Courses/cpp/mysamples/common/shaderman.cpp",
-  "file": "/home/developer/Courses/cpp/mysamples/common/shaderman.cpp"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/tree.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/tree.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/tree.cpp"
 },
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/t3_cube",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t3.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t3_cube/main.cc",
-  "file": "/home/developer/Courses/cpp/mysamples/t3_cube/main.cc"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/controls.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/controls.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/controls.cpp"
 },
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/t4_motion",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t4.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t4_motion/main.cc",
-  "file": "/home/developer/Courses/cpp/mysamples/t4_motion/main.cc"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/shaderman.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/shaderman.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/shaderman.cpp"
 },
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/t4_motion",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t4.dir/controls.cpp.o -c /home/developer/Courses/cpp/mysamples/t4_motion/controls.cpp",
-  "file": "/home/developer/Courses/cpp/mysamples/t4_motion/controls.cpp"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/framebuffer.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/framebuffer.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/framebuffer.cpp"
 },
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/t5_two_cubes",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t5.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t5_two_cubes/main.cc",
-  "file": "/home/developer/Courses/cpp/mysamples/t5_two_cubes/main.cc"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/context.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/context.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/context.cpp"
 },
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/t6_phong_model",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t6.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t6_phong_model/main.cc",
-  "file": "/home/developer/Courses/cpp/mysamples/t6_phong_model/main.cc"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/data.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/data.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/data.cpp"
 },
 {
-  "directory": "/home/developer/Courses/cpp/mysamples/t7_lighting_map",
-  "command": "/usr/bin/c++   -D_GNU_SOURCE -I/home/developer/Courses/cpp/mysamples/include -I/usr/include/libdrm -isystem /usr/include/opencv    -o CMakeFiles/t7.dir/main.cc.o -c /home/developer/Courses/cpp/mysamples/t7_lighting_map/main.cc",
-  "file": "/home/developer/Courses/cpp/mysamples/t7_lighting_map/main.cc"
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/model.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/model.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/model.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/mesh.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/mesh.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/mesh.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/bone.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/bone.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/bone.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/common.dir/geometry.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/geometry.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/geometry.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/common",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -I/C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/shadercollects.dir/collections/basic_shaders.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/common/collections/basic_shaders.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/common/collections/basic_shaders.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t03_cube",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t3.dir/main.cc.obj -c /C/Users/xichen.zhou/projects/gltutorial/t03_cube/main.cc",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t03_cube/main.cc"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t04_motion",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t4.dir/main.cc.obj -c /C/Users/xichen.zhou/projects/gltutorial/t04_motion/main.cc",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t04_motion/main.cc"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t04_motion",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t4.dir/controls.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/t04_motion/controls.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t04_motion/controls.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t05_two_cubes",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t5.dir/main.cc.obj -c /C/Users/xichen.zhou/projects/gltutorial/t05_two_cubes/main.cc",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t05_two_cubes/main.cc"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t06_phong_model",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t6.dir/main.cc.obj -c /C/Users/xichen.zhou/projects/gltutorial/t06_phong_model/main.cc",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t06_phong_model/main.cc"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t07_lighting_map",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t7.dir/main.cc.obj -c /C/Users/xichen.zhou/projects/gltutorial/t07_lighting_map/main.cc",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t07_lighting_map/main.cc"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t08_instancing",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t8.dir/main.cc.obj -c /C/Users/xichen.zhou/projects/gltutorial/t08_instancing/main.cc",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t08_instancing/main.cc"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t09_load_mesh",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -I/C/msys64/mingw64/include/assimp -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t9.dir/main.cc.obj -c /C/Users/xichen.zhou/projects/gltutorial/t09_load_mesh/main.cc",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t09_load_mesh/main.cc"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t10_blending",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t10.dir/main.cc.obj -c /C/Users/xichen.zhou/projects/gltutorial/t10_blending/main.cc",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t10_blending/main.cc"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t11_framebuffer",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -I/C/msys64/mingw64/include/assimp -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t11.dir/newmain.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/t11_framebuffer/newmain.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t11_framebuffer/newmain.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t12_cubemaps",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -I/C/msys64/mingw64/include/assimp -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/tt12.dir/maintest.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/t12_cubemaps/maintest.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t12_cubemaps/maintest.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t13_lightmap",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -I/C/msys64/mingw64/include/assimp -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t13.dir/main.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/t13_lightmap/main.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t13_lightmap/main.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t13_lightmap",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -I/C/msys64/mingw64/include/assimp -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t13.dir/shadow.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/t13_lightmap/shadow.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t13_lightmap/shadow.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t14_boneAnime",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -I/C/msys64/mingw64/include/assimp -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t14.dir/main.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/t14_boneAnime/main.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t14_boneAnime/main.cpp"
+},
+{
+  "directory": "C:/Users/xichen.zhou/projects/gltutorial/t14_boneAnime",
+  "command": "/C/msys64/mingw64/bin/g++.exe  -D_GLEW_STATIC -D_GNU_SOURCE -I/C/msys64/mingw64/include/eigen3 -isystem /C/msys64/mingw64/include -I/C/Users/xichen.zhou/projects/gltutorial/include -I/C/msys64/mingw64/include/assimp -isystem /C/msys64/mingw64/include/opencv  -std=c++11 -Wall -g -fPIC   -o CMakeFiles/t14.dir/shadow.cpp.obj -c /C/Users/xichen.zhou/projects/gltutorial/t14_boneAnime/shadow.cpp",
+  "file": "C:/Users/xichen.zhou/projects/gltutorial/t14_boneAnime/shadow.cpp"
 }
 ]

@@ -9,6 +9,10 @@
 #include <utility>
 #include <memory>
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
@@ -28,7 +32,9 @@ class ShaderMan;
  * @brief skeleton class for setup one type of data 
  *
  * this thing should clean up the drawing process. There are some common
- * paradigms like framebuffers.  
+ * paradigms like framebuffers. Only one shader is limited on one DrawObj,
+ * because otherwise you dont really know which shader to deal with.
+ * 
  * 
  * A message system design for this system. Two types of communications need to
  * be done: 1) local communication and 2) broadcasting.  Usually message queue
@@ -41,10 +47,12 @@ class ShaderMan;
  * The other type is the global message system. So you send the message to a
  * global queue. It get cleared out at the end of the iteration, and only one
  * guy can do it.
+ * 
+ * Since most times it has one, we could setup here
  */
 class DrawObj {
 protected:
-	int pos_in_context;	
+	int pos_in_context;
 	GLuint prog;
 	context *ctxt;
 public:
@@ -53,6 +61,7 @@ public:
 	void set_shader(GLuint p);
 	//we should have better shader interface next time
 	GLuint program(void) const;
+	//okay, we cannot really do anything on init_setup and itr_setup
 	//okay, this thing only context should called it
 	virtual int init_setup(void) = 0;
 	//this get called first
@@ -66,17 +75,6 @@ public:
 	void setPosinContext(size_t pos);
 };
 
-class MultiPassDrawObj : public DrawObj {
-	//this class is created to run multiple shader path at same time
-protected:
-	//It is better to declare as shared_ptr. Because We don't know if we are
-	//the only object uses that shader program or not, personally I think it
-	//is really stupid to just have one object uses the shader
-	std::vector<std::shared_ptr<ShaderMan> > shaders;
-public:
-	MultiPassDrawObj(void);
-	void appendShader(std::shared_ptr<ShaderMan>& shader);
-};
 
 class context {
 protected:
@@ -86,6 +84,7 @@ protected:
 	//local que is better defined, use this first
 	std::queue<std::pair<int, msg_t> > forward_msg_que;
 	std::queue<msg_t> _bcast_msg_que;
+	int width, height;
 public:
 	context(int width, int height, const char *winname);
 	context();
@@ -101,6 +100,9 @@ public:
 	//lets test if this shit works
 	void sendMsg(const DrawObj& d, const msg_t msg);
 	const msg_t retriveMsg(const DrawObj& d);
+	const glm::vec2 retriveWinsize() const;
+	//friend declarations
+	friend void context_winSizeChange(GLFWwindow *win, int width, int height);
 	//solution to eliminate the setTexShader, getTexShader calls: message
 	//queue. Basically I need a local message queue that send and retrieve
 	//information at every draw iteration. It should be empty and the end.

@@ -1,3 +1,4 @@
+R"(
 #version 330 core
 
 in  vec2 TexCoords;
@@ -39,3 +40,5 @@ void main()
 
 	color = vec4(col, 1.0);
 }
+
+)"

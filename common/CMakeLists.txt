@@ -14,9 +14,12 @@ add_library(common STATIC
   data.cpp
   #model loaders,
   model.cpp
-  mesh.cpp
-  bone.cpp
+#  mesh.cpp
+#  bone.cpp
   geometry.cpp
+  collections/mesh.cpp
+  collections/material.cpp
+  collections/instancing.cpp
   )
 
 target_link_libraries(common

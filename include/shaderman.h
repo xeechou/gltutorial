@@ -3,6 +3,9 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <utility>
+#include <tuple>
+
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
@@ -12,7 +15,7 @@
 #include <GL/glfw3.h>
 #endif
 
-#include <utility>
+
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -23,6 +26,7 @@
 
 
 //now it becomes the second place where we use the
+//it will be nice if we can provide a string template and then use the string directly in the initializer
 class ShaderMan
 {
 protected:
@@ -32,6 +36,11 @@ protected:
 	std::vector<GLuint> shaders;
 	GLuint pid; //program id
 
+	//this is specificly for texture
+	std::vector<std::pair<TEX_TYPE, std::string> > texture_uniforms;
+	//including texture
+	std::map<std::string, GLuint> uniforms;
+	
 public:
 	ShaderMan(void) {pid = 0;};	
 	ShaderMan(const char *vshader, const char *fshader);
@@ -39,7 +48,7 @@ public:
 	
 	//so, we have a brunch of aiSupported texture, for texture like CUBEMAP...
 	//I need to figure out later how to support it.
-	//this maybe really useless
+	//TODO: remove this
 	std::vector<TEX_TYPE> tex_uniforms;
 	//default, vertex shader and fragment shader	
 	int loadShaders(const char *, const char *);
@@ -52,7 +61,13 @@ public:
 	GLuint getPid(void) const {return pid;}
 	void useProgram(void) const {glUseProgram(pid);}
 	//we need two callback
-	virtual void setupTexUniform(void)  {};
+//	virtual void setupTexUniform(void)  {};
+	//since we only support one texture per tex-type, we just need to query by the type
+	bool addTextureUniform(const std::string name, const TEX_TYPE);
+	//return texture id
+	GLint getTexUniform(const TEX_TYPE type) const;
+	//return uniform id
+	GLint getUniform(const std::string name) const;
 	
 	static std::string getShaderName(GLenum shader);
 	static GLuint createShaderFromString(const std::string& string, GLenum);
@@ -60,7 +75,7 @@ public:
 };
 
 //modulelize the shader
-
+GLint load2DTexture2GPU(const std::string fname);
 
 
 class TextureMan

@@ -108,17 +108,6 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 
-struct Vertex {
-	glm::vec3 Position;
-	glm::vec3 normal;
-	glm::vec2 TexCoords;
-};
-
-/** UV mapping **/
-struct Texture {
-	GLuint id;
-	std::string type;
-};
 
 glm::mat4 ROTATION = glm::mat4(1.0);
 

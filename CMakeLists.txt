@@ -11,10 +11,20 @@ add_definitions(
 if(MSYS)
   add_definitions(-D_GLEW_STATIC)
 endif()
+
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -g -fPIC")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
-#set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build"), you cant have it
+if (WIN32)
+   set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/buildWin")
+else()
+   set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build")
+endif()		
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) 
 
 find_package(PkgConfig REQUIRED)
 
@@ -60,8 +70,8 @@ add_subdirectory(t05_two_cubes)
 add_subdirectory(t06_phong_model)
 add_subdirectory(t07_lighting_map)
 add_subdirectory(t08_instancing)
-add_subdirectory(t09_load_mesh)
-add_subdirectory(t10_blending)
+#add_subdirectory(t09_load_mesh)
+#add_subdirectory(t10_blending)
 add_subdirectory(t11_framebuffer)
 add_subdirectory(t12_cubemaps)
 add_subdirectory(t13_lightmap)
