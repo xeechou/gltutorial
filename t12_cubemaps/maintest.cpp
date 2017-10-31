@@ -102,7 +102,7 @@ public:
 //			glClear(GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		//you cannot do this
-		model->draw();
+		model->drawProperty();
 		return 0;
 	}
 	int itr_setup(void) override {
@@ -139,16 +139,11 @@ int main(int argc, char **argv)
 	skybox.loadCubeMap(argv[2]);
 	skybox.get_camera_mat = unity_like_get_camera_mat;
 	
-//	ShaderMan container("vs.glsl", "fs.glsl");
-	Model model(argv[1]);
-	model.makeInstances(10, Model::INIT_squares, glm::vec3(0.1f));
-//	model.appendInstance(glm::vec3(0.0f));
-//	model.appendInstance(glm::vec3(10.0f));
-//	model.appendInstance(glm::vec3(-10.0f));
-//	model.appendInstance(glm::vec3(20.0f));
-
-//	model.make_instances(10, Model::INIT_random);
-	model.pushIntances2GPU();
+	Model model;
+	model.addProperty("mesh", std::make_shared<Mesh1>());
+	model.addProperty("instancing",
+			  std::make_shared<Instancing>(10, Instancing::OPTION::square_instances, glm::vec3(0.1f)));
+	model.load(argv[1]);
 
 	nanoobj nsuit(&model);
 	nsuit.setCubeMapTex(skybox.getCubeTex());
