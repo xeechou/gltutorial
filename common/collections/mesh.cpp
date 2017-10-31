@@ -185,15 +185,26 @@ Mesh1::draw(const msg_t arg)
 	}
 }
 
+
+void
+Mesh1::activeIthMesh(uint i) const
+{
+	if (i >= this->gpu_handles.size())
+		return;
+	glBindVertexArray(this->gpu_handles[i].VAO);
+}
+
 uint
 Mesh1::howmanyMeshes() const
 {
 	return this->gpu_handles.size();
 }
 
+/*
 std::tuple<Vertices*, size_t *, Faces *>
 Mesh1::select_mesh(size_t i)
 {
 	
 }
 
+*/

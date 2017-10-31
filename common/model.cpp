@@ -41,6 +41,27 @@
 #include <model.hpp>
 #include <data.hpp>
 
+/**
+ * @brief describes the order of properties
+ */
+enum PROPERTYorder {
+	mesh = 0, //load mesh first
+	instancing = 1, //instancing has to draw and push after
+	material = 2,
+};
+
+static int
+getPropertyOrder(const std::string& name)
+{
+	if (name == "mesh")
+		return PROPERTYorder::mesh;
+	else if (name == "material")
+		return PROPERTYorder::material;
+	else if (name == "instancing")
+		return PROPERTYorder::instancing;
+	return -1;
+}
+
 
 Model::Model(const std::string& file, int param)
 {
@@ -511,23 +532,28 @@ Model::loadAnimations(const aiScene* scene)
 }
 
 
-void
+bool
 Model::addProperty(const std::string &name, std::shared_ptr<OBJproperty> data)
 {
-	this->properties.push_back(std::make_pair(name, data));
+	int order = getPropertyOrder(name);
+	
+	if (this->properties.find(order) != this->properties.end() || order < 0)
+		return false;
+	this->properties[order] = std::make_pair(name, data);
 	data->bindModel(this);
 	if (data->isdrawPoint()) {
 		assert(this->drawproperty == nullptr);
 		this->drawproperty = data;
 	}
+	return true;
 }
 
 OBJproperty*
 Model::searchProperty(const std::string name) const
 {
-	for (uint i = 0; i < this->properties.size(); i++)
-		if (properties[i].first == name)
-			return properties[i].second.get();
+	int order = getPropertyOrder(name);
+	if (this->properties.find(order) != this->properties.end())
+		return this->properties.at(order).second.get();
 	return NULL;
 }
 
@@ -550,14 +576,19 @@ Model::load(const std::string &file)
 	
 	int layout_start = 0;
 	for (auto it = this->properties.begin(); it != this->properties.end(); it++) {
+		auto pair = it->second;
+		std::cerr << pair.first << std::endl;
 		//in this case, every oproperty has layout
-		it->second->alloc_shader_layout(layout_start);
-		layout_start = it->second->getLayoutsEnd();
-		it->second->load(scene);
+		pair.second->alloc_shader_layout(layout_start);
+		layout_start = pair.second->getLayoutsEnd();
+		pair.second->load(scene);
 	}
 	//I don't think this requires an order for GPU, keep it simple unless it is required, maybe draw indeed need the order
-	for (auto it = this->properties.begin(); it != this->properties.end(); it++)
-		it->second->push2GPU();
+	for (auto it = this->properties.begin(); it != this->properties.end(); it++) {
+		auto pair = it->second;
+		pair.second->push2GPU();
+	}
+
 	
 	delete scene;
 }
