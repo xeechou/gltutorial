@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 	model.addProperty("mesh", std::make_shared<Mesh1>());
 	model.addProperty("material", std::make_shared<Material1>());
 	model.load(argv[1]);
-//	model.push2GPU();
+	model.push2GPU();
 	
 	model.bindShader(&container);
 
