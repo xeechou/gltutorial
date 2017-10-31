@@ -38,16 +38,17 @@ const unsigned int height = 1024;
 
 class NanoShader : public ShaderMan {
 public:
-	NanoShader(const char *vs, const char *fs) : ShaderMan(vs, fs) {}
-	void setupTexUniform(void) override {
-		this->tex_uniforms.push_back(TEX_Diffuse);
-		this->tex_uniforms.push_back(TEX_Specular);
+	NanoShader(void) {}
+	void setupTexUniform(void) {
 		glUseProgram(this->getPid());
-		GLuint diffuse_id  = glGetUniformLocation(this->getPid(), "diffuse");
-		GLuint specular_id = glGetUniformLocation(this->getPid(), "specular");
+		this->addTextureUniform("diffuse", TEX_Diffuse);
+		this->addTextureUniform("specular", TEX_Specular);
+
+//		GLuint diffuse_id  = glGetUniformLocation(this->getPid(), "diffuse");
+//		GLuint specular_id = glGetUniformLocation(this->getPid(), "specular");
 		//I should not need to active texture to 
-		glUniform1i(diffuse_id, 0);
-		glUniform1i(specular_id,1);
+//		glUniform1i(diffuse_id, 0);
+//		glUniform1i(specular_id,1);
 	}
 };
 
@@ -58,15 +59,34 @@ int main(int argc, char **argv)
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 
-	ShaderMan postprocess("quadvs.glsl", "quadfs.glsl");
+	std::string quadvs =
+#include "quadvs.glsl"
+		;
+	std::string quadfs =
+#include "quadfs.glsl"
+		;
+	ShaderMan postprocess;
+	postprocess.loadProgramFromString(quadvs, quadfs);
 	glUseProgram(postprocess.getPid());
 	FBobject fbobj(width, height);
-	
-	NanoShader container("vs.glsl", "fs.glsl");
+
+	std::string vs_source =
+#include "vs.glsl"
+		;
+	std::string fs_source =
+#include "fs.glsl"
+		;
+	NanoShader container;
+	container.loadProgramFromString(vs_source, fs_source);
 	container.setupTexUniform();
 	glUseProgram(container.getPid());
 	GLuint prog_id = container.getPid();
-	Model model(argv[1]);
+	Model model;
+	model.addProperty("mesh", std::make_shared<Mesh1>());
+	model.addProperty("material", std::make_shared<Material1>());
+	model.load(argv[1]);
+//	model.push2GPU();
+	
 	model.bindShader(&container);
 
 	GLfloat theta = 0.0f;
@@ -108,7 +128,7 @@ int main(int argc, char **argv)
 		
 //		fbobj.unreffbo();
 //		glDisable(GL_DEPTH_TEST);
-		model.draw();
+		model.drawProperty();
 
 		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" <<  std::endl;
