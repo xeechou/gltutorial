@@ -150,7 +150,7 @@ shadowMap::itr_setup() {return 0;}
 int
 shadowMap::itr_draw()
 {
-	glViewport(0,0, this->width, this->height);		
+	glViewport(0,0, this->width, this->height);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
 	glUseProgram(this->prog);
 	glClear(GL_DEPTH_BUFFER_BIT);

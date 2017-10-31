@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	GLFWwindow *window = cont.getGLFWwindow();
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
-	GLuint cubeTex = loadTexture2GPU(argv[1]);
+	GLuint cubeTex = load2DTexture2GPU(argv[1]);
 
 //	ShaderMan cubeShader("vs.glsl", "fs.glsl");
 //	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
