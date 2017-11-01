@@ -20,6 +20,8 @@ public:
 	glm::mat4 _cascade_transform;
 	
 	TreeNode(const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
+	~TreeNode(void);
+	
 	const std::string name() const {return id;}
 	const glm::mat4 getModelMat() const;
 	void setModelMat(const glm::mat4& model);

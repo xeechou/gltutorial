@@ -1,5 +1,6 @@
 #include <vector>
 #include <exception>
+#include <thread>
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -13,6 +14,8 @@
 #include <dlib/gui_widgets.h>
 
 class FacialLandmark {
+	//you need to thread this thing. Because you need to process detect the
+	//head rectangle before you do landmark, the second one is faster...
 protected:
 	cv::Rect rect_ann, rect_blob;
 	dlib::frontal_face_detector face_detector;

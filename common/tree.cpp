@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
@@ -21,6 +22,14 @@ TreeNode::TreeNode(const std::string id, const glm::mat4& m) :
 		this->id = id;
 	this->parent = NULL;
 	this->children.clear();
+}
+
+TreeNode::~TreeNode()
+{
+	std::cerr << "called tree descturctor" << std::endl;
+	//delete all its children. Since we don't use share_ptr here
+//	for (uint i = 0; i< this->children.size(); i++)
+//		delete this->children[i];
 }
 
 //we should define a static function here
