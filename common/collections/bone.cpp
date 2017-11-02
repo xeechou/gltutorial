@@ -52,14 +52,16 @@ Bone::setStackedTransformMat()
 }
 
 
-typedef std::vector<Eigen::Triplet<float> > BoneWeights;
+
 
 class Skeleton : public OBJproperty {
 	//this one has normals, or mesh
 protected:
 	std::map<std::string, Bone> bones;
 	//in the mean time, we should also keep the a sparseMatrix of the bone weights
-	std::vector<BoneWeights> meshes;
+	std::vector<Eigen::MatrixXf> meshes;
+	std::vector<Eigen::MatrixXd> meshes_bones;
+
 	void loadBoneWeights(const aiScene *scene, int mesh, int bone);
 	aiNode* findRootBone(const aiScene *scene) const;
 	void buildHierachy(const aiScene *scene, const aiNode *root);
@@ -79,9 +81,11 @@ bool
 Skeleton::load(const aiScene *scene)
 {
 	this->meshes.resize(scene->mNumMeshes);
-
 	for (uint i = 0; i < scene->mNumMeshes; i++) {
 		const aiMesh *mesh = scene->mMeshes[i];
+		this->meshes[i] = Eigen::MatrixXf::Zero(mesh->mNumVertices, this->shader_layouts.second);
+		this->meshes_bones[i] = Eigen::MatrixXd::Zero(mesh->mNumVertices, this->shader_layouts.second);
+		
 		for (uint j = 0; j < mesh->mNumBones; j++) {
 			const std::string bone_name = std::string(mesh->mBones[j]->mName.C_Str());
 			aiBone *aibone = mesh->mBones[j];
@@ -89,7 +93,6 @@ Skeleton::load(const aiScene *scene)
 				Bone localbone(this->bones.size(), bone_name, aiMat2glmMat(aibone->mOffsetMatrix));
 				this->bones.insert(std::make_pair(bone_name, localbone));
 			}
-							  
 			this->loadBoneWeights(scene, i, j);
 		}
 	}
@@ -104,26 +107,36 @@ bool
 Skeleton::push2GPU()
 {
 	//what to push to GPU?
-	//alright, we shoudl 
+	//this really depends on how you are gonna write the shader.
+	//get the sparse mat
+	for (uint i = 0; i < this->meshes.size(); i++) {
+		Eigen::MatrixXf& weights = this->meshes[i];
+		Eigen::MatrixXd& idbones = this->meshes_bones[i];
+	}
 }
 
 void
 Skeleton::loadBoneWeights(const aiScene *s, int meshi, int bonej)
 {
-	BoneWeights& weights = this->meshes[meshi];
+	Eigen::MatrixXf& weights = this->meshes[meshi];
+	Eigen::MatrixXd& ids = this->meshes_bones[meshi];
 	aiMesh *mesh = s->mMeshes[meshi];
 	aiBone *bone = s->mMeshes[meshi]->mBones[bonej];
 	std::string bone_name = std::string(bone->mName.C_Str());
 	//find the correct id of that bone
-	int j;
-	for (j = 0; j < this->bones.size(); j++)
-		if (bones[j].name() == bone_name)
-			break;
+	int j = this->bones[bone_name].getInd();
 	
-	typedef Eigen::Triplet<float> T;
-	for (int i = 0; i < bone->mNumWeights; i++)
-		weights.push_back(T(bone->mWeights[i].mVertexId, j,
-				    bone->mWeights[i].mWeight));
+//	typedef Eigen::Triplet<float> T;
+	for (uint i = 0; i < bone->mNumWeights; i++)
+		for (uint k = 0; k < this->shader_layouts.second; k++) {
+			if (weights(bone->mWeights[i].mVertexId, k) == 0) {
+				weights(bone->mWeights[i].mVertexId, k) = bone->mWeights[i].mWeight;
+				ids(bone->mWeights[i].mVertexId, k) = j;
+				break;
+			}
+		}
+//		weights.push_back(T(bone->mWeights[i].mVertexId, j,
+//				    bone->mWeights[i].mWeight));
 	//will create the SparseMat on push2GPU()
 }
 
