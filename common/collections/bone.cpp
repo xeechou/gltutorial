@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <random>
 
+
+#include <Eigen/Core>
+#include <Eigen/Sparse>
 #include <tree.hpp>
 #include <types.hpp>
 #include <property.hpp>
@@ -24,6 +27,7 @@ class Bone : public TreeNode {
 public:
 	Bone(int indx, const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
 	Bone(const Bone& bone);
+	Bone(void);
 	~Bone(void);
 	int getInd() const {return _index;}
 	void setInd(int ind) {_index = ind;}
@@ -36,12 +40,18 @@ Bone::Bone(int indx, const std::string id, const glm::mat4& m) :
 	//we are setting up the stacked transform later
 }
 
-Bone::Bone(const Bone& bone) : TreeNode(bone)
+Bone::Bone(const Bone& bone) : TreeNode(bone.id, bone._offsetMat)
 {
 	//we cannot assume it has other code
 	_offsetMat = bone._offsetMat;
 	_index = bone._index;
 	id = bone.id;
+}
+
+//there is nothing else you can do, but give this 
+Bone::Bone(void) : TreeNode("", glm::mat4(1.0f))
+{
+	
 }
 
 void
@@ -57,10 +67,12 @@ Bone::setStackedTransformMat()
 class Skeleton : public OBJproperty {
 	//this one has normals, or mesh
 protected:
+	//in the end, we end up with the same structure of previous one
 	std::map<std::string, Bone> bones;
 	//in the mean time, we should also keep the a sparseMatrix of the bone weights
-	std::vector<Eigen::MatrixXf> meshes;
-	std::vector<Eigen::MatrixXd> meshes_bones;
+	std::vector<Eigen::MatrixXf> mb_weights;
+	std::vector<Eigen::MatrixXi> mb_indices;
+	std::vector<GLuint> gpu_handles;
 
 	void loadBoneWeights(const aiScene *scene, int mesh, int bone);
 	aiNode* findRootBone(const aiScene *scene) const;
@@ -80,11 +92,13 @@ Skeleton::Skeleton(uint weights)
 bool
 Skeleton::load(const aiScene *scene)
 {
-	this->meshes.resize(scene->mNumMeshes);
+	mb_weights.resize(scene->mNumMeshes);
+	mb_indices.resize(scene->mNumMeshes);
 	for (uint i = 0; i < scene->mNumMeshes; i++) {
 		const aiMesh *mesh = scene->mMeshes[i];
-		this->meshes[i] = Eigen::MatrixXf::Zero(mesh->mNumVertices, this->shader_layouts.second);
-		this->meshes_bones[i] = Eigen::MatrixXd::Zero(mesh->mNumVertices, this->shader_layouts.second);
+		//initialize this first
+		this->mb_weights[i] = Eigen::MatrixXf::Zero(mesh->mNumVertices, this->shader_layouts.second);
+		this->mb_indices[i] = Eigen::MatrixXi::Zero(mesh->mNumVertices, this->shader_layouts.second);
 		
 		for (uint j = 0; j < mesh->mNumBones; j++) {
 			const std::string bone_name = std::string(mesh->mBones[j]->mName.C_Str());
@@ -106,38 +120,51 @@ Skeleton::load(const aiScene *scene)
 bool
 Skeleton::push2GPU()
 {
-	//what to push to GPU?
-	//this really depends on how you are gonna write the shader.
-	//get the sparse mat
-	for (uint i = 0; i < this->meshes.size(); i++) {
-		Eigen::MatrixXf& weights = this->meshes[i];
-		Eigen::MatrixXd& idbones = this->meshes_bones[i];
+	uint first_layout = this->shader_layouts.first;
+	uint layout_ends  = this->shader_layouts.first + this->shader_layouts.second;
+	Mesh1* mesh_handle = (Mesh1*)this->model->searchProperty("mesh");
+	for (uint i = 0; i < this->mb_weights.size(); i++) {
+		mesh_handle->activeIthMesh(i);
+		glGenBuffers(1, &this->gpu_handles[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, this->gpu_handles[i]);
+		glBufferData()
+		Eigen::MatrixXf& weights = this->mb_weights[i];
+		Eigen::MatrixXi& idbones = this->mb_indices[i];
+
+		for (uint l = first_layout; l < layout_ends; l++) {
+			glEnableVertexAttribArray(l);
+			
+		}
+		glBindVertexArray(0);
 	}
+	return true;
 }
 
 void
 Skeleton::loadBoneWeights(const aiScene *s, int meshi, int bonej)
 {
-	Eigen::MatrixXf& weights = this->meshes[meshi];
-	Eigen::MatrixXd& ids = this->meshes_bones[meshi];
+	Eigen::MatrixXf& weights = this->mb_weights[meshi];
+	Eigen::MatrixXi& indices = this->mb_indices[meshi];
 	aiMesh *mesh = s->mMeshes[meshi];
-	aiBone *bone = s->mMeshes[meshi]->mBones[bonej];
+	aiBone *bone = mesh->mBones[bonej];
 	std::string bone_name = std::string(bone->mName.C_Str());
 	//find the correct id of that bone
-	int j = this->bones[bone_name].getInd();
-	
-//	typedef Eigen::Triplet<float> T;
-	for (uint i = 0; i < bone->mNumWeights; i++)
-		for (uint k = 0; k < this->shader_layouts.second; k++) {
+	auto it = this->bones.find(bone_name);
+	int j  = it->second.getInd();
+	for (uint i = 0; i < bone->mNumWeights; i++) {
+		uint k;
+		for (k = 0; k < this->shader_layouts.second; k++) {
+			uint vid = bone->mWeights[i].mVertexId;
+			float w  = bone->mWeights[i].mWeight;
 			if (weights(bone->mWeights[i].mVertexId, k) == 0) {
-				weights(bone->mWeights[i].mVertexId, k) = bone->mWeights[i].mWeight;
-				ids(bone->mWeights[i].mVertexId, k) = j;
+				weights(vid, k) = w;
+				indices(vid, k) = j;
 				break;
 			}
 		}
-//		weights.push_back(T(bone->mWeights[i].mVertexId, j,
-//				    bone->mWeights[i].mWeight));
-	//will create the SparseMat on push2GPU()
+		//it should never get here
+		assert(k != this->shader_layouts.second);
+	}
 }
 
 
