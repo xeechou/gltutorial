@@ -20,6 +20,7 @@ add_library(common STATIC
   collections/mesh.cpp
   collections/material.cpp
   collections/instancing.cpp
+  collections/bone.cpp
   )
 
 target_link_libraries(common
