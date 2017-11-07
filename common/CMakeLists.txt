@@ -56,3 +56,4 @@ target_link_libraries(shadercollects
   ${GLEW_LIBRARIES}
   ${GLFW_LIBRARIES}
   )
+add_subdirectory(cvcollections)

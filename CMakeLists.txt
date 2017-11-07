@@ -33,7 +33,8 @@ find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
-#find_package(DLIB REQUIRED)
+#dlib is purely headerfile, but we need to include the dlib CMakeLists. And include 
+find_package(DLIB REQUIRED)
 #find_package(assimp REQUIRED) this doesn't work on windows either
 #find_package(GLFW REQUIRED)
 

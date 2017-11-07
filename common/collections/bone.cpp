@@ -26,6 +26,7 @@ static cv::Mat_<cv::Vec2f>
 assembleWeights(cv::Mat& weights, cv::Mat& indx)
 {
 	//we need to return a two channel matrix
+	//even with assemble weights. we still could not get the
 	cv::Mat_<cv::Vec2f> boneWeights(weights.rows, weights.cols);
 	cv::Mat tmprow(1,weights.cols, weights.type());
 	for (int i = 0; i < boneWeights.rows; i++) {
@@ -34,6 +35,7 @@ assembleWeights(cv::Mat& weights, cv::Mat& indx)
 		for( int j = 0;  j < boneWeights.cols; j++)
 			boneWeights(i,j) = cv::Vec2f((float)indx.at<int>(i,j), weights.at<float>(i,j));
 	}
+	//I can use 
 	return boneWeights;
 }
 

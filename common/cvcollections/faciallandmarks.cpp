@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <exception>
 #include <thread>
@@ -39,6 +40,11 @@ FacialLandmark::FacialLandmark(const std::string& landmark_path)
 	//since it has a frontal face detector, I guess the process should be easy enough
 }
 
+FacialLandmark::~FacialLandmark()
+{
+	
+}
+
 void
 FacialLandmark::getPoseModel(cv::Mat &frame)
 {
@@ -54,6 +60,8 @@ FacialLandmark::getPoseModel(cv::Mat &frame)
 	win.clear_overlay();
 	win.set_image(cimg);
 	win.add_overlay(dlib::render_face_detections(detected));
+	int c;
+	std::cin >> c;
 }
 
 int main(int argc, char *argv[])
