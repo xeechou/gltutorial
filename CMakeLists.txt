@@ -60,7 +60,13 @@ set(LIB_3rdParties
   ${assimp_LIBRARIES}
   )
 
-#message("the opengl gl libraries" ${OPENGL_gl_LIBRARY})
+set(LIB_3rdPartiesCV
+  ${OpenCV_LIBS}
+  ${DLIB_LIBRARIES}
+  )
+
+message("build with compiler flags:  " ${CMAKE_CXX_FLAGS})
+
 add_subdirectory(common)
 
 #tutorial folders

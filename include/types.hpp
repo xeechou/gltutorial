@@ -15,13 +15,14 @@
 //can I say. This is definitly not complete. Very first example, we can't get a
 //cubemap texture type here, but it is supported very well by OpenGL.
 enum TEX_TYPE {
-	TEX_Diffuse,
-	TEX_Specular,
-	TEX_Normal,
-	TEX_Ambient,
+	TEX_Diffuse=0,
+	TEX_Specular=1,
+	TEX_Normal=2,
+	TEX_Ambient=3,
 	TEX_NASSIMP_TYPE=4, //it doesnt support cubemap, we need write a specific loadCubeMap function
-	TEX_CubeMap,
-	TEX_NTexType=5,
+	TEX_NTexType=5,	
+	TEX_CubeMap=6,
+
 };
 
 typedef struct {

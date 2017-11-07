@@ -30,7 +30,7 @@ Material1::load(const aiScene *scene)
 		aiString path;
 		Material material;
 		GLuint gpu_handle;
-		for (GLuint j = 0; j < TEX_NTexType; j++) {
+		for (GLuint j = 0; j < TEX_NASSIMP_TYPE; j++) {
 			if (mat->GetTextureCount(texture_types_supported[j].aiTextype) > 0) {
 				mat->GetTexture(texture_types_supported[j].aiTextype, 0, &path);
 				std::string full_path = root_path + "/" + std::string(path.C_Str());
