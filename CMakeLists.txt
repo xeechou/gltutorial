@@ -33,8 +33,9 @@ find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
+#find_package(DLIB REQUIRED)
 #find_package(assimp REQUIRED) this doesn't work on windows either
-#find_package(GLFW REQUIRED) 
+#find_package(GLFW REQUIRED)
 
 pkg_search_module(GLFW REQUIRED glfw3)
 pkg_search_module(EIGEN3 REQUIRED eigen3)

@@ -105,6 +105,7 @@ struct Vertices {
 	std::vector<glm::vec2> TexCoords;
 };
 
+
 typedef glm::u32vec3 face_t;
 typedef std::vector<face_t> Faces;
 

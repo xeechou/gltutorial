@@ -48,10 +48,11 @@ enum PROPERTYorder {
 	mesh = 0, //load mesh first
 	instancing = 1, //instancing has to draw and push after
 	material = 2,
+	Joints = 3,
 };
 
 static int
-getPropertyOrder(const std::string& name)
+get_property_order(const std::string& name)
 {
 	if (name == "mesh")
 		return PROPERTYorder::mesh;
@@ -59,15 +60,29 @@ getPropertyOrder(const std::string& name)
 		return PROPERTYorder::material;
 	else if (name == "instancing")
 		return PROPERTYorder::instancing;
+	else if (name == "joint")
+		return PROPERTYorder::Joints;
 	return -1;
 }
 
-
-//Model::Model(const std::string& file, int param)
-//{
-//	this->drawproperty = nullptr;
-//}
-
+static std::shared_ptr<OBJproperty>
+get_property_by_name(const std::string& name)
+{
+	std::shared_ptr<OBJproperty> property;
+	if (name == "mesh")
+		property = std::make_shared<Mesh1>();
+	else if (name == "material")
+		property = std::make_shared<Material1>();
+	else if (name == "instancing") {
+		//I don't think you will every call by this
+		RSTs insts;
+		insts.addInstance(glm::vec3(0.0f));
+		property = std::make_shared<Instancing>(insts);		
+	}
+	else if (name == "joint")
+		property = std::make_shared<Skeleton>(3);
+	return property;
+}
 
 Model::Model()
 {
@@ -125,10 +140,11 @@ Model::getRootPath(void) const
 bool
 Model::addProperty(const std::string &name, std::shared_ptr<OBJproperty> data)
 {
-	int order = getPropertyOrder(name);
-	
+	int order = get_property_order(name);
 	if (this->properties.find(order) != this->properties.end() || order < 0)
 		return false;
+	if (data == nullptr)
+		data = get_property_by_name(name);
 	this->properties[order] = std::make_pair(name, data);
 	data->bindModel(this);
 	if (data->isdrawPoint()) {
@@ -141,7 +157,7 @@ Model::addProperty(const std::string &name, std::shared_ptr<OBJproperty> data)
 OBJproperty*
 Model::searchProperty(const std::string name) const
 {
-	int order = getPropertyOrder(name);
+	int order = get_property_order(name);
 	if (this->properties.find(order) != this->properties.end())
 		return this->properties.at(order).second.get();
 	return NULL;

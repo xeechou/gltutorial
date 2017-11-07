@@ -28,6 +28,7 @@
 #include "shaderman.h"
 #include "property.hpp"
 #include "context.hpp"
+#include "collections/bone.hpp"
 
 
 class Model {
@@ -57,7 +58,7 @@ public:
 	void load(const std::string& file);
 	//seperate load and push2GPU as geometry class may have it useful
 	void push2GPU(void);
-	bool addProperty(const std::string& name, std::shared_ptr<OBJproperty> data);
+	bool addProperty(const std::string& name, std::shared_ptr<OBJproperty> data=nullptr);
 	OBJproperty *searchProperty(const std::string name) const;
 	
 	//you should actually draw with the shaderMan

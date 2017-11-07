@@ -77,6 +77,7 @@ int main(int argc, char **argv)
 	std::shared_ptr<Model> small_guy = std::make_shared<Model>();
 	small_guy->addProperty("mesh", std::make_shared<Mesh1>());
 	small_guy->addProperty("material", std::make_shared<Material1>());
+	small_guy->addProperty("joint", std::make_shared<Skeleton>(5));
 	staticOBJ model;
 	
 	model.addModel(small_guy, std::string(argv[1]));

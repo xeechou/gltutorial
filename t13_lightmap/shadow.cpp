@@ -62,8 +62,8 @@ int AfterShadow::init_setup(void)
 	LtP = glm::vec3(1.0, 3.0, 0.0);
 	
 	for (unsigned int i = 0; i < cubes.size(); i++) {
+		this->cubes[i]->bindShader(this->shader.get());		
 		this->cubes[i]->push2GPU();
-		this->cubes[i]->bindShader(this->shader.get());
 	}
 	this->p = glm::perspective(glm::radians(90.0f), (float)1.0/(float)1.0, 1.0f, 100.0f);
 

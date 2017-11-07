@@ -2,12 +2,15 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <array>
 #include <string>
 #include <tuple>
 #include <algorithm>
 #include <random>
 
 
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <tree.hpp>
@@ -16,23 +19,24 @@
 #include <model.hpp>
 #include <shaderman.h>
 #include <data.hpp>
+#include <collections/bone.hpp>
 
-//I think this is fair
-class Bone : public TreeNode {
-	///matrix that transfer the vertices from mesh(world) space to bone space.
-	glm::mat4 _offsetMat;
-	//the index of the bone
-	int _index;
-	glm::mat4 _invTransform;
-public:
-	Bone(int indx, const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
-	Bone(const Bone& bone);
-	Bone(void);
-	~Bone(void);
-	int getInd() const {return _index;}
-	void setInd(int ind) {_index = ind;}
-	void setStackedTransformMat() override;
-};
+
+static cv::Mat_<cv::Vec2f>
+assembleWeights(cv::Mat& weights, cv::Mat& indx)
+{
+	//we need to return a two channel matrix
+	cv::Mat_<cv::Vec2f> boneWeights(weights.rows, weights.cols);
+	cv::Mat tmprow(1,weights.cols, weights.type());
+	for (int i = 0; i < boneWeights.rows; i++) {
+		cv::normalize(weights.row(i), tmprow, 1,0,cv::NORM_L1);
+		tmprow.copyTo(weights.row(i));
+		for( int j = 0;  j < boneWeights.cols; j++)
+			boneWeights(i,j) = cv::Vec2f((float)indx.at<int>(i,j), weights.at<float>(i,j));
+	}
+	return boneWeights;
+}
+
 
 Bone::Bone(int indx, const std::string id, const glm::mat4& m) :
 	TreeNode(id), _offsetMat(m), _index(indx)
@@ -48,10 +52,20 @@ Bone::Bone(const Bone& bone) : TreeNode(bone.id, bone._offsetMat)
 	id = bone.id;
 }
 
+Bone::Bone(const Bone&& bone)
+{
+	this->id = bone.id;
+	this->_offsetMat = bone._offsetMat;
+	this->_index = bone._index;
+}
+
 //there is nothing else you can do, but give this 
 Bone::Bone(void) : TreeNode("", glm::mat4(1.0f))
 {
 	
+}
+Bone::~Bone()
+{
 }
 
 void
@@ -62,80 +76,102 @@ Bone::setStackedTransformMat()
 }
 
 
-
-
-class Skeleton : public OBJproperty {
-	//this one has normals, or mesh
-protected:
-	//in the end, we end up with the same structure of previous one
-	std::map<std::string, Bone> bones;
-	//in the mean time, we should also keep the a sparseMatrix of the bone weights
-	std::vector<Eigen::MatrixXf> mb_weights;
-	std::vector<Eigen::MatrixXi> mb_indices;
-	std::vector<GLuint> gpu_handles;
-
-	void loadBoneWeights(const aiScene *scene, int mesh, int bone);
-	aiNode* findRootBone(const aiScene *scene) const;
-	void buildHierachy(const aiScene *scene, const aiNode *root);
-public:
-	Skeleton(uint weights=3);
-	virtual ~Skeleton() override;
-	virtual bool load(const aiScene *scene) override;
-	virtual bool push2GPU(void) override;
-};
-
 Skeleton::Skeleton(uint weights)
 {
 	this->shader_layouts.second=weights;
 }
 
+Skeleton::~Skeleton()
+{
+	for (uint i = 0; i < this->gpu_handles.size(); i++)
+		glDeleteBuffers(1, &gpu_handles[i]);
+}
+
 bool
 Skeleton::load(const aiScene *scene)
 {
-	mb_weights.resize(scene->mNumMeshes);
+ 	mb_weights.resize(scene->mNumMeshes);
 	mb_indices.resize(scene->mNumMeshes);
 	for (uint i = 0; i < scene->mNumMeshes; i++) {
 		const aiMesh *mesh = scene->mMeshes[i];
 		//initialize this first
-		this->mb_weights[i] = Eigen::MatrixXf::Zero(mesh->mNumVertices, this->shader_layouts.second);
-		this->mb_indices[i] = Eigen::MatrixXi::Zero(mesh->mNumVertices, this->shader_layouts.second);
+		this->mb_weights[i] = cv::Mat_<float>::zeros(mesh->mNumVertices, this->shader_layouts.second);
+		this->mb_indices[i] = cv::Mat_<int>::zeros(mesh->mNumVertices, this->shader_layouts.second);
 		
 		for (uint j = 0; j < mesh->mNumBones; j++) {
 			const std::string bone_name = std::string(mesh->mBones[j]->mName.C_Str());
 			aiBone *aibone = mesh->mBones[j];
 			if (this->bones.find(bone_name) == this->bones.end()) {
-				Bone localbone(this->bones.size(), bone_name, aiMat2glmMat(aibone->mOffsetMatrix));
-				this->bones.insert(std::make_pair(bone_name, localbone));
+				std::cerr << bone_name << std::endl;
+//				Bone localbone(
+				this->bones.insert(std::make_pair(bone_name,
+								  Bone(this->bones.size(), bone_name, aiMat2glmMat(aibone->mOffsetMatrix))
+							   ));
 			}
 			this->loadBoneWeights(scene, i, j);
 		}
 	}
-	//all right, since I loaded up all the meshes
-	aiNode *rootNode = this->findRootBone(scene);
-	assert(rootNode != NULL);
+
+	//all right, since I loaded up all the meshes 
+	this->buildHierachy(scene, findRootBone(scene));
+	std::cerr << this->root_bone->layout() << std::endl;
+//	assert(rootNode != NULL);
 	
 	return true;
 }
 
+/*
+static void debug_bw(cv::Mat& debug)
+{
+	int c;
+	std::cerr << debug.channels() << std::endl;
+	for (int i = 0; i < debug.rows; i++) {
+		std::cerr << cv::format(debug.row(i), cv::Formatter::FMT_NUMPY) << std::endl;
+		std::cin >> c;
+	}
+}
+
+static void assert_weight(cv::Mat& weights)
+{
+	for (int i = 0; i < weights.rows; i++) {
+		float sum = 0;
+		for (int j = 0; j < weights.cols; j++)
+			sum += weights.at<float>(i,j);
+		if (sum != 1.0f)
+			std::cout << weights.row(i) << '\t';
+	}
+			
+}
+*/
+
 bool
 Skeleton::push2GPU()
 {
+	this->gpu_handles.resize(this->mb_weights.size());
 	uint first_layout = this->shader_layouts.first;
 	uint layout_ends  = this->shader_layouts.first + this->shader_layouts.second;
 	Mesh1* mesh_handle = (Mesh1*)this->model->searchProperty("mesh");
+	size_t vec2_size = sizeof(cv::Vec2f);
 	for (uint i = 0; i < this->mb_weights.size(); i++) {
+		//NOTE after assembled weight, we still have float error problems
+		cv::Mat_<cv::Vec2f> bw = assembleWeights(this->mb_weights[i], this->mb_indices[i]);
+//		assert_weight(this->mb_weights[i]);
+//		debug_bw(bw);
 		mesh_handle->activeIthMesh(i);
 		glGenBuffers(1, &this->gpu_handles[i]);
 		glBindBuffer(GL_ARRAY_BUFFER, this->gpu_handles[i]);
-		glBufferData()
-		Eigen::MatrixXf& weights = this->mb_weights[i];
-		Eigen::MatrixXi& idbones = this->mb_indices[i];
+		glBufferData(GL_ARRAY_BUFFER, bw.rows * bw.step[0], (void *)bw.data, GL_STATIC_DRAW);
 
 		for (uint l = first_layout; l < layout_ends; l++) {
 			glEnableVertexAttribArray(l);
-			
+			glVertexAttribPointer(l, 2, GL_FLOAT, GL_FALSE,
+					      sizeof(cv::Vec2f),
+					      (void *)((l-first_layout) * vec2_size));
 		}
 		glBindVertexArray(0);
+		//useless
+		this->mb_weights.clear();
+		this->mb_indices.clear();
 	}
 	return true;
 }
@@ -143,8 +179,8 @@ Skeleton::push2GPU()
 void
 Skeleton::loadBoneWeights(const aiScene *s, int meshi, int bonej)
 {
-	Eigen::MatrixXf& weights = this->mb_weights[meshi];
-	Eigen::MatrixXi& indices = this->mb_indices[meshi];
+	cv::Mat_<float>& weights = this->mb_weights[meshi];
+	cv::Mat_<int>& indices = this->mb_indices[meshi];
 	aiMesh *mesh = s->mMeshes[meshi];
 	aiBone *bone = mesh->mBones[bonej];
 	std::string bone_name = std::string(bone->mName.C_Str());
@@ -152,10 +188,11 @@ Skeleton::loadBoneWeights(const aiScene *s, int meshi, int bonej)
 	auto it = this->bones.find(bone_name);
 	int j  = it->second.getInd();
 	for (uint i = 0; i < bone->mNumWeights; i++) {
-		uint k;
+		uint vid = bone->mWeights[i].mVertexId;
+		float w  = bone->mWeights[i].mWeight;
+//		std::cerr << "vertex " << vid << ", weight " << w << std::endl;
+		int k;
 		for (k = 0; k < this->shader_layouts.second; k++) {
-			uint vid = bone->mWeights[i].mVertexId;
-			float w  = bone->mWeights[i].mWeight;
 			if (weights(bone->mWeights[i].mVertexId, k) == 0) {
 				weights(vid, k) = w;
 				indices(vid, k) = j;
@@ -193,6 +230,7 @@ void
 Skeleton::buildHierachy(const aiScene *scene, const aiNode *root_node)
 {
 	std::queue<const aiNode *> fifo_nodes;
+	this->root_bone = &this->bones[root_node->mName.data];
 	fifo_nodes.push(root_node);
 	while (!fifo_nodes.empty()) {
 		const aiNode *node = fifo_nodes.front();

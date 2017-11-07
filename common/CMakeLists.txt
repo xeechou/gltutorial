@@ -2,6 +2,7 @@ include_directories(
   ${GLEW_INCLUDE_DIRS}
   ${OPENGL_INCLUDE_DIR}
   ${EIGEN3_INCLUDE_DIR}
+  ${DLIB_INCLUDE_DIR}
   )
 
 add_library(common STATIC
