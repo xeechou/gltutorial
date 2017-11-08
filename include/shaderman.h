@@ -23,7 +23,7 @@
 
 #include "types.hpp"
 
-
+//okay, we are gonna declare some global uniforms
 
 //now it becomes the second place where we use the
 //it will be nice if we can provide a string template and then use the string directly in the initializer

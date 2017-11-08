@@ -175,6 +175,21 @@ Skeleton::push2GPU()
 		this->mb_weights.clear();
 		this->mb_indices.clear();
 	}
+	const ShaderMan *sm = this->getBindedShader();
+	GLuint prog = sm->getPid();
+//	glGetUniformLocation(sm->getPid())
+	
+	
+	return true;
+}
+
+
+bool
+Skeleton::uploadUniform(const ShaderMan *sm)
+{
+	//for this one, we actually need to update the uniforms in the draw call.
+	GLuint prog = sm->getPid();
+//	glUseProgram(prog);
 	return true;
 }
 
@@ -258,4 +273,15 @@ Skeleton::buildHierachy(const aiScene *scene, const aiNode *root_node)
 			}
 		}
 	}
+}
+
+
+void
+Skeleton::draw(const msg_t msg)
+{
+	//if animation is applied here, we should update the local bone
+	//transformations. But before that, let's just load the uniforms
+	const ShaderMan *sm = this->getBindedShader();
+//	sm->get
+	(void)msg;
 }

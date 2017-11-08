@@ -14,6 +14,7 @@
 #include "types.hpp"
 
 class Model;
+class ShaderMan;
 
 struct mesh_GPU_handle {
 	GLuint VAO;
@@ -45,12 +46,15 @@ public:
 	virtual bool load(const aiScene *scene) {return true;}
 	virtual bool push2GPU(void) {return true;}
 	virtual void draw(const msg_t) {}
+	//since model will bind sometimes binds to different shader, we need this function to setup the uniforms
+	virtual bool uploadUniform(const ShaderMan* sm) {return true;}
 	void bindModel(const Model *model);
 	//some of the property has control to the input of shaders. But not all
 	//of them, in that case. It occupies a band of
 	void alloc_shader_layout(unsigned int start_point);
 	int getLayoutsEnd(void);
 	bool isdrawPoint();
+	const ShaderMan* getBindedShader(void);
 };
 
 inline void
@@ -76,6 +80,7 @@ OBJproperty::isdrawPoint(void)
 {
 	return this->drawpoint;
 }
+
 
 
 

@@ -5,7 +5,12 @@
 #include <model.hpp>
 #include <property.hpp>
 
-
+//not sure if it is a good idea defining here
+const ShaderMan*
+OBJproperty::getBindedShader(void)
+{
+	return this->model->currentShader();
+}
 
 mesh_GPU_handle::mesh_GPU_handle()
 {
@@ -50,7 +55,6 @@ Mesh1::Mesh1(int option)
 	this->init_options = option;
 	layout_count();
 }
-
 
 
 Mesh1::Mesh1(const float *vertx, const float *norms, const float *uvs, const int nnodes,

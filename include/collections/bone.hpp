@@ -51,6 +51,8 @@ public:
 	virtual ~Skeleton() override;
 	virtual bool load(const aiScene *scene) override;
 	virtual bool push2GPU(void) override;
+	virtual bool uploadUniform(const ShaderMan* sm) override;
+	virtual void draw(const msg_t) override;
 };
 
 #endif
