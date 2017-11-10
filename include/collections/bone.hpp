@@ -36,7 +36,9 @@ class Skeleton : public OBJproperty {
 	//this one has normals, or mesh
 protected:
 	//in the end, we end up with the same structure of previous one
+	std::string uniform_bone;
 	std::map<std::string, Bone> bones;
+	std::vector<glm::mat4> cascade_transforms;
 	const Bone *root_bone;
 	//in the mean time, we should also keep the a sparseMatrix of the bone weights
 	std::vector<cv::Mat_<float> > mb_weights;
@@ -47,11 +49,11 @@ protected:
 	aiNode* findRootBone(const aiScene *scene) const;
 	void buildHierachy(const aiScene *scene, const aiNode *root);
 public:
-	Skeleton(uint weights=3);
+	Skeleton(uint weights=3, const std::string& uniform_name=UNIFORM_BONE_ARR);
 	virtual ~Skeleton() override;
 	virtual bool load(const aiScene *scene) override;
 	virtual bool push2GPU(void) override;
-	virtual bool uploadUniform(const ShaderMan* sm) override;
+//	virtual bool uploadUniform(const ShaderMan* sm) override;
 	virtual void draw(const msg_t) override;
 };
 

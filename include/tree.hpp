@@ -34,7 +34,8 @@ public:
 	 */
 	virtual void setStackedTransformMat();
 	/**
-	 * @brief this node and all its decedents
+	 * @brief flush the transformation from this nodes and all its descedens
 	 */
+	void flushTransformations();
 	std::string layout() const;
 };

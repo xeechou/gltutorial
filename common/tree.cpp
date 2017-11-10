@@ -81,3 +81,15 @@ TreeNode::setStackedTransformMat()
 		this->_cascade_transform = this->_model_mat * this->parent->getStackedTransformMat();
 	}
 }
+
+void
+TreeNode::flushTransformations()
+{
+	//there should be something 
+	glm::mat4 parent_ctrans=glm::mat4(1.0);
+	if (parent)
+		parent_ctrans = parent->getStackedTransformMat();
+	this->_cascade_transform = parent_ctrans * this->_model_mat;
+	for (uint i = 0; i < this->children.size(); i++)
+		children[i]->flushTransformations();
+}

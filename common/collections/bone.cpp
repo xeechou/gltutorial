@@ -78,9 +78,10 @@ Bone::setStackedTransformMat()
 }
 
 
-Skeleton::Skeleton(uint weights)
+Skeleton::Skeleton(uint weights, const std::string& uniform_name)
 {
 	this->shader_layouts.second=weights;
+	this->uniform_bone = uniform_name;
 }
 
 Skeleton::~Skeleton()
@@ -104,8 +105,7 @@ Skeleton::load(const aiScene *scene)
 			const std::string bone_name = std::string(mesh->mBones[j]->mName.C_Str());
 			aiBone *aibone = mesh->mBones[j];
 			if (this->bones.find(bone_name) == this->bones.end()) {
-				std::cerr << bone_name << std::endl;
-//				Bone localbone(
+//				std::cerr << bone_name << std::endl;
 				this->bones.insert(std::make_pair(bone_name,
 								  Bone(this->bones.size(), bone_name, aiMat2glmMat(aibone->mOffsetMatrix))
 							   ));
@@ -113,12 +113,11 @@ Skeleton::load(const aiScene *scene)
 			this->loadBoneWeights(scene, i, j);
 		}
 	}
-
-	//all right, since I loaded up all the meshes 
+	//all right, since I loaded up all the meshes
 	this->buildHierachy(scene, findRootBone(scene));
-	std::cerr << this->root_bone->layout() << std::endl;
-//	assert(rootNode != NULL);
-	
+//	std::cerr << this->root_bone->layout() << std::endl;
+	this->cascade_transforms.resize(this->bones.size());
+	//TODO now we do the intial transform	
 	return true;
 }
 
@@ -175,23 +174,22 @@ Skeleton::push2GPU()
 		this->mb_weights.clear();
 		this->mb_indices.clear();
 	}
-	const ShaderMan *sm = this->getBindedShader();
-	GLuint prog = sm->getPid();
-//	glGetUniformLocation(sm->getPid())
+//	const ShaderMan *sm = this->getBindedShader();
 	
 	
 	return true;
 }
 
-
+/*
 bool
 Skeleton::uploadUniform(const ShaderMan *sm)
 {
 	//for this one, we actually need to update the uniforms in the draw call.
-	GLuint prog = sm->getPid();
+//	GLuint prog = sm->getPid();
 //	glUseProgram(prog);
 	return true;
 }
+*/
 
 void
 Skeleton::loadBoneWeights(const aiScene *s, int meshi, int bonej)
@@ -281,7 +279,11 @@ Skeleton::draw(const msg_t msg)
 {
 	//if animation is applied here, we should update the local bone
 	//transformations. But before that, let's just load the uniforms
+	(void)msg;	
 	const ShaderMan *sm = this->getBindedShader();
-//	sm->get
-	(void)msg;
+	sm->useProgram();
+	//you should flash the boneweights
+	glUniformMatrix4fv(sm->getUniform(uniform_bone), this->bones.size(), GL_FALSE, (GLfloat *)&this->cascade_transforms[0]);
+
+
 }
