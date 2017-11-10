@@ -31,7 +31,7 @@ class ShaderMan
 {
 protected:
 	typedef boost::filesystem::path path_t;
-	
+
 	enum STYPE {VERTEX, FRAGMENT, GEOMETRY, COMPUTE};
 	std::vector<GLuint> shaders;
 	GLuint pid; //program id
@@ -40,17 +40,17 @@ protected:
 	std::vector<std::pair<TEX_TYPE, std::string> > texture_uniforms;
 	//including texture
 	std::map<std::string, GLuint> uniforms;
-	
+
 public:
-	ShaderMan(void) {pid = 0;};	
+	ShaderMan(void) {pid = 0;};
 	ShaderMan(const char *vshader, const char *fshader);
 	~ShaderMan(void);
-	
+
 	//so, we have a brunch of aiSupported texture, for texture like CUBEMAP...
 	//I need to figure out later how to support it.
 	//TODO: remove this
 	std::vector<TEX_TYPE> tex_uniforms;
-	//default, vertex shader and fragment shader	
+	//default, vertex shader and fragment shader
 	int loadShaders(const char *, const char *);
 	//old interface
 
@@ -68,7 +68,7 @@ public:
 	GLint getTexUniform(const TEX_TYPE type) const;
 	//return uniform id
 	GLint getUniform(const std::string name) const;
-	
+
 	static std::string getShaderName(GLenum shader);
 	static GLuint createShaderFromString(const std::string& string, GLenum);
 	static GLuint loadShaderProgram(GLuint *shaders, int len);
@@ -92,7 +92,7 @@ public:
 	TextureMan(void) {curr_texture = 0; actived_texture = 0;}
 	~TextureMan() {
 		for (std::map<std::string, GLuint>::const_iterator it = textures.begin();
-		     it != textures.end(); it++)
+				 it != textures.end(); it++)
 			glDeleteTextures(1, &(it->second));
 	};
 };
