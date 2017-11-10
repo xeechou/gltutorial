@@ -3,7 +3,7 @@ INCLUDE(FindPackageHandleStandardArgs)
 set(DLIB_INCLUDE_DIR /usr/local/include)
 SET(DLIB_LibrarySearchPaths
   /usr/local/lib
-  /usr/lib  
+  /usr/lib
   )
 
 find_path(DLIB_SUBDIR dlib/CMakeLists.txt
@@ -13,6 +13,8 @@ find_path(DLIB_SUBDIR dlib/CMakeLists.txt
 if(DLIB_SUBDIR)
   message("dlib is installed as pure header files")
   #if dlib is installed like
+  add_definitions(-DUSE_AVX_INSTRUCTIONS)
+  add_definitions(-DUSE_SSE4_INSTRUCTIONS)
   set(DLIB_INCLUDE_DIR ${DLIB_SUBDIR})
   add_subdirectory("${DLIB_SUBDIR}/dlib" ${CMAKE_BINARY_DIR}/build_dlib)
   set(DLIB_LIBRARY dlib::dlib)
@@ -20,7 +22,7 @@ else()
   message("dlib is installed as binary")
   find_library(DLIB_LIBRARY
     NAMES dlib
-    PATHS ${DLIB_LibrarySearchPaths}    
+    PATHS ${DLIB_LibrarySearchPaths}
     )
 endif()
 # Handle the REQUIRED argument and set the <UPPERCASED_NAME>_FOUND variable
