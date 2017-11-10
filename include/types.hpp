@@ -11,6 +11,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+//define uint now
+typedef unsigned int uint;
+
 //well, we end up make those difficult type just to fix small bugs. Well, how
 //can I say. This is definitly not complete. Very first example, we can't get a
 //cubemap texture type here, but it is supported very well by OpenGL.
