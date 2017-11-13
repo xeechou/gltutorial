@@ -33,6 +33,7 @@ public:
 
 //	void getFacePoints(cv::Mat &frame);
 	void getPoseModel(cv::Mat& frame);
+	void copyPoints(void);
 };
 
 
@@ -64,6 +65,15 @@ FacialLandmark::getPoseModel(cv::Mat &frame)
 		win.set_image(cimg);
 		win.add_overlay(dlib::render_face_detections(detected));
 	}
+}
+
+void
+FacialLandmark::copyPoints(void)
+{
+	std::vector<dlib::Point> face_points(68);
+	for (int i = 0; i < 68; i ++) {
+	}
+
 }
 
 
