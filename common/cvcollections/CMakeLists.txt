@@ -7,9 +7,15 @@ target_link_libraries(facialTest
   )
 
 target_compile_options(facialTest
-  PRIVATE "-mavx"
   PRIVATE "-msse4"
   )
+
+add_executable(threadTest
+  threadt.cpp
+  )
+
+target_link_libraries(threadTest
+  ${OpenCV_LIBS})
 
 #get_target_property(pppp facialTest COMPILE_OPTIONS)
 #message("facial property: ${pppp}")
