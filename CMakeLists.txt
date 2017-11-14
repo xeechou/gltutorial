@@ -15,16 +15,17 @@ endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -g -fPIC")
+#last time I check, the target_compile_options only add additional options, it doesn't override everything, so I am good
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
 if (WIN32)
    set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/buildWin")
 else()
    set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build")
-endif()		
+endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(PkgConfig REQUIRED)
 
@@ -33,7 +34,7 @@ find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
-#dlib is purely headerfile, but we need to include the dlib CMakeLists. And include 
+#dlib is purely headerfile, but we need to include the dlib CMakeLists. And include
 find_package(DLIB REQUIRED)
 #find_package(assimp REQUIRED) this doesn't work on windows either
 #find_package(GLFW REQUIRED)
