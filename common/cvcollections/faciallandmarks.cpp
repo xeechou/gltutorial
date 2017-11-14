@@ -7,6 +7,7 @@
 #include <mutex>
 #include <condition_variable>
 
+#include <opencv2/videoio.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/objdetect.hpp>
@@ -17,6 +18,12 @@
 #include <dlib/image_processing.h>
 #include <dlib/image_processing/render_face_detections.h>
 #include <dlib/gui_widgets.h>
+
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
+
+#include <context.hpp>
 
 class FacialLandmark {
 	//you need to thread this thing. Because you need to process detect the
@@ -33,7 +40,7 @@ public:
 
 //	void getFacePoints(cv::Mat &frame);
 	void getPoseModel(cv::Mat& frame);
-	void copyPoints(void);
+	void copyPoints(const dlib::full_object_detection&);
 };
 
 
@@ -68,10 +75,12 @@ FacialLandmark::getPoseModel(cv::Mat &frame)
 }
 
 void
-FacialLandmark::copyPoints(void)
+FacialLandmark::copyPoints(const dlib::full_object_detection& detection)
 {
-	std::vector<dlib::Point> face_points(68);
+	Eigen::Matrix<float, 2, Eigen::Dynamic> mat(2, detection.num_parts());
+	std::vector<dlib::point> face_points(mat.cols());
 	for (int i = 0; i < 68; i ++) {
+		detection.part(i);
 	}
 
 }
@@ -107,7 +116,14 @@ bool worker(void)
 		cap >> img;
 		face_tracker.getPoseModel(img);
 	}
+	return true;
 }
+
+#include <thread>
+#include <chrono>
+#include <mutex>
+
+
 
 int main(int argc, char *argv[])
 {
@@ -122,7 +138,7 @@ int main(int argc, char *argv[])
 			nextFrame = true;
 			CV.notify_all();
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		//std::cout << "sleeped" << std::endl;
 	}
 	quit = true;
