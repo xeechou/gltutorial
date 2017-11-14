@@ -22,7 +22,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-
+#include "operations.hpp"
 #include "types.hpp"
 #include "tree.hpp"
 #include "shaderman.h"
@@ -45,11 +45,11 @@ protected:
 	const ShaderMan *shader_to_draw;
 	std::shared_ptr<OBJproperty> drawproperty;
 	std::map<uint, std::pair<std::string, std::shared_ptr<OBJproperty> > > properties;
-	
+
 public:
-        /**
-	 * @brief model constructor, loading meshes and textures, 
-	 * 
+	/**
+	 * @brief model constructor, loading meshes and textures,
+	 *
 	 */
 	Model(void);
 	~Model(void);
@@ -59,8 +59,9 @@ public:
 	//seperate load and push2GPU as geometry class may have it useful
 	void push2GPU(void);
 	bool addProperty(const std::string& name, std::shared_ptr<OBJproperty> data=nullptr);
+	//	bool addProperty(int proptype, const std::string& name, std::shared_ptr<OBJproperty> data);
 	OBJproperty *searchProperty(const std::string name) const;
-	
+
 	//you should actually draw with the shaderMan
 	void draw(const ShaderMan *differentShader=NULL);
 	void drawProperty(const ShaderMan *differentShader=NULL);
@@ -69,6 +70,17 @@ public:
 	const ShaderMan* currentShader(void) const {return this->shader_to_draw;}
 };
 
+/**
+ * @brief describes the order of properties
+ */
+/*
+template<typename Property, typename... Rest>
+bool add_model_property(Model* m, const char* name, Rest... args)
+{
+	m->addProperty(name, std::make_shared<Property>(Rest...));
+	return true;
+}
+*/
 /*
 A draw Obj can have more model to draw. One model can also bind to multiple
 shaders. So you don't really know which to which to which. So maybe next time

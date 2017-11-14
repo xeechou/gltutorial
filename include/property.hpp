@@ -20,7 +20,7 @@ struct mesh_GPU_handle {
 	GLuint VAO;
 	GLuint VBO;
 	GLuint EBO;
-	
+
 	mesh_GPU_handle();
 	~mesh_GPU_handle();
 };
@@ -88,7 +88,7 @@ class Mesh1 : public OBJproperty {
 protected:
 	int init_options;
 	int layout_position, layout_normal, layout_tex;
-	
+
 	int nmeshes;
 	//GPU handles
 	std::vector<mesh_GPU_handle> gpu_handles;
@@ -119,7 +119,7 @@ public:
 };
 
 class Material1 : public OBJproperty {
-	
+
 protected:
 	std::vector<Material> Materials;
 public:
@@ -139,17 +139,35 @@ public:
 		random_instances,
 		square_instances,
 	};
-	
+
 	Instancing(const RSTs& instances);
 	Instancing(const int n, const OPTION opt=OPTION::square_instances,
 		   const glm::vec3 dscale=glm::vec3(1.0f),
 		   const glm::vec3 dtrans=glm::vec3(0.0f),
 		   const glm::quat droate=glm::quat(glm::vec3(0.0f)));
 	virtual ~Instancing() override;
-	//so our instancing doesn't need to have a loading function	
+	//so our instancing doesn't need to have a loading function
 	virtual bool push2GPU(void) override;
 	virtual void draw(const msg_t) override;
 };
 
+
+class Transforming : public OBJproperty {
+private:
+	glm::vec3 translation;
+	glm::quat rotation;
+	glm::vec3 scaling;
+
+public:
+	Transforming(const glm::vec3& t=glm::vec3(0.0),
+		     const glm::vec3& a=glm::vec3(0.0),
+		     const glm::vec3& s=glm::vec3(1.0));
+	glm::mat4 getMVP(void);
+	void transform(const glm::vec3& t,
+		       const glm::vec3& ang=glm::vec3(0.0),
+		       const glm::vec3& s=glm::vec3(0.0));
+	virtual ~Transforming() override {};
+	virtual bool draw(const msg_t) override {};
+};
 
 #endif /* EOF */

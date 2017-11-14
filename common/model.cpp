@@ -40,30 +40,34 @@
 #include <utils.h>
 #include <model.hpp>
 #include <data.hpp>
+//#include <operations.hpp>
 
-/**
- * @brief describes the order of properties
- */
-enum PROPERTYorder {
-	mesh = 0, //load mesh first
+
+enum PROPERTY_T {
+mesh = 0, //load mesh first
 	instancing = 1, //instancing has to draw and push after
 	material = 2,
-	Joints = 3,
-};
+	joints = 3,
+	transform = 4,
+	};
 
-static int
-get_property_order(const std::string& name)
+//The one who uses it should also be const expr, otherwise it wont work
+constexpr int
+get_property_order(const std::string name)
 {
-	if (name == "mesh")
-		return PROPERTYorder::mesh;
-	else if (name == "material")
-		return PROPERTYorder::material;
-	else if (name == "instancing")
-		return PROPERTYorder::instancing;
-	else if (name == "joint")
-		return PROPERTYorder::Joints;
-	return -1;
+if (name == "mesh")
+	return PROPERTY_T::mesh;
+ else if (name == "material")
+	 return PROPERTY_T::material;
+ else if (name == "instancing")
+	 return PROPERTY_T::instancing;
+ else if (name == "joint")
+	 return PROPERTY_T::joints;
+ else if (name == "transform")
+	 return PROPERTY_T::transform;
+return -1;
 }
+
 
 static std::shared_ptr<OBJproperty>
 get_property_by_name(const std::string& name)
@@ -77,10 +81,12 @@ get_property_by_name(const std::string& name)
 		//I don't think you will every call by this
 		RSTs insts;
 		insts.addInstance(glm::vec3(0.0f));
-		property = std::make_shared<Instancing>(insts);		
+		property = std::make_shared<Instancing>(insts);
 	}
 	else if (name == "joint")
 		property = std::make_shared<Skeleton>(3);
+	else if (name == "transform")
+		property = std::make_shared<Transforming>();
 	return property;
 }
 
@@ -102,7 +108,7 @@ Model::readModel(const std::string& file)
 	//import.SetPropertyInteger(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80.0f);
 	import.SetPropertyInteger(AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
 
-	unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bitangents 
+	unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bitangents
 		aiProcess_JoinIdenticalVertices    | // join identical vertices/ optimize indexing
 		aiProcess_ValidateDataStructure    | // perform a full validation of the loader's output
 		aiProcess_ImproveCacheLocality     | // improve the cache locality of the output vertices
@@ -114,11 +120,11 @@ Model::readModel(const std::string& file)
 		aiProcess_LimitBoneWeights         | // limit bone weights to 4 per vertex
 		aiProcess_OptimizeMeshes           | // join small meshes, if possible;
 		aiProcess_SplitByBoneCount         | // split meshes with too many bones. Necessary for our (limited) hardware skinning shader
-		aiProcess_SortByPType              | // sort primitives		
+		aiProcess_SortByPType              | // sort primitives
 		aiProcess_Triangulate              | // split polygons into triangulate
-		aiProcess_FlipUVs                  | // flipUVccordinates 
+		aiProcess_FlipUVs                  | // flipUVccordinates
 		0;
-	
+
 	const aiScene *scene = import.ReadFile(file, ppsteps);
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		throw std::runtime_error(std::string("ERROR::ASSIMP") + import.GetErrorString());\
@@ -176,9 +182,9 @@ Model::drawProperty(const ShaderMan *differentShader)
 void
 Model::load(const std::string &file)
 {
-	this->root_path = file.substr(0, file.find_last_of('/'));	
+	this->root_path = file.substr(0, file.find_last_of('/'));
 	aiScene *scene = this->readModel(file);
-	
+
 	int layout_start = 0;
 	for (auto it = this->properties.begin(); it != this->properties.end(); it++) {
 		auto pair = it->second;

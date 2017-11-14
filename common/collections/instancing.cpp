@@ -26,7 +26,7 @@ Instancing::Instancing(const int n, const OPTION opt,
 		this->rsts.translations.resize(n * n);
 		this->rsts.scales.resize(n * n);
 		this->rsts.rotations.resize(n * n);
-		
+
 		int rows  = n;
 		int cols  = n;
 		int count = 0;
@@ -38,7 +38,7 @@ Instancing::Instancing(const int n, const OPTION opt,
 				count += 1;
 			}
 		}
-		
+
 	}
 	else if (opt == Instancing::OPTION::random_instances) {
 		this->rsts.translations.resize(n);
@@ -53,7 +53,7 @@ Instancing::Instancing(const int n, const OPTION opt,
 			this->rsts.scales[i] = dscale;
 		}
 	}
-	
+
 }
 
 Instancing::~Instancing()
@@ -68,10 +68,10 @@ Instancing::push2GPU(void)
 {
 	if (this->instanceVBO)
 		glDeleteBuffers(1, &this->instanceVBO);
-	
+
 	Mesh1* mesh_handle = (Mesh1*)this->model->searchProperty("mesh");
-	size_t vec4_size = sizeof(glm::vec4);	
-	
+	size_t vec4_size = sizeof(glm::vec4);
+
 	std::vector<glm::vec3>& trs = this->rsts.translations;
 	std::vector<glm::quat>& rts = this->rsts.rotations;
 	std::vector<glm::vec3>& scs = this->rsts.scales;
@@ -80,11 +80,11 @@ Instancing::push2GPU(void)
 	std::vector<glm::mat4> instance_mats(ninstances);
 	for (size_t i = 0; i < instance_mats.size(); i++)
 		instance_mats[i] = glm::translate(trs[i]) * glm::mat4_cast(rts[i]) * glm::scale(scs[i]);
-	
+
 	glGenBuffers(1, &this->instanceVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * instance_mats.size(), &instance_mats[0], GL_STATIC_DRAW);
-	//this is the 
+	//this is the
 	for (uint i = 0; i < mesh_handle->howmanyMeshes(); i++) {
 		mesh_handle->activeIthMesh(i);
 		uint ilayout = this->shader_layouts.first;
