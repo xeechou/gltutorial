@@ -166,8 +166,8 @@ public:
 	void transform(const glm::vec3& t,
 		       const glm::vec3& ang=glm::vec3(0.0),
 		       const glm::vec3& s=glm::vec3(0.0));
-	virtual ~Transforming() override {};
-	virtual bool draw(const msg_t) override {};
+	virtual ~Transforming() override {}
+	virtual void draw(const msg_t) override;
 };
 
 #endif /* EOF */

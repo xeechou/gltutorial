@@ -12,3 +12,11 @@
 #include <shaderman.h>
 
 
+void
+Transforming::draw(const msg_t msg)
+{
+	(void)msg;
+	const ShaderMan *prog = this->getBindedShader();
+	prog->useProgram();
+	glUniform4m();
+}

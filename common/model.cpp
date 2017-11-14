@@ -44,28 +44,28 @@
 
 
 enum PROPERTY_T {
-mesh = 0, //load mesh first
+	mesh = 0, //load mesh first
 	instancing = 1, //instancing has to draw and push after
 	material = 2,
 	joints = 3,
 	transform = 4,
-	};
+};
 
 //The one who uses it should also be const expr, otherwise it wont work
-constexpr int
+int
 get_property_order(const std::string name)
 {
-if (name == "mesh")
-	return PROPERTY_T::mesh;
- else if (name == "material")
-	 return PROPERTY_T::material;
- else if (name == "instancing")
-	 return PROPERTY_T::instancing;
- else if (name == "joint")
-	 return PROPERTY_T::joints;
- else if (name == "transform")
-	 return PROPERTY_T::transform;
-return -1;
+	if (name == "mesh")
+		return PROPERTY_T::mesh;
+	else if (name == "material")
+		return PROPERTY_T::material;
+	else if (name == "instancing")
+		return PROPERTY_T::instancing;
+	else if (name == "joint")
+		return PROPERTY_T::joints;
+	else if (name == "transform")
+		return PROPERTY_T::transform;
+	return -1;
 }
 
 
