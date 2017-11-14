@@ -36,24 +36,20 @@ DrawObj::DrawObj(GLuint shader)
 }
 
 
-
-context::context(void) : context(1000, 1000, "window")
-{}
-
 //problem is, this is the boring code, nobody want to use it
 //you will have to setup your own window callback function
 context::context(int width, int height, const char *winname)
 {
 	_win = NULL;
-       
+
 	if (!glfwInit()) {
 		fprintf(stderr, "Error: glfw init failed!\n");
 		return;
 	}
 	glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // We want OpenGL 3.3, shit
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // We want OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+//	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL
 
 	this->width = width;
@@ -69,11 +65,11 @@ context::context(int width, int height, const char *winname)
 	//time to set userData
 	glfwSetWindowUserPointer(_win, this);
 	glfwSetWindowSizeCallback(_win, context_winSizeChange);
-	
+
 	glfwMakeContextCurrent(_win);
 	//TODO: replace glew with glad
 	glewExperimental = true;
-	
+
 	if (glewInit() != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
 		glfwTerminate();
@@ -160,7 +156,7 @@ context::run()
 			drawobjs[i]->itr_draw();
 		}
 		assert(this->forward_msg_que.empty());
-		glfwPollEvents();		
+		glfwPollEvents();
 		glfwSwapBuffers(_win);
 	} while (glfwGetKey(_win, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		 !glfwWindowShouldClose(_win));

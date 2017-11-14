@@ -8,6 +8,10 @@
 #include <queue>
 #include <utility>
 #include <memory>
+#include <thread>
+#include <functional>
+#include <chrono>
+#include <mutex>
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -29,13 +33,13 @@ class DrawObj;
 class ShaderMan;
 
 /**
- * @brief skeleton class for setup one type of data 
+ * @brief skeleton class for setup one type of data
  *
  * this thing should clean up the drawing process. There are some common
  * paradigms like framebuffers. Only one shader is limited on one DrawObj,
  * because otherwise you dont really know which shader to deal with.
- * 
- * 
+ *
+ *
  * A message system design for this system. Two types of communications need to
  * be done: 1) local communication and 2) broadcasting.  Usually message queue
  * is a dispatching process, each message gets to the disired end when
@@ -47,7 +51,7 @@ class ShaderMan;
  * The other type is the global message system. So you send the message to a
  * global queue. It get cleared out at the end of the iteration, and only one
  * guy can do it.
- * 
+ *
  * Since most times it has one, we could setup here
  */
 class DrawObj {
@@ -86,8 +90,7 @@ protected:
 	std::queue<msg_t> _bcast_msg_que;
 	int width, height;
 public:
-	context(int width, int height, const char *winname);
-	context();
+	context(int width=1000, int height=1000, const char *winname="window");
 	~context();
 	GLFWwindow * getGLFWwindow() {return _win;}
 	void append_drawObj(DrawObj *dobj);
@@ -108,6 +111,17 @@ public:
 	//information at every draw iteration. It should be empty and the end.
 };
 
+
+class ThreadedContext : public context {
+protected:
+	std::shared_ptr<std::thread> timer;
+	int _ms;
+public:
+	ThreadedContext(void);
+	ThreadedContext(unsigned int ms);
+
+
+};
 
 //////inline functions
 //DrawObj
@@ -142,8 +156,8 @@ DrawObj::program() const
 	return this->prog;
 }
 
-//
-
+const context *
+current_context(void);
 
 
 #endif

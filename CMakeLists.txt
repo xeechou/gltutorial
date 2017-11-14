@@ -20,20 +20,22 @@ if (WIN32)
    set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/buildWin")
 else()
    set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/build")
-endif()		
+endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(PkgConfig REQUIRED)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 find_package(glm   REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
-#dlib is purely headerfile, but we need to include the dlib CMakeLists. And include 
+#dlib is purely headerfile, but we need to include the dlib CMakeLists. And include
 find_package(DLIB REQUIRED)
 #find_package(assimp REQUIRED) this doesn't work on windows either
 #find_package(GLFW REQUIRED)

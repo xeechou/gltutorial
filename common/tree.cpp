@@ -11,6 +11,8 @@
 #include <utility>
 #include <sstream>
 #include <cstdio>
+
+#include <types.hpp>
 #include <tree.hpp>
 
 TreeNode::TreeNode(const std::string id, const glm::mat4& m) :
