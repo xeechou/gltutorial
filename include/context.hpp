@@ -12,6 +12,7 @@
 #include <functional>
 #include <chrono>
 #include <mutex>
+#include <condition_variable>
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -80,6 +81,33 @@ public:
 };
 
 
+//don't subclass this
+class Camera {
+private:
+	glm::mat4 camera_mat;
+	glm::vec3 camera_pos;
+	glm::vec3 look_angle;
+
+public:
+	glm::Mat4 pv;
+	enum type {
+		persp = 0,
+		orth  = 1
+	};
+	//good thing is when we do things here, we can update the view matrix very quickly
+	Camera(const glm::vec3& pos, const glm::vec3& lookat,
+	       const float fov, const float aspectRatio,
+	       const float nearplane=1.0, const float farplane=100.0);
+
+	Camera(const glm::vec3& pos, const glm::vec3& lookat,
+	       const float left, const float right, const float bot, const float top,
+	       const float nearplane=1.0, float farplane=100.0);
+	const glm::mat4 pvMat(void) const;
+	//setup the camera motion by
+	//we can also add the input events to camera
+};
+
+
 class context {
 protected:
 	typedef void (*cb_t) (GLuint, void *data);
@@ -89,6 +117,7 @@ protected:
 	std::queue<std::pair<int, msg_t> > forward_msg_que;
 	std::queue<msg_t> _bcast_msg_que;
 	int width, height;
+	Camera cam;
 public:
 	context(int width=1000, int height=1000, const char *winname="window");
 	~context();
@@ -101,6 +130,7 @@ public:
 	void (* itr_pre_cb) (void *data);
 	void (* itr_post_cb) (void *data);
 	//lets test if this shit works
+	glm::mat4 getCameraMat(void) const;
 	void sendMsg(const DrawObj& d, const msg_t msg);
 	const msg_t retriveMsg(const DrawObj& d);
 	const glm::vec2 retriveWinsize() const;
@@ -111,6 +141,28 @@ public:
 	//information at every draw iteration. It should be empty and the end.
 };
 
+
+/*
+template<Derived>
+struct FrameThread {
+	//yep, you need to wait on this
+	std::condition_variable cvar;
+	std::mutex mtx;
+
+	//there should be some
+	void down() { //request a frame
+		{
+			std::lock_quard<std::mutex> lk(mtx);
+			std::static_cast<Derived*>(this)->_down();
+			//then you only uses derived classes, but again, you need to know the derived type at compile at
+			//I think I will go with virtual functions again. Plus you need list or graph for that
+		}
+	}
+	void up(void) {
+
+	}
+};
+*/
 
 class ThreadedContext : public context {
 protected:

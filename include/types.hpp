@@ -115,6 +115,4 @@ struct Vertices {
 typedef glm::u32vec3 face_t;
 typedef std::vector<face_t> Faces;
 
-
-
 #endif /* EOF */

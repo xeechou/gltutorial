@@ -162,3 +162,14 @@ context::run()
 		 !glfwWindowShouldClose(_win));
 	return 0;
 }
+
+
+Camera::Camera(const glm::vec3& pos, const glm::vec3& lookat,
+	       const float fov, const float aspectRatio, const float nearplane, const float farplane)
+{
+	//this sucks...
+	this->camera_pos = pos;
+	this->look_angle = 
+}
+
+

@@ -151,18 +151,19 @@ public:
 	virtual void draw(const msg_t) override;
 };
 
-
+//this class is a little confusing, since you wont actually upload model matrix,
+//you will need a camera class as well
 class Transforming : public OBJproperty {
 private:
-	glm::vec3 translation;
+	glm::vec4 translation;
 	glm::quat rotation;
-	glm::vec3 scaling;
-
+	glm::vec4 scaling;
+	glm::mat4 modelMat;
 public:
 	Transforming(const glm::vec3& t=glm::vec3(0.0),
 		     const glm::vec3& a=glm::vec3(0.0),
 		     const glm::vec3& s=glm::vec3(1.0));
-	glm::mat4 getMVP(void);
+	glm::mat4 getMMat(void);
 	void transform(const glm::vec3& t,
 		       const glm::vec3& ang=glm::vec3(0.0),
 		       const glm::vec3& s=glm::vec3(0.0));
