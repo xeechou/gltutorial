@@ -7,7 +7,7 @@ include_directories(
 
 add_library(common STATIC
   utils.cpp
-  tree.cpp  
+  tree.cpp
   controls.cpp
   shaderman.cpp
   framebuffer.cpp
@@ -15,13 +15,12 @@ add_library(common STATIC
   data.cpp
   #model loaders,
   model.cpp
-#  mesh.cpp
-#  bone.cpp
   geometry.cpp
   collections/mesh.cpp
   collections/material.cpp
   collections/instancing.cpp
   collections/bone.cpp
+  collections/transforming.cpp
   )
 
 target_link_libraries(common

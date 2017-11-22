@@ -74,14 +74,6 @@ public:
  * @brief describes the order of properties
  */
 /*
-template<typename Property, typename... Rest>
-bool add_model_property(Model* m, const char* name, Rest... args)
-{
-	m->addProperty(name, std::make_shared<Property>(Rest...));
-	return true;
-}
-*/
-/*
 A draw Obj can have more model to draw. One model can also bind to multiple
 shaders. So you don't really know which to which to which. So maybe next time
 

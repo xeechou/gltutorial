@@ -68,6 +68,18 @@ get_property_order(const std::string name)
 	return -1;
 }
 
+//I hope oneday I can just call this, but, you cannot return a type,
+//template<const ENUM... but anyway it is ugly>typename... args>
+//constexpr get_property_by_name(model, name, param...) {
+//}
+/*
+  template<typename Property, typename... Rest>
+  bool add_model_property(Model* m, const char* name, Rest... args)
+  {
+  m->addProperty(name, std::make_shared<Property>(Rest...));
+  return true;
+  }
+*/
 
 static std::shared_ptr<OBJproperty>
 get_property_by_name(const std::string& name)

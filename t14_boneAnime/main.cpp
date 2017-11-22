@@ -55,13 +55,14 @@ private:
 	std::string file;
 	glm::vec3 lightdir;
 	ShaderMan shader_program;
+	std::shared_ptr<Camera> camera;
 public:
 	staticOBJ(void);
 	//make it static, call before init_setup
 	//Don't delete it.
 	void addModel(std::shared_ptr<Model> model, std::string toload="");
 	void setLight(glm::vec3 origin);
-	
+
 	int init_setup(void) override;
 	int itr_setup(void) override;
 	int itr_draw(void) override;
@@ -75,13 +76,14 @@ int main(int argc, char **argv)
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 
 	std::shared_ptr<Model> small_guy = std::make_shared<Model>();
-	small_guy->addProperty("mesh", std::make_shared<Mesh1>());
-	small_guy->addProperty("material", std::make_shared<Material1>());
+	small_guy->addProperty("mesh");
+	small_guy->addProperty("material");
 	//for 5, it will be okay to use our asset, 4 is okay, I guess it is
 	//because people like to fit it to two matrix, but nah I'm gonna pass
 	small_guy->addProperty("joint", std::make_shared<Skeleton>(4));
+	small_guy->addProperty("transform", std::make_shared<Transforming>(40,0,0));
 	staticOBJ model;
-	
+
 	model.addModel(small_guy, std::string(argv[1]));
 	model.setLight(glm::vec3(0, 100, 0));
 	cont.append_drawObj(&model);
@@ -125,8 +127,7 @@ staticOBJ::init_setup()
 		this->drawobj->load(this->file);
 		this->drawobj->push2GPU();
 	}
-	
-		
+	this->camera = std::make_shared<Camera>(this->ctxt, glm::vec3(4.0, 3.0, 0), glm::radians(90.0f));
 	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
 	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
 	GLuint lightDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
@@ -151,9 +152,10 @@ staticOBJ::itr_setup()
 	glm::mat4 m = glm::mat4(1.0f);
 	glm::mat4 v = unity_like_get_camera_mat();
 	glm::mat4 p = glm::perspective(glm::radians(90.0f), (float)wh[0] / (float)wh[1],
-				       0.1f, 100.0f);
-	glm::mat4 mvp = p * v * m;
-	//uniforms
+							 0.1f, 100.0f);
+	glm::mat4 mpv = this->camera->pvMat() *
+		(Transforming *)(this->drawobj->searchProperty("transform") )->getMMat();
+	//	glm::mat4 mvp = p * v * m;
 	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &mvp[0][0]);
 	return 0;
 }
@@ -166,6 +168,7 @@ staticOBJ::itr_draw()
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+
 //	glBindTexture(GL_TEXTURE2D, 0);
 	//now we can draw
 	this->drawobj->drawProperty();

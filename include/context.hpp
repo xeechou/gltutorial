@@ -56,6 +56,8 @@ class ShaderMan;
  * Since most times it has one, we could setup here
  */
 class DrawObj {
+	//It will be really nice if drawobj can be added through something like
+	//scripting or graphic interface
 protected:
 	int pos_in_context;
 	GLuint prog;
@@ -81,30 +83,24 @@ public:
 };
 
 
-//don't subclass this
 class Camera {
+	//it should be called in one of the drawobjs, that calls this.
 private:
-	glm::mat4 camera_mat;
 	glm::vec3 camera_pos;
-	glm::vec3 look_angle;
-
+	glm::vec3 look_axies; //axis-angle representation.
+	const context *ctxt;
+	//when fov is 0, means we are using the ortho camera
+	float fov, np,fp;
 public:
-	glm::Mat4 pv;
-	enum type {
-		persp = 0,
-		orth  = 1
-	};
-	//good thing is when we do things here, we can update the view matrix very quickly
-	Camera(const glm::vec3& pos, const glm::vec3& lookat,
-	       const float fov, const float aspectRatio,
+	glm::mat4 pv;
+	Camera(const context *ctxt,
+	       const glm::vec3& pos, const glm::vec3& lookat, const float fov,
 	       const float nearplane=1.0, const float farplane=100.0);
-
-	Camera(const glm::vec3& pos, const glm::vec3& lookat,
-	       const float left, const float right, const float bot, const float top,
-	       const float nearplane=1.0, float farplane=100.0);
+	Camera(const context *ctxt,
+	       const glm::vec3& pos, const glm::vec3& lookat,
+	       const float nearplane=1.0, const float farplane=100.0);
+	//
 	const glm::mat4 pvMat(void) const;
-	//setup the camera motion by
-	//we can also add the input events to camera
 };
 
 
@@ -117,7 +113,6 @@ protected:
 	std::queue<std::pair<int, msg_t> > forward_msg_que;
 	std::queue<msg_t> _bcast_msg_que;
 	int width, height;
-	Camera cam;
 public:
 	context(int width=1000, int height=1000, const char *winname="window");
 	~context();
@@ -134,12 +129,15 @@ public:
 	void sendMsg(const DrawObj& d, const msg_t msg);
 	const msg_t retriveMsg(const DrawObj& d);
 	const glm::vec2 retriveWinsize() const;
+	const float getWidth(void) const;
+	const float getHeight(void) const;
 	//friend declarations
 	friend void context_winSizeChange(GLFWwindow *win, int width, int height);
 	//solution to eliminate the setTexShader, getTexShader calls: message
 	//queue. Basically I need a local message queue that send and retrieve
 	//information at every draw iteration. It should be empty and the end.
 };
+
 
 
 /*
@@ -210,6 +208,17 @@ DrawObj::program() const
 
 const context *
 current_context(void);
+
+inline const float
+context::getWidth(void) const
+{
+	return this->width;
+}
+inline const float
+context::getHeight(void) const
+{
+	return this->height;
+}
 
 
 #endif

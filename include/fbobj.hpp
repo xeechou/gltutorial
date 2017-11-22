@@ -15,8 +15,9 @@ public:
 	~FBobject(void);
 	void reffbo(void);
 	void unreffbo();
-	
+
 };
+
 
 
 

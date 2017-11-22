@@ -21,11 +21,19 @@
 #include <shaderman.h>
 #include <operations.hpp>
 
-Transforming::Transforming(const glm::vec3& t, const glm::vec3& a, const glm::vec3& s, const std::string uniform_name) :
+Transforming::Transforming(const glm::vec3& t, const glm::vec3& a, const glm::vec3& s) :
 	translation(t), rotation(a), scaling(s)
 {
-	this->uniform = uniform_name;
 }
+Transforming::Transforming(float pitch, float yall, float roll)
+{
+	this->translation = glm::vec3(0.0);
+	this->rotation = glm::vec3(pitch, yall, roll);
+	this->scaling = glm::vec3(1.0);
+}
+
+
+
 
 glm::mat4
 Transforming::getMMat()
@@ -47,6 +55,12 @@ Transforming::transform(const glm::vec3& t,
 }
 
 void
+Transforming::rotate(float pitch, float yall, float roll)
+{
+	this->rotation += glm::vec3(pitch, yall, roll);
+}
+/*
+void
 Transforming::draw(const msg_t msg)
 {
 	(void)msg;
@@ -56,3 +70,4 @@ Transforming::draw(const msg_t msg)
 						 this->uniform.c_str()),
 			    1, GL_FALSE, &this->modelMat[0][0]);
 }
+*/

@@ -20,9 +20,9 @@ cstr_eq(const char *lhs, const char *rhs)
 //write as much c++11 code as possible
 
 static inline glm::mat4
-trs2mat4(const glm::vec& t, const glm::quat& r, const glm::vec3& s)
+trs2mat4(const glm::vec3& t, const glm::quat& r, const glm::vec3& s)
 {
-	return glm::translate(t) * r.toMat4() * glm::scale(s);
+	return glm::translate(t) * glm::mat4_cast(r) * glm::scale(s);
 }
 
 

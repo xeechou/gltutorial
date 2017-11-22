@@ -164,12 +164,41 @@ context::run()
 }
 
 
-Camera::Camera(const glm::vec3& pos, const glm::vec3& lookat,
-	       const float fov, const float aspectRatio, const float nearplane, const float farplane)
+Camera::Camera(const context* c,
+	       const glm::vec3& pos, const glm::vec3& lookat,
+	       const float fov,
+	       const float nearplane, const float farplane)
 {
-	//this sucks...
+	this->ctxt = c;
 	this->camera_pos = pos;
-	this->look_angle = 
+	this->look_axies = pos - lookat;
+	this->fov = fov;
+	this->np = nearplane;
+	this->fp = farplane;
+
 }
 
+Camera::Camera(const context *ctxt,
+	       const glm::vec3& pos, const glm::vec3& lookat,
+	       const float nearplane, const float farplane)
+{
+	this->camera_pos = pos;
+	this->look_axies = pos - lookat;
+	this->fov = 0.0;
+	this->np = nearplane;
+	this->fp = farplane;
+}
 
+const glm::mat4
+Camera::pvMat(void) const
+{
+	glm::mat4 pmat, vmat;
+	float width = this->ctxt->getWidth();
+	float height = this->ctxt->getHeight();
+	if (this->fov != 0.0)
+		pmat = glm::perspective(this->fov, width/height, this->np, this->fp);
+	else
+		pmat = glm::ortho(0.0f, width, height, 0.0f, this->np, this->fp);
+	vmat = glm::lookAt(this->camera_pos, this->camera_pos + this->look_axies, glm::vec3(0,1,0));
+	return pmat * vmat;
+}

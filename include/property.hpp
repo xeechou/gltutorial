@@ -159,19 +159,19 @@ private:
 	glm::vec3 rotation; //pitch, yaw, roll euler angles
 	glm::vec3 scaling;
 	glm::mat4 modelMat;
-	std::string uniform;
-
 public:
 	Transforming(const glm::vec3& t=glm::vec3(0.0),
 		     const glm::vec3& a=glm::vec3(0.0),
-		     const glm::vec3& s=glm::vec3(1.0),
-		     const std::string uniform_name=UNIFORM_MVP);
+		     const glm::vec3& s=glm::vec3(1.0));
+	Transforming(float pitch, float yall, float roll);
 	glm::mat4 getMMat(void);
 	void transform(const glm::vec3& t,
 		       const glm::vec3& ang=glm::vec3(0.0),
 		       const glm::vec3& s=glm::vec3(0.0));
+	void rotate(float pitch, float yall, float roll);
+
 	virtual ~Transforming() override {}
-	virtual void draw(const msg_t) override;
+	//	virtual void draw(const msg_t) override;
 };
 
 #endif /* EOF */

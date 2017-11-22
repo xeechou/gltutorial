@@ -7,7 +7,7 @@ layout (location = 2) in vec2 texCoords;
 layout (location = 3) in vec2 bw0;
 layout (location = 4) in vec2 bw1;
 layout (location = 5) in vec2 bw2;
-layout (location = 6) in vec3 bw3;
+layout (location = 6) in vec2 bw3;
 
 out vec2 TexCoords;
 out vec3 fragPos;
@@ -19,16 +19,30 @@ out vec3 Normal;
 const int maxNbone = 100;
 uniform mat4 MVP;
 uniform mat4 model;
-uniform mat4 boneMat[maxNbone];
+uniform mat4 bone_array[maxNbone];
 
 void main(void)
 {
-	//it is still very simple
-	gl_Position = MVP * vec4(position, 1.0);
-	Normal = normal;
-	fragPos = vec3(model * vec4(position, 1.0f));
+	vec4 v = vec4(position, 1.0);
+	vec4 n = vec4(normal, 1.0);
+	vec4 newVertex;
+	vec4 newNormal;
+
+	//updating vertex
+	newVertex = (v * bone_array[bw0.x]) * bw0.y +
+		    (v * bone_array[bw1.x]) * bw1.y +
+		    (v * bone_array[bw2.x]) * bw2.y +
+		    (v * bone_array[bw3.x]) * bw3.y;
+	//updating normal
+	newNormal = (n * bone_array[bw0.x]) * bw0.y +
+		    (n * bone_array[bw1.x]) * bw1.y +
+		    (n * bone_array[bw2.x]) * bw2.y +
+		    (n * bone_array[bw3.x]) * bw3.y;
+
+	gl_Position = MVP * newVertex;
+	Normal = newNormal;
+	fragPos = vec3(model * newVertex);
 	TexCoords = texCoords;
 }
 
 )"
-
