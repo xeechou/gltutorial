@@ -4,6 +4,7 @@ set(DLIB_INCLUDE_DIR /usr/local/include)
 SET(DLIB_LibrarySearchPaths
   /usr/local/lib
   /usr/lib
+  "$ENV{MINGW_PREFIX}/lib"
   )
 
 find_path(DLIB_SUBDIR dlib/CMakeLists.txt

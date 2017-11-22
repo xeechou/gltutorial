@@ -11,6 +11,17 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+//define global variables, some of them is not force to use, others are this are
+//optional names, definitely not called directly in any code, users always have
+//the privilege to use other names
+#define UNIFORM_MVP  "mvp"
+#define UNIFORM_BONE_ARR "bone_array"
+#define UNIFORM_TEX_DIFFUSE "defuse_map"
+#define UNIFORM_TEX_SPECULAR "specular_map"
+#define UNIFORM_TEX_SHADOW_MAP  "shadow_map"
+#define UNIFORM_TEX_CUBEMAP  "cube_map"
+
+
 //define uint now
 typedef unsigned int uint;
 
@@ -23,7 +34,7 @@ enum TEX_TYPE {
 	TEX_Normal=2,
 	TEX_Ambient=3,
 	TEX_NASSIMP_TYPE=4, //it doesnt support cubemap, we need write a specific loadCubeMap function
-	TEX_NTexType=5,	
+	TEX_NTexType=5,
 	TEX_CubeMap=6,
 
 };

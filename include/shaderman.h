@@ -24,14 +24,6 @@
 #include "types.hpp"
 
 
-//define global variables, some of them is not force to use, others are this are
-//optional names, definitely not called directly in any code, users always have
-//the privilege to use other names
-#define UNIFORM_BONE_ARR "bone_array"
-#define UNIFORM_TEX_DIFFUSE "defuse_map"
-#define UNIFORM_TEX_SPECULAR "specular_map"
-#define UNIFORM_TEX_SHADOW_MAP  "shadow_map"
-#define UNIFORM_TEX_CUBEMAP  "cube_map"
 
 //now it becomes the second place where we use the
 //it will be nice if we can provide a string template and then use the string directly in the initializer

@@ -155,14 +155,17 @@ public:
 //you will need a camera class as well
 class Transforming : public OBJproperty {
 private:
-	glm::vec4 translation;
-	glm::quat rotation;
-	glm::vec4 scaling;
+	glm::vec3 translation;
+	glm::vec3 rotation; //pitch, yaw, roll euler angles
+	glm::vec3 scaling;
 	glm::mat4 modelMat;
+	std::string uniform;
+
 public:
 	Transforming(const glm::vec3& t=glm::vec3(0.0),
 		     const glm::vec3& a=glm::vec3(0.0),
-		     const glm::vec3& s=glm::vec3(1.0));
+		     const glm::vec3& s=glm::vec3(1.0),
+		     const std::string uniform_name=UNIFORM_MVP);
 	glm::mat4 getMMat(void);
 	void transform(const glm::vec3& t,
 		       const glm::vec3& ang=glm::vec3(0.0),
