@@ -29,18 +29,18 @@ void main(void)
 	vec4 newNormal;
 
 	//updating vertex
-	newVertex = (v * bone_array[bw0.x]) * bw0.y +
-		    (v * bone_array[bw1.x]) * bw1.y +
-		    (v * bone_array[bw2.x]) * bw2.y +
-		    (v * bone_array[bw3.x]) * bw3.y;
+	newVertex = (v * bone_array[int(bw0.x)]) * bw0.y +
+		    (v * bone_array[int(bw1.x)]) * bw1.y +
+		    (v * bone_array[int(bw2.x)]) * bw2.y +
+		    (v * bone_array[int(bw3.x)]) * bw3.y;
 	//updating normal
-	newNormal = (n * bone_array[bw0.x]) * bw0.y +
-		    (n * bone_array[bw1.x]) * bw1.y +
-		    (n * bone_array[bw2.x]) * bw2.y +
-		    (n * bone_array[bw3.x]) * bw3.y;
+	newNormal = (n * bone_array[int(bw0.x)]) * bw0.y +
+		    (n * bone_array[int(bw1.x)]) * bw1.y +
+		    (n * bone_array[int(bw2.x)]) * bw2.y +
+		    (n * bone_array[int(bw3.x)]) * bw3.y;
 
 	gl_Position = MVP * newVertex;
-	Normal = newNormal;
+	Normal = vec3(newNormal);
 	fragPos = vec3(model * newVertex);
 	TexCoords = texCoords;
 }

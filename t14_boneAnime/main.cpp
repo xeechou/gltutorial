@@ -127,7 +127,7 @@ staticOBJ::init_setup()
 		this->drawobj->load(this->file);
 		this->drawobj->push2GPU();
 	}
-	this->camera = std::make_shared<Camera>(this->ctxt, glm::vec3(4.0, 3.0, 0), glm::radians(90.0f));
+	this->camera = std::make_shared<Camera>(this->ctxt, glm::radians(90.0f),  glm::vec3(4.0, 3.0, 0), glm::vec3(0.0));
 	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
 	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
 	GLuint lightDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
@@ -153,8 +153,8 @@ staticOBJ::itr_setup()
 	glm::mat4 v = unity_like_get_camera_mat();
 	glm::mat4 p = glm::perspective(glm::radians(90.0f), (float)wh[0] / (float)wh[1],
 							 0.1f, 100.0f);
-	glm::mat4 mpv = this->camera->pvMat() *
-		(Transforming *)(this->drawobj->searchProperty("transform") )->getMMat();
+	glm::mat4 mvp = this->camera->pvMat() *
+		((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
 	//	glm::mat4 mvp = p * v * m;
 	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &mvp[0][0]);
 	return 0;

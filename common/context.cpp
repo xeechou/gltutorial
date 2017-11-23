@@ -164,9 +164,8 @@ context::run()
 }
 
 
-Camera::Camera(const context* c,
+Camera::Camera(const context* c, const float fov,
 	       const glm::vec3& pos, const glm::vec3& lookat,
-	       const float fov,
 	       const float nearplane, const float farplane)
 {
 	this->ctxt = c;
