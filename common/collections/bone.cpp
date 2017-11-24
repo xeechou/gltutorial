@@ -35,7 +35,7 @@ assembleWeights(cv::Mat& weights, cv::Mat& indx)
 		for( int j = 0;  j < boneWeights.cols; j++)
 			boneWeights(i,j) = cv::Vec2f((float)indx.at<int>(i,j), weights.at<float>(i,j));
 	}
-	//I can use 
+	//I can use
 	return boneWeights;
 }
 
@@ -61,10 +61,10 @@ Bone::Bone(const Bone&& bone)
 	this->_index = bone._index;
 }
 
-//there is nothing else you can do, but give this 
+//there is nothing else you can do, but give this
 Bone::Bone(void) : TreeNode("", glm::mat4(1.0f))
 {
-	
+
 }
 Bone::~Bone()
 {
@@ -93,14 +93,14 @@ Skeleton::~Skeleton()
 bool
 Skeleton::load(const aiScene *scene)
 {
- 	mb_weights.resize(scene->mNumMeshes);
+	mb_weights.resize(scene->mNumMeshes);
 	mb_indices.resize(scene->mNumMeshes);
 	for (uint i = 0; i < scene->mNumMeshes; i++) {
 		const aiMesh *mesh = scene->mMeshes[i];
 		//initialize this first
 		this->mb_weights[i] = cv::Mat_<float>::zeros(mesh->mNumVertices, this->shader_layouts.second);
 		this->mb_indices[i] = cv::Mat_<int>::zeros(mesh->mNumVertices, this->shader_layouts.second);
-		
+
 		for (uint j = 0; j < mesh->mNumBones; j++) {
 			const std::string bone_name = std::string(mesh->mBones[j]->mName.C_Str());
 			aiBone *aibone = mesh->mBones[j];
@@ -117,7 +117,9 @@ Skeleton::load(const aiScene *scene)
 	this->buildHierachy(scene, findRootBone(scene));
 //	std::cerr << this->root_bone->layout() << std::endl;
 	this->cascade_transforms.resize(this->bones.size());
-	//TODO now we do the intial transform	
+	//a fake transform, which does nothing at all
+	std::fill(this->cascade_transforms.begin(), this->cascade_transforms.end(), glm::mat4(1.0f));
+	//TODO now we do the intial transform
 	return true;
 }
 
@@ -141,7 +143,7 @@ static void assert_weight(cv::Mat& weights)
 		if (sum != 1.0f)
 			std::cout << weights.row(i) << '\t';
 	}
-			
+
 }
 */
 
@@ -175,8 +177,8 @@ Skeleton::push2GPU()
 		this->mb_indices.clear();
 	}
 //	const ShaderMan *sm = this->getBindedShader();
-	
-	
+
+
 	return true;
 }
 
@@ -279,7 +281,7 @@ Skeleton::draw(const msg_t msg)
 {
 	//if animation is applied here, we should update the local bone
 	//transformations. But before that, let's just load the uniforms
-	(void)msg;	
+	(void)msg;
 	const ShaderMan *sm = this->getBindedShader();
 	sm->useProgram();
 	//you should flash the boneweights

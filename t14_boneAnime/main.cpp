@@ -155,6 +155,7 @@ staticOBJ::itr_setup()
 							 0.1f, 100.0f);
 	glm::mat4 mvp = this->camera->pvMat() *
 		((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
+	std::cout << glm::to_string(mvp) << std::endl;
 	//	glm::mat4 mvp = p * v * m;
 	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &mvp[0][0]);
 	return 0;
