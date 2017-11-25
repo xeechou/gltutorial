@@ -117,7 +117,8 @@ Skeleton::load(const aiScene *scene)
 	this->buildHierachy(scene, findRootBone(scene));
 //	std::cerr << this->root_bone->layout() << std::endl;
 	this->cascade_transforms.resize(this->bones.size());
-	//TODO now we do the intial transform	
+	std::fill(cascade_transforms.begin(), cascade_transforms.end(), glm::mat4(1.0));
+	
 	return true;
 }
 
@@ -176,6 +177,7 @@ Skeleton::push2GPU()
 	}
 //	const ShaderMan *sm = this->getBindedShader();
 	
+
 	
 	return true;
 }
@@ -282,8 +284,9 @@ Skeleton::draw(const msg_t msg)
 	(void)msg;	
 	const ShaderMan *sm = this->getBindedShader();
 	sm->useProgram();
-	//you should flash the boneweights
-	glUniformMatrix4fv(sm->getUniform(uniform_bone), this->bones.size(), GL_FALSE, (GLfloat *)&this->cascade_transforms[0]);
-
-
+	//sm->getUniform is -1
+	glUniformMatrix4fv(glGetUniformLocation(sm->getPid(), this->uniform_bone.c_str()),
+			   this->bones.size() * sizeof(glm::mat4),
+			   GL_FALSE,
+			   (GLfloat *)&this->cascade_transforms[0]);
 }

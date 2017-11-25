@@ -234,6 +234,10 @@ Mesh1::draw(const msg_t arg)
 	(void)arg;
 	Material1 *material = (Material1*)this->model->searchProperty(std::string("material"));
 	Instancing *instancing = (Instancing *)this->model->searchProperty("instancing");
+	//TODO: it should be okay
+	Skeleton *bones = (Skeleton *)this->model->searchProperty("joint");
+	if (bones) //which is just uploading the uniforms
+		bones->draw(arg);
 
 	for (uint i = 0; i < this->gpu_handles.size(); i++) {
 		if (material)

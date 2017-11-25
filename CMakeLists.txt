@@ -14,7 +14,7 @@ endif()
 
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -g -fPIC")
+set(CMAKE_CXX_FLAGS "-std=c++14 -Wall -g -fPIC")
 #last time I check, the target_compile_options only add additional options, it doesn't override everything, so I am good
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${PROJECT_SOURCE_DIR}/cmake")
 if (WIN32)

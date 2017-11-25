@@ -62,6 +62,15 @@ ShaderMan::addTextureUniform(const std::string name, const TEX_TYPE type)
 	return true;
 }
 
+/*
+bool
+ShaderMan::addUniform(const std::string name, size_t nelem, size_t narr)
+{
+	glUseProgram(this->pid);
+	GLuint loc = glGetUniformLocation(this->pid, name.c_str());
+}
+*/
+
 GLint
 ShaderMan::getUniform(const std::string name) const
 {

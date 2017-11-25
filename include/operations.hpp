@@ -1,6 +1,7 @@
 #ifndef OPERATIONS_HPP
 #define OPERATIONS_HPP
 
+#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -25,5 +26,21 @@ trs2mat4(const glm::vec3& t, const glm::quat& r, const glm::vec3& s)
 	return glm::translate(t) * glm::mat4_cast(r) * glm::scale(s);
 }
 
+
+static inline void
+print_glmMat4(const glm::mat4& mat)
+{
+	for (int i = 0; i < 4; i++)
+		std::cout << glm::to_string(glm::row(mat,i)) << std::endl;
+	std::cout << std::endl;
+}
+
+static inline void
+print_glmMat3(const glm::mat3& mat)
+{
+	for (int i = 0; i < 3; i++)
+		std::cout << glm::to_string(glm::row(mat,i)) << std::endl;
+	std::cout << std::endl;
+}
 
 #endif

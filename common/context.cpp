@@ -16,6 +16,7 @@
 
 #include <context.hpp>
 #include <shaderman.h>
+#include <operations.hpp>
 
 void
 context_winSizeChange(GLFWwindow *win, int width, int height)
@@ -195,9 +196,11 @@ Camera::pvMat(void) const
 	float width = this->ctxt->getWidth();
 	float height = this->ctxt->getHeight();
 	if (this->fov != 0.0)
-		pmat = glm::perspective(this->fov, width/height, this->np, this->fp);
+		pmat = glm::perspective(glm::radians(this->fov), width/height, this->np, this->fp);
 	else
 		pmat = glm::ortho(0.0f, width, height, 0.0f, this->np, this->fp);
 	vmat = glm::lookAt(this->camera_pos, this->camera_pos + this->look_axies, glm::vec3(0,1,0));
+//	print_glmMat4(vmat);
+//	print_glmMat4(pmat);
 	return pmat * vmat;
 }
