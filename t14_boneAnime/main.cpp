@@ -149,15 +149,17 @@ int
 staticOBJ::itr_setup()
 {
 	glm::vec2 wh = this->ctxt->retriveWinsize();
-	glm::mat4 m = glm::mat4(1.0f);
-	glm::mat4 v = unity_like_get_camera_mat();
-	glm::mat4 p = glm::perspective(glm::radians(90.0f), (float)wh[0] / (float)wh[1],
-							 0.1f, 100.0f);
+//	glm::mat4 m = glm::mat4(1.0f);
+//	glm::mat4 v = unity_like_get_camera_mat();
+//	glm::mat4 p = glm::perspective(glm::radians(90.0f), (float)wh[0] / (float)wh[1],
+//							 0.1f, 100.0f);
+	glm::mat4 m = ((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
 	glm::mat4 mvp = this->camera->pvMat() *
 		((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
 	std::cout << glm::to_string(mvp) << std::endl;
 	//	glm::mat4 mvp = p * v * m;
-	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &mvp[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &m[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(this->prog, "model"), 1, GL_FALSE, &m[0][0]);
 	return 0;
 }
 

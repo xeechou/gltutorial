@@ -39,7 +39,8 @@ void main(void)
 		    (n * bone_array[int(bw2.x)]) * bw2.y +
 		    (n * bone_array[int(bw3.x)]) * bw3.y;
 
-	gl_Position = MVP * newVertex;
+//	gl_Position = MVP * newVertex;
+	gl_Position = newVertex;
 	Normal = vec3(newNormal);
 	fragPos = vec3(model * newVertex);
 	TexCoords = texCoords;
