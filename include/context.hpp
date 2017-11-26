@@ -95,11 +95,11 @@ public:
 	glm::mat4 pv;
 	Camera(const context *ctxt, const float fov,
 	       const glm::vec3& pos, const glm::vec3& lookat,
-	       const float nearplane=1.0, const float farplane=100.0);
+	       const float nearplane=0.1, const float farplane=100.0);
 
 	Camera(const context *ctxt,
 	       const glm::vec3& pos, const glm::vec3& lookat,
-	       const float nearplane=1.0, const float farplane=100.0);
+	       const float nearplane=0.1, const float farplane=100.0);
 	//
 	const glm::mat4 pvMat(void) const;
 };

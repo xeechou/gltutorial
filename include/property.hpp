@@ -32,14 +32,12 @@ protected:
 	//some of the property has access to GPU, the second is the span
 	std::pair<int, int> shader_layouts;
 	//the span is determined by the subclasses, you have to write it yourself
-	int drawpoint;
 	const Model* model;
 
 public:
 	OBJproperty()  {
 		this->shader_layouts.first = 0;
 		this->shader_layouts.second = 0;
-		this->drawpoint = false;
 	}
 	virtual ~OBJproperty() {}
 	//return success or not
@@ -53,7 +51,6 @@ public:
 	//of them, in that case. It occupies a band of
 	void alloc_shader_layout(unsigned int start_point);
 	int getLayoutsEnd(void);
-	bool isdrawPoint();
 	const ShaderMan* getBindedShader(void);
 };
 
@@ -73,12 +70,6 @@ inline int
 OBJproperty::getLayoutsEnd(void)
 {
 	return this->shader_layouts.first + this->shader_layouts.second;
-}
-
-inline bool
-OBJproperty::isdrawPoint(void)
-{
-	return this->drawpoint;
 }
 
 

@@ -16,6 +16,7 @@
 
 #include <context.hpp>
 #include <shaderman.h>
+#include <operations.hpp>
 
 void
 context_winSizeChange(GLFWwindow *win, int width, int height)
@@ -132,8 +133,6 @@ context::init(void)
 		glUseProgram(drawobjs[i]->program());
 		drawobjs[i]->init_setup();
 	}
-	//clean the queue, it should be clean actually
-
 	assert(this->forward_msg_que.empty());
 //	decltype(this->_forward_msg_que) swap_queue;
 //	std::swap(this->_forward_msg_que, swap_queue);
@@ -170,7 +169,7 @@ Camera::Camera(const context* c, const float fov,
 {
 	this->ctxt = c;
 	this->camera_pos = pos;
-	this->look_axies = pos - lookat;
+	this->look_axies = lookat -pos;
 	this->fov = fov;
 	this->np = nearplane;
 	this->fp = farplane;
@@ -182,7 +181,7 @@ Camera::Camera(const context *ctxt,
 	       const float nearplane, const float farplane)
 {
 	this->camera_pos = pos;
-	this->look_axies = pos - lookat;
+	this->look_axies = lookat - pos;
 	this->fov = 0.0;
 	this->np = nearplane;
 	this->fp = farplane;
@@ -195,9 +194,11 @@ Camera::pvMat(void) const
 	float width = this->ctxt->getWidth();
 	float height = this->ctxt->getHeight();
 	if (this->fov != 0.0)
-		pmat = glm::perspective(this->fov, width/height, this->np, this->fp);
+		pmat = glm::perspective(glm::radians(this->fov), width/height, this->np, this->fp);
 	else
 		pmat = glm::ortho(0.0f, width, height, 0.0f, this->np, this->fp);
 	vmat = glm::lookAt(this->camera_pos, this->camera_pos + this->look_axies, glm::vec3(0,1,0));
+//	print_glmMat4(vmat);
+//	print_glmMat4(pmat);
 	return pmat * vmat;
 }

@@ -176,9 +176,6 @@ Skeleton::push2GPU()
 		this->mb_weights.clear();
 		this->mb_indices.clear();
 	}
-//	const ShaderMan *sm = this->getBindedShader();
-
-
 	return true;
 }
 
@@ -279,13 +276,12 @@ Skeleton::buildHierachy(const aiScene *scene, const aiNode *root_node)
 void
 Skeleton::draw(const msg_t msg)
 {
-	//if animation is applied here, we should update the local bone
-	//transformations. But before that, let's just load the uniforms
-	(void)msg;
 	const ShaderMan *sm = this->getBindedShader();
 	sm->useProgram();
-	//you should flash the boneweights
-	glUniformMatrix4fv(sm->getUniform(uniform_bone), this->bones.size(), GL_FALSE, (GLfloat *)&this->cascade_transforms[0]);
-
-
+	glUniformMatrix4fv(glGetUniformLocation(sm->getPid(), this->uniform_bone.c_str()),
+			   this->bones.size() * sizeof(glm::mat4),
+			   GL_FALSE,
+			   (GLfloat *)&this->cascade_transforms[0]);
+	//now we can draw all the meshes
+	static_cast<Mesh1*>(this->model->searchProperty("mesh"))->draw(msg);
 }

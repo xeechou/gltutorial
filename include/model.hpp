@@ -43,7 +43,8 @@ protected:
 	//
 	std::string root_path;
 	const ShaderMan *shader_to_draw;
-	std::shared_ptr<OBJproperty> drawproperty;
+	std::pair<int, std::shared_ptr<OBJproperty> > draw_point;
+
 	std::map<uint, std::pair<std::string, std::shared_ptr<OBJproperty> > > properties;
 
 public:

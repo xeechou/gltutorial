@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <tuple>
 #include <types.hpp>
@@ -45,13 +44,12 @@ Mesh1::layout_count(void)
 		layout_span += 1;
 	}
 	this->shader_layouts.second=layout_span;
-	
+
 }
 
 
 Mesh1::Mesh1(int option)
 {
-	this->drawpoint=true;
 	this->init_options = option;
 	layout_count();
 }
@@ -60,19 +58,18 @@ Mesh1::Mesh1(int option)
 Mesh1::Mesh1(const float *vertx, const float *norms, const float *uvs, const int nnodes,
 	     const float *indices, const int nfaces)
 {
-	this->drawpoint = true;
 	this->init_options = OPTION::LOAD_NORM | OPTION::LOAD_TEX;
-	
+
 	const int size_vn = 3;
 	const int size_uv = 2;
-	
+
 	this->meshes_vertices.resize(1);
 	this->meshes_faces.resize(1);
 	std::vector<glm::vec3> &poses   = this->meshes_vertices[0].Positions;
 	std::vector<glm::vec3> &normals = this->meshes_vertices[0].Normals;
 	std::vector<glm::vec2> &texuvs  = this->meshes_vertices[0].TexCoords;
 	Faces &faces = this->meshes_faces[0];
-	
+
 	poses.resize(nnodes);
 	normals.resize(nnodes);
 	texuvs.resize(nnodes);
@@ -89,7 +86,7 @@ Mesh1::Mesh1(const float *vertx, const float *norms, const float *uvs, const int
 		faces.resize(nfaces);
 		std::copy(indices, indices + nfaces *3, indx.begin());
 	} else {
-		nnfaces = nnodes /3;		
+		nnfaces = nnodes /3;
 		faces.resize(nnfaces);
 		int n = {0};
 		indx.resize(nnodes);
@@ -98,7 +95,7 @@ Mesh1::Mesh1(const float *vertx, const float *norms, const float *uvs, const int
 	for (uint i = 0; i < nnfaces; i++)
 		faces[i] = glm::u32vec3(indx[3*i], indx[3*i+1], indx[3*i+2]);
 	layout_count();
-	
+
 }
 
 
@@ -114,7 +111,7 @@ Mesh1::load(const aiScene *scene)
 	this->meshes_vertices.resize(scene->mNumMeshes);
 	this->material_indices.resize(scene->mNumMeshes);
 	this->meshes_faces.resize(scene->mNumMeshes);
-	
+
 	for (size_t j = 0; j < scene->mNumMeshes; j++) {
 		aiMesh *mesh = scene->mMeshes[j];
 		this->material_indices[j] = (int)mesh->mMaterialIndex;
@@ -123,7 +120,7 @@ Mesh1::load(const aiScene *scene)
 		std::vector<glm::vec3> &norms = this->meshes_vertices[j].Normals;
 		std::vector<glm::vec2> &texuvs= this->meshes_vertices[j].TexCoords;
 		Faces  &faces =  this->meshes_faces[j];
-		
+
 		poses.resize(mesh->mNumVertices);
 		if (this->init_options & OPTION::LOAD_NORM) {
 			norms.resize(mesh->mNumVertices);
@@ -139,7 +136,7 @@ Mesh1::load(const aiScene *scene)
 			//and we need cancel the span
 			this->shader_layouts.second--;
 		}
-	
+
 		for (GLuint i = 0; i < mesh->mNumVertices; i++) {
 			poses[i] = glm::vec3(mesh->mVertices[i].x,
 					     mesh->mVertices[i].y,
@@ -174,19 +171,19 @@ Mesh1::push2GPU()
 	if (this->shader_layouts.second > 2)
 		this->layout_tex = this->shader_layouts.first + 2;
 
-	
+
 	this->gpu_handles.resize(this->meshes_vertices.size());
 	int stride = sizeof(glm::vec3) +
 		((this->init_options & OPTION::LOAD_NORM) ? sizeof(glm::vec3) : 0) +
 		((this->init_options & OPTION::LOAD_TEX) ? sizeof(glm::vec2) : 0);
-	
+
 	for (size_t j = 0; j < this->gpu_handles.size(); j++) {
 		mesh_GPU_handle &handle = this->gpu_handles[j];
 		std::vector<glm::vec3> &poses = this->meshes_vertices[j].Positions;
 		std::vector<glm::vec3> &norms = this->meshes_vertices[j].Normals;
 		std::vector<glm::vec2> &texuvs= this->meshes_vertices[j].TexCoords;
 		Faces  &faces =  this->meshes_faces[j];
-		
+
 		glGenVertexArrays(1, &handle.VAO);
 		glGenBuffers(1, &handle.VBO);
 		glGenBuffers(1, &handle.EBO);
@@ -201,13 +198,13 @@ Mesh1::push2GPU()
 		glBindBuffer(GL_ARRAY_BUFFER, handle.VBO);
 		glBufferData(GL_ARRAY_BUFFER, poses.size() * stride,
 			     NULL, GL_STATIC_DRAW);
-		
+
 		size_t offset = 0;
 		glBufferSubData(GL_ARRAY_BUFFER, offset, poses.size() * sizeof(glm::vec3), &poses[0]);
 		glEnableVertexAttribArray(this->layout_position);
 		glVertexAttribPointer(this->layout_position, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid *)offset);
 		offset += poses.size() * sizeof(glm::vec3);
-		
+
 		if (this->init_options & OPTION::LOAD_NORM) {
 			glBufferSubData(GL_ARRAY_BUFFER, offset, norms.size() * sizeof(glm::vec3), &norms[0]);
 			//okay, I am confused, do I need to call this like all the time?
@@ -238,7 +235,7 @@ Mesh1::draw(const msg_t arg)
 	for (uint i = 0; i < this->gpu_handles.size(); i++) {
 		if (material)
 			material->draw( msg_t((uint32_t)this->material_indices[i]) );
-		
+
 		mesh_GPU_handle &handle = this->gpu_handles[i];
 		Faces& faces = this->meshes_faces[i];
 		glBindVertexArray(handle.VAO);
@@ -270,7 +267,7 @@ Mesh1::howmanyMeshes() const
 std::tuple<Vertices*, size_t *, Faces *>
 Mesh1::select_mesh(size_t i)
 {
-	
+
 }
 
 */

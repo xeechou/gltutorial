@@ -127,7 +127,7 @@ staticOBJ::init_setup()
 		this->drawobj->load(this->file);
 		this->drawobj->push2GPU();
 	}
-	this->camera = std::make_shared<Camera>(this->ctxt, glm::radians(90.0f),  glm::vec3(4.0, 3.0, 0), glm::vec3(0.0));
+	this->camera = std::make_shared<Camera>(this->ctxt, 90.0f,  glm::vec3(4, 3.0, 3.0), glm::vec3(0.0));
 	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
 	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
 	GLuint lightDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
@@ -138,8 +138,6 @@ staticOBJ::init_setup()
 	glUniform1f(lightSpecularLoc, 0.5f);
 	glUniform3f(lightposLoc, 0,100,3);
 	//now setup the texture
-	//okay, forget about the texture, they are done by bindTexture
-	//also, we need to bind the texture to uniforms
 	this->shader_program.addTextureUniform("diffuse", TEX_Diffuse);
 	glUniform3f(glGetUniformLocation(this->prog, "viewPos"), 4.0,3.0,3.0);
 	return 0;
@@ -149,16 +147,18 @@ int
 staticOBJ::itr_setup()
 {
 	glm::vec2 wh = this->ctxt->retriveWinsize();
+
 //	glm::mat4 m = glm::mat4(1.0f);
 //	glm::mat4 v = unity_like_get_camera_mat();
 //	glm::mat4 p = glm::perspective(glm::radians(90.0f), (float)wh[0] / (float)wh[1],
 //							 0.1f, 100.0f);
 	glm::mat4 m = ((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
+	//the pvMat is correct, but I still don't know why the I still cannot draw anything
 	glm::mat4 mvp = this->camera->pvMat() *
 		((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
-	std::cout << glm::to_string(mvp) << std::endl;
-	//	glm::mat4 mvp = p * v * m;
-	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &m[0][0]);
+//	std::cout << glm::to_string(mvp) << std::endl;
+	// glm::mat4 mvp = p * v * m;
+	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &mvp[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(this->prog, "model"), 1, GL_FALSE, &m[0][0]);
 	return 0;
 }

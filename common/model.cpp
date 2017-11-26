@@ -51,9 +51,14 @@ enum PROPERTY_T {
 	transform = 4,
 };
 
+enum DRAW_PROPERTY_T {
+	Dmesh = 0,
+	Djoints = 1,
+};
+
 //The one who uses it should also be const expr, otherwise it wont work
-int
-get_property_order(const std::string name)
+static int
+get_property_order(const std::string& name)
 {
 	if (name == "mesh")
 		return PROPERTY_T::mesh;
@@ -65,6 +70,15 @@ get_property_order(const std::string name)
 		return PROPERTY_T::joints;
 	else if (name == "transform")
 		return PROPERTY_T::transform;
+	return -1;
+}
+static int
+get_drawproperty_order(const std::string& name)
+{
+	if (name == "mesh")
+		return DRAW_PROPERTY_T::Dmesh;
+	else if (name == "joint")
+		return DRAW_PROPERTY_T::Djoints;
 	return -1;
 }
 
@@ -104,7 +118,7 @@ get_property_by_name(const std::string& name)
 
 Model::Model()
 {
-	this->drawproperty = nullptr;
+	this->draw_point = std::make_pair(-1, nullptr);
 }
 
 Model::~Model()
@@ -165,10 +179,8 @@ Model::addProperty(const std::string &name, std::shared_ptr<OBJproperty> data)
 		data = get_property_by_name(name);
 	this->properties[order] = std::make_pair(name, data);
 	data->bindModel(this);
-	if (data->isdrawPoint()) {
-		assert(this->drawproperty == nullptr);
-		this->drawproperty = data;
-	}
+	if (get_drawproperty_order(name) > this->draw_point.first)
+		this->draw_point = std::make_pair(-1, data);
 	return true;
 }
 
@@ -187,7 +199,7 @@ Model::drawProperty(const ShaderMan *differentShader)
 	const ShaderMan *origin_shader = this->shader_to_draw;
 	if (differentShader)
 		this->bindShader(differentShader);
-	this->drawproperty->draw(msg_t());
+	this->draw_point.second->draw(msg_t());
 	this->bindShader(origin_shader);
 }
 
