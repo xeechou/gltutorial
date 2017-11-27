@@ -46,14 +46,6 @@ Bone::Bone(int indx, const std::string id, const glm::mat4& m) :
 	//we are setting up the stacked transform later
 }
 
-Bone::Bone(const Bone& bone) : TreeNode(bone.id, bone._offsetMat)
-{
-	//we cannot assume it has other code
-	_offsetMat = bone._offsetMat;
-	_index = bone._index;
-	id = bone.id;
-}
-
 Bone::Bone(const Bone&& bone)
 {
 	this->id = bone.id;
@@ -278,8 +270,11 @@ Skeleton::draw(const msg_t msg)
 {
 	const ShaderMan *sm = this->getBindedShader();
 	sm->useProgram();
+	//now we need to change the bone array.
+
+	//causes crashing, why?
 	glUniformMatrix4fv(glGetUniformLocation(sm->getPid(), this->uniform_bone.c_str()),
-			   this->bones.size() * sizeof(glm::mat4),
+			   this->cascade_transforms.size() * sizeof(this->cascade_transforms[0]),
 			   GL_FALSE,
 			   (GLfloat *)&this->cascade_transforms[0]);
 	//now we can draw all the meshes

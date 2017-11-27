@@ -18,17 +18,25 @@
 TreeNode::TreeNode(const std::string id, const glm::mat4& m) :
 	_model_mat(m)
 {
-	if (id == "")
-		this->id = "accun Nom";
-	else
-		this->id = id;
+	this->id = id;
 	this->parent = NULL;
 	this->children.clear();
+	this->flushed = false;
+}
+
+TreeNode::TreeNode(void)
+{
+	std::cout << "called superclass constructor" << std::endl;
+	this->id = "";
+	this->parent = NULL;
+	this->children.clear();
+	this->_model_mat = glm::mat4(1.0f);
+	this->flushed = false;
 }
 
 TreeNode::~TreeNode()
 {
-	std::cerr << "called tree descturctor" << std::endl;
+//	std::cerr << "called tree descturctor" << std::endl;
 	//delete all its children. Since we don't use share_ptr here
 //	for (uint i = 0; i< this->children.size(); i++)
 //		delete this->children[i];
@@ -38,7 +46,7 @@ TreeNode::~TreeNode()
 std::string TreeNode::layout() const
 {
 	typedef std::pair<int, const TreeNode *> indent_node_t;
-	
+
 	std::stringstream ss;
 	std::stack<indent_node_t> nodes;
 	nodes.push(std::make_pair(0, this));
@@ -48,7 +56,7 @@ std::string TreeNode::layout() const
 		ss << std::string(indent, ' ');
 		ss << node->name() << std::endl;
 		nodes.pop();
-//		std::printf("this is the indent I have: %d\n", indent +2);
+
 		for (unsigned int i = 0; i < node->children.size(); i++)
 			nodes.push(std::make_pair(indent + 2, node->children[i]));
 	}
@@ -66,12 +74,20 @@ void
 TreeNode::setModelMat(const glm::mat4& model)
 {
 	_model_mat = model;
+	this->flushed = false;
 }
 
 const glm::mat4
-TreeNode::getStackedTransformMat() const
+TreeNode::getStackedTransformMat()
 {
-	return this->_cascade_transform;
+	if (!parent) {
+		this->flushed = true;
+		return this->_model_mat;
+	} else {
+		this->flushed = true;
+		return this->parent->getStackedTransformMat() * _cascade_transform;
+	}
+
 }
 
 void
@@ -87,7 +103,7 @@ TreeNode::setStackedTransformMat()
 void
 TreeNode::flushTransformations()
 {
-	//there should be something 
+	//there should be something
 	glm::mat4 parent_ctrans=glm::mat4(1.0);
 	if (parent)
 		parent_ctrans = parent->getStackedTransformMat();

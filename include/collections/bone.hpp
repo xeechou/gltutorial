@@ -16,14 +16,14 @@
 
 //I think this is fair
 class Bone : public TreeNode {
-	///matrix that transfer the vertices from mesh(world) space to bone space.
+	//the finally should be all stacked transform * _offsetMat
+	///matrix that transfer the vertices from model space to bone space.
 	glm::mat4 _offsetMat;
 	//the index of the bone
 	int _index;
 	glm::mat4 _invTransform;
 public:
 	Bone(int indx, const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
-	Bone(const Bone& bone);
 	Bone(const Bone&& bone);
 	Bone(void);
 	~Bone(void);
