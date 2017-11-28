@@ -35,22 +35,27 @@ assembleWeights(cv::Mat& weights, cv::Mat& indx)
 		for( int j = 0;  j < boneWeights.cols; j++)
 			boneWeights(i,j) = cv::Vec2f((float)indx.at<int>(i,j), weights.at<float>(i,j));
 	}
-	//I can use
 	return boneWeights;
 }
 
 
-Bone::Bone(int indx, const std::string id, const glm::mat4& m) :
-	TreeNode(id), _offsetMat(m), _index(indx)
+Bone::Bone(const std::string id, const glm::mat4& m) :
+	TreeNode(id), _offsetMat(m)
 {
 	//we are setting up the stacked transform later
+}
+
+Bone::Bone(const Bone& bone)
+{
+	this->id = bone.id;
+	this->_offsetMat = bone._offsetMat;
 }
 
 Bone::Bone(const Bone&& bone)
 {
 	this->id = bone.id;
 	this->_offsetMat = bone._offsetMat;
-	this->_index = bone._index;
+//	this->_index = bone._index;
 }
 
 //there is nothing else you can do, but give this
@@ -58,6 +63,7 @@ Bone::Bone(void) : TreeNode("", glm::mat4(1.0f))
 {
 
 }
+
 Bone::~Bone()
 {
 }
@@ -96,12 +102,17 @@ Skeleton::load(const aiScene *scene)
 		for (uint j = 0; j < mesh->mNumBones; j++) {
 			const std::string bone_name = std::string(mesh->mBones[j]->mName.C_Str());
 			aiBone *aibone = mesh->mBones[j];
-			if (this->bones.find(bone_name) == this->bones.end()) {
-//				std::cerr << bone_name << std::endl;
-				this->bones.insert(std::make_pair(bone_name,
-								  Bone(this->bones.size(), bone_name, aiMat2glmMat(aibone->mOffsetMatrix))
-							   ));
+			if (this->bone_names.find(bone_name) == this->bone_names.end()) {
+				this->bone_names[bone_name] = this->bones.size();
+				this->bones.emplace_back(Bone(bone_name, aiMat2glmMat(aibone->mOffsetMatrix)));
+
 			}
+//			if (this->bones.find(bone_name) == this->bones.end()) {
+//				std::cerr << bone_name << std::endl;
+//				this->bones.insert(std::make_pair(bone_name,
+//								  Bone(this->bones.size(), bone_name, aiMat2glmMat(aibone->mOffsetMatrix))
+//							   ));
+//			}
 			this->loadBoneWeights(scene, i, j);
 		}
 	}
@@ -189,10 +200,9 @@ Skeleton::loadBoneWeights(const aiScene *s, int meshi, int bonej)
 	cv::Mat_<int>& indices = this->mb_indices[meshi];
 	aiMesh *mesh = s->mMeshes[meshi];
 	aiBone *bone = mesh->mBones[bonej];
-	std::string bone_name = std::string(bone->mName.C_Str());
 	//find the correct id of that bone
-	auto it = this->bones.find(bone_name);
-	int j  = it->second.getInd();
+	std::string bone_name(bone->mName.data);
+	int j  = this->bone_names[bone_name];
 	for (uint i = 0; i < bone->mNumWeights; i++) {
 		uint vid = bone->mWeights[i].mVertexId;
 		float w  = bone->mWeights[i].mWeight;
@@ -221,8 +231,8 @@ Skeleton::findRootBone(const aiScene *scene) const
 		aiNode *current = node_queue.front();
 		node_queue.pop();
 		std::string potential_bone = current->mName.C_Str();
-		const auto itr = this->bones.find(potential_bone);
-		if (itr != this->bones.end()) {
+		const auto itr = this->bone_names.find(potential_bone);
+		if (itr != this->bone_names.end()) {
 			return current;
 		}
 		for (uint i = 0; i < current->mNumChildren; i++) {
@@ -232,32 +242,28 @@ Skeleton::findRootBone(const aiScene *scene) const
 	return NULL;
 }
 
+//this is safe only because we insert all the bones before calling this function
 void
 Skeleton::buildHierachy(const aiScene *scene, const aiNode *root_node)
 {
 	std::queue<const aiNode *> fifo_nodes;
-	this->root_bone = &this->bones[root_node->mName.data];
+	this->root_bone = &this->bones[this->bone_names[root_node->mName.data]];
 	fifo_nodes.push(root_node);
 	while (!fifo_nodes.empty()) {
 		const aiNode *node = fifo_nodes.front();
 		fifo_nodes.pop();
 		std::string name = node->mName.data;
 		std::string parent_name = node->mParent->mName.data;
-		Bone& thisbone = bones[name];
+		Bone& thisbone = this->bones[bone_names[name]];
 		thisbone._model_mat = aiMat2glmMat(node->mTransformation);
 		//setup the parent first
-		if (this->bones.find(parent_name) != this->bones.end()) {
-			thisbone.parent = &this->bones[parent_name];
-			thisbone._cascade_transform *= thisbone.parent->_cascade_transform;
-		} else {
-			thisbone.parent = NULL;
-			thisbone._cascade_transform = thisbone._model_mat;
-		}
+		thisbone.parent = (this->bone_names.find(parent_name) != this->bone_names.end()) ?
+			&this->bones[this->bone_names[parent_name]] : NULL;
 		//now the children
 		for (uint i = 0; i < node->mNumChildren; i++) {
 			std::string childname = node->mChildren[i]->mName.data;
-			if (this->bones.find(childname) != this->bones.end()) {
-				thisbone.children.push_back(&this->bones[childname]);
+			if (this->bone_names.find(childname) != this->bone_names.end()) {
+				thisbone.children.push_back(&this->bones[this->bone_names[childname]]);
 				fifo_nodes.push(node->mChildren[i]);
 			}
 		}
@@ -269,8 +275,10 @@ void
 Skeleton::draw(const msg_t msg)
 {
 	const ShaderMan *sm = this->getBindedShader();
+	for (uint i = 0; i < this->bones.size(); i++) {
+		this->cascade_transforms[i] = this->bones[i].getStackedTransformMat() * this->bones[i].offsetMat();
+	}
 	sm->useProgram();
-	//now we need to change the bone array.
 
 	//causes crashing, why?
 	glUniformMatrix4fv(glGetUniformLocation(sm->getPid(), this->uniform_bone.c_str()),

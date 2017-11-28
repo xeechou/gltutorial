@@ -20,16 +20,18 @@ class Bone : public TreeNode {
 	///matrix that transfer the vertices from model space to bone space.
 	glm::mat4 _offsetMat;
 	//the index of the bone
-	int _index;
+//	int _index;
 	glm::mat4 _invTransform;
 public:
-	Bone(int indx, const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
+	Bone(const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
+	Bone(const Bone& bone);
 	Bone(const Bone&& bone);
 	Bone(void);
 	~Bone(void);
-	int getInd() const {return _index;}
-	void setInd(int ind) {_index = ind;}
+//	int getInd() const {return _index;}
+//	void setInd(int ind) {_index = ind;}
 	void setStackedTransformMat() override;
+	const glm::mat4 offsetMat() const {return this->_offsetMat;}
 };
 
 class Skeleton : public OBJproperty {
@@ -37,7 +39,10 @@ class Skeleton : public OBJproperty {
 protected:
 	//in the end, we end up with the same structure of previous one
 	std::string uniform_bone;
-	std::map<std::string, Bone> bones;
+	//just for the sake of convience
+	std::map<std::string, int> bone_names;
+	std::vector<Bone> bones;
+	//this is the GPU data
 	std::vector<glm::mat4> cascade_transforms;
 	const Bone *root_bone;
 	//in the mean time, we should also keep the a sparseMatrix of the bone weights

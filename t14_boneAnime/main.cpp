@@ -68,6 +68,7 @@ public:
 	int itr_draw(void) override;
 };
 
+
 int main(int argc, char **argv)
 {
 	context cont(width, height, "window");
@@ -75,13 +76,17 @@ int main(int argc, char **argv)
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 
+	float angle[3] = {-20.0f, 0.0f, 0.0f};
+	if (argc > 2)
+		sscanf(argv[2], "%f,%f,%f", &angle[0], &angle[1], &angle[2]);
 	std::shared_ptr<Model> small_guy = std::make_shared<Model>();
 	small_guy->addProperty("mesh");
 	small_guy->addProperty("material");
 	//for 5, it will be okay to use our asset, 4 is okay, I guess it is
 	//because people like to fit it to two matrix, but nah I'm gonna pass
 	small_guy->addProperty("joint", std::make_shared<Skeleton>(4));
-	small_guy->addProperty("transform", std::make_shared<Transforming>(40,0,0));
+	small_guy->addProperty("transform",
+			       std::make_shared<Transforming>(angle[0], angle[1], angle[2]));
 	staticOBJ model;
 
 	model.addModel(small_guy, std::string(argv[1]));
@@ -127,7 +132,7 @@ staticOBJ::init_setup()
 		this->drawobj->load(this->file);
 		this->drawobj->push2GPU();
 	}
-	this->camera = std::make_shared<Camera>(this->ctxt, 90.0f,  glm::vec3(4, 3.0, 3.0), glm::vec3(0.0));
+	this->camera = std::make_shared<Camera>(this->ctxt, 90.0f,  glm::vec3(0, 2.0, 20.0), glm::vec3(0.0));
 	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
 	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
 	GLuint lightDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
@@ -136,10 +141,10 @@ staticOBJ::init_setup()
 	glUniform1f(lightAmbientLoc, 0.3f);
 	glUniform1f(lightDiffuseLoc, 0.5f);
 	glUniform1f(lightSpecularLoc, 0.5f);
-	glUniform3f(lightposLoc, 0,100,3);
+	glUniform3f(lightposLoc, 0,2,20);
 	//now setup the texture
 	this->shader_program.addTextureUniform("diffuse", TEX_Diffuse);
-	glUniform3f(glGetUniformLocation(this->prog, "viewPos"), 4.0,3.0,3.0);
+	glUniform3f(glGetUniformLocation(this->prog, "viewPos"), 0.0,2.0,20.0);
 	return 0;
 }
 
