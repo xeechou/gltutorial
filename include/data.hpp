@@ -8,6 +8,9 @@ extern float CUBEVERTS[108];
 extern float CUBENORMS[108];
 extern float CUBETEXS[72];
 
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -18,9 +21,9 @@ static inline const aiMatrix4x4
 glmMat2aiMat(const glm::mat4& mat)
 {
      return aiMatrix4x4(mat[0][0],mat[0][1],mat[0][2],mat[0][3],
-                        mat[1][0],mat[1][1],mat[1][2],mat[1][3],
-                        mat[2][0],mat[2][1],mat[2][2],mat[2][3],
-                        mat[3][0],mat[3][1],mat[3][2],mat[3][3]);	
+			mat[1][0],mat[1][1],mat[1][2],mat[1][3],
+			mat[2][0],mat[2][1],mat[2][2],mat[2][3],
+			mat[3][0],mat[3][1],mat[3][2],mat[3][3]);
 }
 
 static inline const glm::mat4
@@ -46,10 +49,30 @@ aiMat2glmMat(const aiMatrix4x4& in_mat)
      tmp[1][3] = in_mat.b4;
      tmp[2][3] = in_mat.c4;
      tmp[3][3] = in_mat.d4;
-     return tmp;	
+     return tmp;
 }
-	
 
-//extern float 
+template<typename T>
+Eigen::Matrix<T, 4, 4>
+glmMat2EigenMat(const glm::tmat4x4<T>& mat)
+{
+	Eigen::Matrix<T,4,4> ret;
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			ret(i,j) = mat[i][j];
+	return ret;
+}
+
+template<typename T>
+glm::tmat4x4<T>
+Eigen2glmMat(const Eigen::Matrix<T,4,4>& mat)
+{
+	glm::tmat4x4<T> ret;
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			ret[i][j] = mat(i,j);
+	return ret;
+}
+//extern float
 
 #endif

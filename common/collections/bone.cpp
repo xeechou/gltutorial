@@ -120,9 +120,18 @@ Skeleton::load(const aiScene *scene)
 	this->buildHierachy(scene, findRootBone(scene));
 //	std::cerr << this->root_bone->layout() << std::endl;
 	this->cascade_transforms.resize(this->bones.size());
-	//a fake transform, which does nothing at all
-	std::fill(this->cascade_transforms.begin(), this->cascade_transforms.end(), glm::mat4(1.0f));
-	//TODO now we do the intial transform
+	//debug, if the layout is correct
+	std::cout << this->root_bone->layout() << std::endl;
+	//now we are trying to get the first transform
+	//just for the debug
+	std::fstream fs;
+	Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+	fs.open("/tmp/debug_tree_mat", std::ios::out);
+	for (uint i = 0; i < this->bones.size(); i++) {
+		this->cascade_transforms[i] = this->bones[i].getStackedTransformMat() * this->bones[i].offsetMat();
+		fs << this->bones[i].id << std::endl;
+		fs << glmMat2EigenMat(this->bones[i]._model_mat).format(CleanFmt) << "\n_________________________\n";
+	}
 	return true;
 }
 
@@ -280,9 +289,8 @@ Skeleton::draw(const msg_t msg)
 	}
 	sm->useProgram();
 
-	//causes crashing, why?
 	glUniformMatrix4fv(glGetUniformLocation(sm->getPid(), this->uniform_bone.c_str()),
-			   this->cascade_transforms.size() * sizeof(this->cascade_transforms[0]),
+			   this->cascade_transforms.size(), //should be number of matrices
 			   GL_FALSE,
 			   (GLfloat *)&this->cascade_transforms[0]);
 	//now we can draw all the meshes
