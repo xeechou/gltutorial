@@ -16,22 +16,17 @@
 
 //I think this is fair
 class Bone : public TreeNode {
-	//the finally should be all stacked transform * _offsetMat
-	///matrix that transfer the vertices from model space to bone space.
-	glm::mat4 _offsetMat;
-	//the index of the bone
-//	int _index;
+	glm::mat4 _origin_mod; //initial pos
 	glm::mat4 _invTransform;
+	glm::mat4 _offset;
+	RST trans;
 public:
-	Bone(const std::string id = "", const glm::mat4& m = glm::mat4(1.0f));
-	Bone(const Bone& bone);
+	Bone(const std::string id, const glm::mat4& offset, const glm::mat4& m = glm::mat4(1.0f));
 	Bone(const Bone&& bone);
-	Bone(void);
 	~Bone(void);
-//	int getInd() const {return _index;}
-//	void setInd(int ind) {_index = ind;}
-	void setStackedTransformMat() override;
-	const glm::mat4 offsetMat() const {return this->_offsetMat;}
+	glm::mat4 updateInversTransform();
+	glm::mat4 getInversTransform(void) const;
+	glm::mat4 getoffset(void) const;
 };
 
 class Skeleton : public OBJproperty {
@@ -58,8 +53,8 @@ public:
 	virtual ~Skeleton() override;
 	virtual bool load(const aiScene *scene) override;
 	virtual bool push2GPU(void) override;
-//	virtual bool uploadUniform(const ShaderMan* sm) override;
 	virtual void draw(const msg_t) override;
+	//we need a way to debug it.
 };
 
 #endif

@@ -78,36 +78,28 @@ TreeNode::setModelMat(const glm::mat4& model)
 }
 
 const glm::mat4
-TreeNode::getStackedTransformMat()
+TreeNode::updateStackedTransformMat()
 {
-	if (!parent) {
-		this->flushed = true;
-		return this->_model_mat;
-	} else {
-		this->flushed = true;
-		return this->parent->getStackedTransformMat() * _cascade_transform;
-	}
-
+	this->flushed = true;
+	if (!parent)
+		this->_cascade_transform = _model_mat;
+	else if (parent->flushed)
+		this->_cascade_transform = parent->_cascade_transform * _model_mat;
+	else
+		this->_cascade_transform = parent->updateStackedTransformMat() * _model_mat;
+	return this->_cascade_transform;
 }
 
-void
-TreeNode::setStackedTransformMat()
-{
-	if (!this->parent)
-		this->_cascade_transform = this->_model_mat;
-	else {
-		this->_cascade_transform = this->_model_mat * this->parent->getStackedTransformMat();
-	}
-}
-
+/*
 void
 TreeNode::flushTransformations()
 {
 	//there should be something
 	glm::mat4 parent_ctrans=glm::mat4(1.0);
 	if (parent)
-		parent_ctrans = parent->getStackedTransformMat();
+		parent_ctrans = parent->updateStackedTransformMat();
 	this->_cascade_transform = parent_ctrans * this->_model_mat;
 	for (uint i = 0; i < this->children.size(); i++)
 		children[i]->flushTransformations();
 }
+*/

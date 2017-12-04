@@ -89,15 +89,24 @@ typedef union msg_t {
 //Other more specific types
 typedef std::set<double> timestamps_t;
 
+struct RST {
+	glm::vec3 t;
+	glm::quat r;
+	glm::vec3 s;
+};
+
+
 struct RSTs {
 	std::vector<glm::vec3> translations;
 	std::vector<glm::quat> rotations;
 	std::vector<glm::vec3> scales;
+	//I don't remember why I implemented this way...
 
 	void addInstance(const glm::vec3 p,
 			 const glm::quat r=glm::quat(glm::vec3(0.0)),
 			 const glm::vec3 s=glm::vec3(1.0f));
 };
+
 
 inline void
 RSTs::addInstance(const glm::vec3 p, const glm::quat r, const glm::vec3 s)

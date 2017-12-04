@@ -30,15 +30,14 @@ public:
 	/**
 	 * @brief accumlate the transformation matrix from its accenster, setModelMat has to call first
 	 */
-	const glm::mat4 getStackedTransformMat();
+	const glm::mat4 updateStackedTransformMat();
 	/**
 	 * @brief set the cascade transformation and its inverse for the this node. It will prove useful
 	 */
-	virtual void setStackedTransformMat();
 	/**
 	 * @brief flush the transformation from this nodes and all its descedens
 	 */
-	void flushTransformations();
+//	void flushTransformations();
 	std::string layout() const;
 };
 

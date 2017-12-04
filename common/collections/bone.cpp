@@ -39,42 +39,42 @@ assembleWeights(cv::Mat& weights, cv::Mat& indx)
 }
 
 
-Bone::Bone(const std::string id, const glm::mat4& m) :
-	TreeNode(id), _offsetMat(m)
+Bone::Bone(const std::string id, const glm::mat4& offset, const glm::mat4& model_mat) :
+	TreeNode(id), _offset(offset)
 {
-	//we are setting up the stacked transform later
-}
-
-Bone::Bone(const Bone& bone)
-{
-	this->id = bone.id;
-	this->_offsetMat = bone._offsetMat;
+	_model_mat = model_mat;
 }
 
 Bone::Bone(const Bone&& bone)
 {
 	this->id = bone.id;
-	this->_offsetMat = bone._offsetMat;
-//	this->_index = bone._index;
-}
-
-//there is nothing else you can do, but give this
-Bone::Bone(void) : TreeNode("", glm::mat4(1.0f))
-{
-
+	this->_offset = bone._offset;
+	this->_model_mat = bone._model_mat;
 }
 
 Bone::~Bone()
 {
 }
 
-void
-Bone::setStackedTransformMat()
+glm::mat4
+Bone::getoffset() const
 {
-	TreeNode::setStackedTransformMat();
-	this->_invTransform = glm::inverse(this->_cascade_transform);
+	return this->_offset;
 }
 
+glm::mat4
+Bone::updateInversTransform()
+{
+
+	this->_invTransform =  glm::inverse(this->updateStackedTransformMat());
+	return this->_invTransform;
+}
+
+glm::mat4
+Bone::getInversTransform() const
+{
+	return this->_invTransform;
+}
 
 Skeleton::Skeleton(uint weights, const std::string& uniform_name)
 {
@@ -102,36 +102,29 @@ Skeleton::load(const aiScene *scene)
 		for (uint j = 0; j < mesh->mNumBones; j++) {
 			const std::string bone_name = std::string(mesh->mBones[j]->mName.C_Str());
 			aiBone *aibone = mesh->mBones[j];
+//			std::cout << glm::to_string(aiMat2glmMat(aibone->mOffsetMatrix)) << std::endl;
 			if (this->bone_names.find(bone_name) == this->bone_names.end()) {
 				this->bone_names[bone_name] = this->bones.size();
-				this->bones.emplace_back(Bone(bone_name, aiMat2glmMat(aibone->mOffsetMatrix)));
+				this->bones.emplace_back( std::move(Bone(bone_name, aiMat2glmMat(aibone->mOffsetMatrix))) );
 
 			}
-//			if (this->bones.find(bone_name) == this->bones.end()) {
-//				std::cerr << bone_name << std::endl;
-//				this->bones.insert(std::make_pair(bone_name,
-//								  Bone(this->bones.size(), bone_name, aiMat2glmMat(aibone->mOffsetMatrix))
-//							   ));
-//			}
 			this->loadBoneWeights(scene, i, j);
 		}
 	}
 	//all right, since I loaded up all the meshes
 	this->buildHierachy(scene, findRootBone(scene));
-//	std::cerr << this->root_bone->layout() << std::endl;
 	this->cascade_transforms.resize(this->bones.size());
-	//debug, if the layout is correct
 	std::cout << this->root_bone->layout() << std::endl;
 	//now we are trying to get the first transform
 	//just for the debug
-	std::fstream fs;
-	Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-	fs.open("/tmp/debug_tree_mat", std::ios::out);
-	for (uint i = 0; i < this->bones.size(); i++) {
-		this->cascade_transforms[i] = this->bones[i].getStackedTransformMat() * this->bones[i].offsetMat();
-		fs << this->bones[i].id << std::endl;
-		fs << glmMat2EigenMat(this->bones[i]._model_mat).format(CleanFmt) << "\n_________________________\n";
-	}
+//	std::fstream fs;
+//	Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+//	fs.open("/tmp/debug_tree_mat", std::ios::out);
+//	for (uint i = 0; i < this->bones.size(); i++) {
+//		this->cascade_transforms[i] = this->bones[i].updateStackedTransformMat() * this->bones[i].offsetMat();
+//		fs << this->bones[i].id << std::endl;
+//		fs << glmMat2EigenMat(this->bones[i]._model_mat).format(CleanFmt) << "\n_________________________\n";
+//	}
 	return true;
 }
 
@@ -249,6 +242,7 @@ Skeleton::findRootBone(const aiScene *scene) const
 		}
 	}
 	return NULL;
+
 }
 
 //this is safe only because we insert all the bones before calling this function
@@ -265,7 +259,8 @@ Skeleton::buildHierachy(const aiScene *scene, const aiNode *root_node)
 		std::string parent_name = node->mParent->mName.data;
 		Bone& thisbone = this->bones[bone_names[name]];
 		thisbone._model_mat = aiMat2glmMat(node->mTransformation);
-		//setup the parent first
+		thisbone.updateInversTransform();
+
 		thisbone.parent = (this->bone_names.find(parent_name) != this->bone_names.end()) ?
 			&this->bones[this->bone_names[parent_name]] : NULL;
 		//now the children
@@ -284,8 +279,11 @@ void
 Skeleton::draw(const msg_t msg)
 {
 	const ShaderMan *sm = this->getBindedShader();
+//	((Bone*)this->root_bone)->setModelMat(glm::eulerAngleXYZ(34.0f, 0.0f,0.0f));
 	for (uint i = 0; i < this->bones.size(); i++) {
-		this->cascade_transforms[i] = this->bones[i].getStackedTransformMat() * this->bones[i].offsetMat();
+		//seems most likely there are
+//		this->cascade_transforms[i] = this->bones[i].getInversTransform() *this->bones[i].updateStackedTransformMat();// * this->bones[i].getoffset();
+		this->cascade_transforms[i] = this->bones[i].updateStackedTransformMat() *this->bones[i].getInversTransform();// * this->bones[i].getoffset();
 	}
 	sm->useProgram();
 
