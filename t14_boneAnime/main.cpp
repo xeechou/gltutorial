@@ -100,10 +100,10 @@ int main(int argc, char **argv)
 staticOBJ::staticOBJ()
 {
 	std::string vs_source =
-#include "vs.glsl"
+#include "vs_debug.glsl"
 		;
 	std::string fs_source =
-#include "fs.glsl"
+#include "fs_debug.glsl"
 		;
 	//we can even forget about the specular for now
 	this->shader_program.loadProgramFromString(vs_source, fs_source);
@@ -132,6 +132,9 @@ staticOBJ::init_setup()
 		this->drawobj->load(this->file);
 		this->drawobj->push2GPU();
 	}
+	GLuint totalbone = glGetUniformLocation(this->prog, "totalbone");
+	//this sort of work if we don't have many bones
+	glUniform1i(totalbone, 16);
 	this->camera = std::make_shared<Camera>(this->ctxt, 90.0f,  glm::vec3(0, 2.0, 20.0), glm::vec3(0.0));
 	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
 	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
@@ -141,7 +144,7 @@ staticOBJ::init_setup()
 	glUniform1f(lightAmbientLoc, 0.3f);
 	glUniform1f(lightDiffuseLoc, 0.5f);
 	glUniform1f(lightSpecularLoc, 0.5f);
-	glUniform3f(lightposLoc, 0,2,20);
+	glUniform3f(lightposLoc, 0, 2.0f, 20);
 	//now setup the texture
 	this->shader_program.addTextureUniform("diffuse", TEX_Diffuse);
 	glUniform3f(glGetUniformLocation(this->prog, "viewPos"), 0.0,2.0,20.0);
