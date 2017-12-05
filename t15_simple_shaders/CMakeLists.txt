@@ -8,11 +8,10 @@ include_directories(
   )
 
 
-add_executable(t14
-  main.cpp
-  shadow.cpp)
+add_executable(t15
+  main.cpp)
 
-target_link_libraries(t14
+target_link_libraries(t15
   ${GLFW_LIBRARIES}
   ${GLEW_LIBRARIES}
   ${GLM_LIBRARIES}

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <set>
 #include <vector>
@@ -107,12 +108,6 @@ Skeleton::load(const aiScene *scene)
 				this->bones.emplace_back(Bone(bone_name, aiMat2glmMat(aibone->mOffsetMatrix)));
 
 			}
-//			if (this->bones.find(bone_name) == this->bones.end()) {
-//				std::cerr << bone_name << std::endl;
-//				this->bones.insert(std::make_pair(bone_name,
-//								  Bone(this->bones.size(), bone_name, aiMat2glmMat(aibone->mOffsetMatrix))
-//							   ));
-//			}
 			this->loadBoneWeights(scene, i, j);
 		}
 	}
@@ -190,17 +185,6 @@ Skeleton::push2GPU()
 	}
 	return true;
 }
-
-/*
-bool
-Skeleton::uploadUniform(const ShaderMan *sm)
-{
-	//for this one, we actually need to update the uniforms in the draw call.
-//	GLuint prog = sm->getPid();
-//	glUseProgram(prog);
-	return true;
-}
-*/
 
 void
 Skeleton::loadBoneWeights(const aiScene *s, int meshi, int bonej)

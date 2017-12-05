@@ -38,14 +38,54 @@
 #include <fbobj.hpp>
 #include <context.hpp>
 #include <collections/shaders.hpp>
-#include "shadow.hpp"
+#include <data.hpp>
 
 
 const unsigned int width = 1024;
 const unsigned int height = 1024;
 
-//series of keyframes.
 
+
+class planeOBJ : public DrawObj {
+private:
+	ShaderMan _shader_program;
+	GLuint _vao, _vbo;
+	int time;
+public:
+	planeOBJ(int param);
+	int init_setup(void) override;
+	int itr_setup(void) override;
+	int itr_draw(void) override;
+};
+
+planeOBJ::planeOBJ(int param)
+{
+	this->time = 0;
+}
+
+int
+planeOBJ::init_setup(void)
+{
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+	glGenBuffers(1, &_vbo);
+	bindQUAD(_vao, _vbo);
+	return 0;
+}
+
+int
+planeOBJ::itr_setup(void)
+{
+	//we can increase the time of drawing
+	return 0;
+	this->time += 0.01;
+}
+
+int
+planeOBJ::itr_draw(void)
+{
+	drawQUAD(_vao, _vbo);
+}
 
 int main(int argc, char **argv)
 {
@@ -54,39 +94,8 @@ int main(int argc, char **argv)
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
 
-	shadowMap shadow;
-	AfterShadow cubes;
 //	ShaderMan cubeShader("vs.glsl", "fs.glsl");
 //	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");
-	
-	Model charactor(argv[1], Model::Parameter::LOAD_BONE | Model::Parameter::LOAD_ANIM);
-	cubes.append_model(&charactor);
-	shadow.append_model(&charactor);
-	cont.append_drawObj(&shadow);
-	cont.append_drawObj(&cubes);
-
-	//the general shader, 
-	
 	cont.init();
 	cont.run();
-}
-
-
-Animator::Animator(const Model* model)
-{
-	this->setModel(model);
-}
-
-void
-Animator::setModel(const Model *model)
-{
-	this->model = model;
-	//only one instance
-	if (!model->getNinstances()) {
-		//extract one bone
-		instance_mats.push_back(glm::mat4(1.0f));
-	}
-	for (int i = 0; i < model->getNinstances(); i++) {
-		//extract bones from the 
-	}
 }

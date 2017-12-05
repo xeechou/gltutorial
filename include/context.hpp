@@ -65,6 +65,7 @@ protected:
 public:
 	DrawObj();
 	DrawObj(GLuint p);
+	virtual ~DrawObj(void) {}
 	void set_shader(GLuint p);
 	//we should have better shader interface next time
 	GLuint program(void) const;

@@ -8,6 +8,11 @@ extern float CUBEVERTS[108];
 extern float CUBENORMS[108];
 extern float CUBETEXS[72];
 
+void bindQUAD(unsigned int vao, unsigned int vbo);
+void drawQUAD(unsigned int vao, unsigned int vbo);
+void bindCUBE(unsigned int vao, unsigned int vbo);
+void drawCUBE(unsigned int vao, unsigned int vbo);
+
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
@@ -25,6 +30,8 @@ glmMat2aiMat(const glm::mat4& mat)
 			mat[2][0],mat[2][1],mat[2][2],mat[2][3],
 			mat[3][0],mat[3][1],mat[3][2],mat[3][3]);
 }
+
+
 
 static inline const glm::mat4
 aiMat2glmMat(const aiMatrix4x4& in_mat)
