@@ -100,10 +100,10 @@ int main(int argc, char **argv)
 staticOBJ::staticOBJ()
 {
 	std::string vs_source =
-#include "vs_debug.glsl"
+#include "vs.glsl"
 		;
 	std::string fs_source =
-#include "fs_debug.glsl"
+#include "fs.glsl"
 		;
 	//we can even forget about the specular for now
 	this->shader_program.loadProgramFromString(vs_source, fs_source);

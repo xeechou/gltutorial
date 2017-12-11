@@ -32,20 +32,19 @@ public:
 class Skeleton : public OBJproperty {
 	//this one has normals, or mesh
 protected:
-	//in the end, we end up with the same structure of previous one
+	typedef cv::Mat_<cv::Vec2f> bw_mat_t;
 	std::string uniform_bone;
-	//just for the sake of convience
+	std::vector<glm::mat4> cascade_transforms;
+
 	std::map<std::string, int> bone_names;
 	std::vector<Bone> bones;
-	//this is the GPU data
-	std::vector<glm::mat4> cascade_transforms;
 	const Bone *root_bone;
-	//in the mean time, we should also keep the a sparseMatrix of the bone weights
-	std::vector<cv::Mat_<float> > mb_weights;
-	std::vector<cv::Mat_<int> > mb_indices;
-	std::vector<GLuint> gpu_handles;
 
-	void loadBoneWeights(const aiScene *scene, int mesh, int bone);
+	//this is the GPU data
+	std::vector<GLuint> gpu_handles;
+	std::vector<bw_mat_t> bone_weights; //permesh
+
+
 	aiNode* findRootBone(const aiScene *scene) const;
 	void buildHierachy(const aiScene *scene, const aiNode *root);
 public:

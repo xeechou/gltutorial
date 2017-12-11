@@ -45,3 +45,4 @@ CMakeFiles
 **/Makefile
 
 **/t[0-9]
+/build/*

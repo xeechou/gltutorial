@@ -23,23 +23,6 @@
 #include <collections/bone.hpp>
 
 
-static cv::Mat_<cv::Vec2f>
-assembleWeights(cv::Mat& weights, cv::Mat& indx)
-{
-	//we need to return a two channel matrix
-	//even with assemble weights. we still could not get the
-	cv::Mat_<cv::Vec2f> boneWeights(weights.rows, weights.cols);
-	cv::Mat tmprow(1,weights.cols, weights.type());
-	for (int i = 0; i < boneWeights.rows; i++) {
-		cv::normalize(weights.row(i), tmprow, 1,0,cv::NORM_L1);
-		tmprow.copyTo(weights.row(i));
-		for( int j = 0;  j < boneWeights.cols; j++)
-			boneWeights(i,j) = cv::Vec2f((float)indx.at<int>(i,j), weights.at<float>(i,j));
-	}
-	return boneWeights;
-}
-
-
 Bone::Bone(const std::string id, const glm::mat4& offset, const glm::mat4& model_mat) :
 	TreeNode(id), _offset(offset)
 {
@@ -92,42 +75,33 @@ Skeleton::~Skeleton()
 bool
 Skeleton::load(const aiScene *scene)
 {
-	mb_weights.resize(scene->mNumMeshes);
-	mb_indices.resize(scene->mNumMeshes);
+	this->bone_weights.resize(scene->mNumMeshes);
 	for (uint i = 0; i < scene->mNumMeshes; i++) {
 		const aiMesh *mesh = scene->mMeshes[i];
 		//initialize this first
-		this->mb_weights[i] = cv::Mat_<float>::zeros(mesh->mNumVertices, this->shader_layouts.second);
-		this->mb_indices[i] = cv::Mat_<int>::zeros(mesh->mNumVertices, this->shader_layouts.second);
-
+		this->bone_weights[i] = Skeleton::bw_mat_t::zeros(mesh->mNumVertices, this->shader_layouts.second);
+		std::vector<uint> weight_indx(mesh->mNumVertices, 0);
 		for (uint j = 0; j < mesh->mNumBones; j++) {
 			const std::string bone_name = std::string(mesh->mBones[j]->mName.C_Str());
 			aiBone *aibone = mesh->mBones[j];
-//			std::cout << glm::to_string(aiMat2glmMat(aibone->mOffsetMatrix)) << std::endl;
 			if (this->bone_names.find(bone_name) == this->bone_names.end()) {
-				this->bone_names[bone_name] = this->bones.size();
+				size_t bone_idx = this->bones.size();
+				this->bone_names[bone_name] = bone_idx;
 				this->bones.emplace_back( std::move(Bone(bone_name, aiMat2glmMat(aibone->mOffsetMatrix))) );
-
+				//load bone_weights
+				for (uint k = 0; k < aibone->mNumWeights; k++) {
+					uint vid = aibone->mWeights[k].mVertexId;
+					float w  = aibone->mWeights[k].mWeight;
+					this->bone_weights[i](vid, weight_indx[vid]++) = cv::Vec2f((float)bone_idx, w);
+				}
 			}
-			this->loadBoneWeights(scene, i, j);
 		}
 	}
-	//all right, since I loaded up all the meshes
 	this->buildHierachy(scene, findRootBone(scene));
 	this->cascade_transforms.resize(this->bones.size());
-	std::cout << this->root_bone->layout() << std::endl;
-	//now we are trying to get the first transform
-	//just for the debug
-//	std::fstream fs;
-//	Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-//	fs.open("/tmp/debug_tree_mat", std::ios::out);
-//	for (uint i = 0; i < this->bones.size(); i++) {
-//		this->cascade_transforms[i] = this->bones[i].updateStackedTransformMat() * this->bones[i].offsetMat();
-//		fs << this->bones[i].id << std::endl;
-//		fs << glmMat2EigenMat(this->bones[i]._model_mat).format(CleanFmt) << "\n_________________________\n";
-//	}
 	return true;
 }
+
 
 /*
 static void debug_bw(cv::Mat& debug)
@@ -152,65 +126,47 @@ static void assert_weight(cv::Mat& weights)
 
 }
 */
+static void
+normalize_weights(cv::Mat_<cv::Vec2f>& mat)
+{
+	cv::Mat channels[2];
+	cv::split(mat, channels);
+	cv::Mat tmprow(1,channels[1].cols, channels[1].type());
+	for (int i = 0; i < channels[1].rows; i++)
+		cv::normalize(channels[1].row(i), channels[1].row(i), 1,0,cv::NORM_L1);
+	cv::merge(channels, 2, mat);
+}
+
 
 bool
 Skeleton::push2GPU()
 {
-	this->gpu_handles.resize(this->mb_weights.size());
+	this->gpu_handles.resize(this->bone_weights.size());
 	uint first_layout = this->shader_layouts.first;
 	uint layout_ends  = this->shader_layouts.first + this->shader_layouts.second;
 	Mesh1* mesh_handle = (Mesh1*)this->model->searchProperty("mesh");
 	size_t vec2_size = sizeof(cv::Vec2f);
-	for (uint i = 0; i < this->mb_weights.size(); i++) {
+	for (uint i = 0; i < this->bone_weights.size(); i++) {
 		//NOTE after assembled weight, we still have float error problems
-		cv::Mat_<cv::Vec2f> bw = assembleWeights(this->mb_weights[i], this->mb_indices[i]);
-//		assert_weight(this->mb_weights[i]);
+		normalize_weights(this->bone_weights[i]);
 //		debug_bw(bw);
 		mesh_handle->activeIthMesh(i);
 		glGenBuffers(1, &this->gpu_handles[i]);
 		glBindBuffer(GL_ARRAY_BUFFER, this->gpu_handles[i]);
-		glBufferData(GL_ARRAY_BUFFER, bw.rows * bw.step[0], (void *)bw.data, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, this->bone_weights[i].step[0] * this->bone_weights[i].rows,
+			     (void *)this->bone_weights[i].data, GL_STATIC_DRAW);
 
 		for (uint l = first_layout; l < layout_ends; l++) {
 			glEnableVertexAttribArray(l);
 			glVertexAttribPointer(l, 2, GL_FLOAT, GL_FALSE,
-					      sizeof(cv::Vec2f),
-					      (void *)((l-first_layout) * vec2_size));
+					      this->bone_weights[i].step[0],
+					      (void *)(l * vec2_size));
 		}
 		glBindVertexArray(0);
-		//useless
-		this->mb_weights.clear();
-		this->mb_indices.clear();
 	}
 	return true;
 }
 
-void
-Skeleton::loadBoneWeights(const aiScene *s, int meshi, int bonej)
-{
-	cv::Mat_<float>& weights = this->mb_weights[meshi];
-	cv::Mat_<int>& indices = this->mb_indices[meshi];
-	aiMesh *mesh = s->mMeshes[meshi];
-	aiBone *bone = mesh->mBones[bonej];
-	//find the correct id of that bone
-	std::string bone_name(bone->mName.data);
-	int j  = this->bone_names[bone_name];
-	for (uint i = 0; i < bone->mNumWeights; i++) {
-		uint vid = bone->mWeights[i].mVertexId;
-		float w  = bone->mWeights[i].mWeight;
-//		std::cerr << "vertex " << vid << ", weight " << w << std::endl;
-		int k;
-		for (k = 0; k < this->shader_layouts.second; k++) {
-			if (weights(bone->mWeights[i].mVertexId, k) == 0) {
-				weights(vid, k) = w;
-				indices(vid, k) = j;
-				break;
-			}
-		}
-		//it should never get here
-		assert(k != this->shader_layouts.second);
-	}
-}
 
 
 aiNode *
@@ -269,14 +225,14 @@ void
 Skeleton::draw(const msg_t msg)
 {
 	const ShaderMan *sm = this->getBindedShader();
-//	((Bone*)this->root_bone)->setModelMat(glm::eulerAngleXYZ(34.0f, 0.0f,0.0f));
+//	((Bone*)this->root_bone)->setModelMat(glm::eulerAngleXYZ(34.0f, 20.0f,0.0f));
 	for (uint i = 0; i < this->bones.size(); i++) {
 		//seems most likely there are
-//		this->cascade_transforms[i] = this->bones[i].getInversTransform() *this->bones[i].updateStackedTransformMat();// * this->bones[i].getoffset();
-		this->cascade_transforms[i] = this->bones[i].updateStackedTransformMat() *this->bones[i].getInversTransform();// * this->bones[i].getoffset();
+		this->cascade_transforms[i] = this->bones[i].getInversTransform() *this->bones[i].updateStackedTransformMat();// * this->bones[i].getoffset();
+		this->cascade_transforms[i] = this->bones[i].updateStackedTransformMat() * this->bones[i].getInversTransform();
+			//this->bones[i].getInversTransform() * //this->bones[i].getoffset();
 	}
 	sm->useProgram();
-
 	glUniformMatrix4fv(glGetUniformLocation(sm->getPid(), this->uniform_bone.c_str()),
 			   this->cascade_transforms.size(), //should be number of matrices
 			   GL_FALSE,
