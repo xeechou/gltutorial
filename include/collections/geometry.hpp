@@ -6,7 +6,7 @@
 /* this is actually a bad design. I can either write public functions:
    makeCube, makeUVSphere, makeCylinder, makePyramid something like that */
 class CubeModel : public Model {
-	
+
 public:
 	//this will give you a one-by-one cube
 	CubeModel(const glm::vec3 translation = glm::vec3(0.0f),
@@ -15,6 +15,10 @@ public:
 	//void SetColor(glm::vec4 color);
 };
 
+class SphereModel : public Model {
+public:
+	SphereModel(float radius);
+};
 
 
 #endif /* EOF */

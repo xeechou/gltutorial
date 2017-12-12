@@ -12,6 +12,7 @@ void bindQUAD(unsigned int vao, unsigned int vbo);
 void drawQUAD(unsigned int vao, unsigned int vbo);
 void bindCUBE(unsigned int vao, unsigned int vbo);
 void drawCUBE(unsigned int vao, unsigned int vbo);
+void bindSphere(unsigned int vao, unsigned int vbo, float radius);
 
 #include <Eigen/Core>
 #include <Eigen/Dense>

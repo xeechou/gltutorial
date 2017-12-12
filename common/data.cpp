@@ -1,6 +1,6 @@
 #include <data.hpp>
 
-
+#include <glm/gtc/constants.hpp>
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
@@ -9,6 +9,7 @@
 #elif __WIN32
 #include <GL/glfw3.h>
 #endif
+#include <Eigen/Core>
 
 float QUADVERTICES[24] = {
 	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -216,4 +217,21 @@ void drawQUAD(unsigned int vao, unsigned int vbo)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+}
+
+void bindSphere(unsigned int vao, unsigned int vbo, float radius)
+{
+	//so we are generating 180 latitude first, then generate lontitude
+	//well, determine how big is the
+	float smallest_degree = 0.1 / radius;
+	size_t nlats = (int)(glm::pi<float>() / smallest_degree);
+	size_t latitudes[nlats];
+	int n = 0;
+	std::generate(latitudes, latitudes+nlats, [&]() {return -glm::quarter_pi<float>() * 2.0 + smallest_degree * n++;});
+	latitudes[nlats-1] = glm::quarter_pi<float>()*2;
+	size_t longtitudes[nlats*2];
+	n = 0;
+	std::generate(longtitudes, longtitudes+2*nlats, [&]() {return smallest_degree * n++;});
+	longtitudes[nlats*2-1] = glm::pi<float>() * 2;
+	//generat
 }
