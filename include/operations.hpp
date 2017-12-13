@@ -43,4 +43,16 @@ print_glmMat3(const glm::mat3& mat)
 	std::cout << std::endl;
 }
 
+/**
+ * (latitude, longtitude, radius) to world coordinates
+ */
+static inline glm::vec3
+polar2euclidean(const glm::vec3& p)
+{
+	return p[2] * glm::vec3(glm::cos(p[0]) * glm::sin(p[1]),
+				glm::cos(glm::quater_pi<float>() - p[0]),
+				glm::sin(p[1]) * glm::cos(p[0]));
+}
+
+
 #endif
