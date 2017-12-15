@@ -44,15 +44,21 @@ print_glmMat3(const glm::mat3& mat)
 }
 
 /**
- * (latitude, longtitude, radius) to world coordinates
+ * (raidus, longtitude, latitude) to world coordinates
  */
 static inline glm::vec3
-polar2euclidean(const glm::vec3& p)
+polar2euclidean(float r, float theta, float phi)
 {
-	return p[2] * glm::vec3(glm::cos(p[0]) * glm::sin(p[1]),
-				glm::cos(glm::quater_pi<float>() - p[0]),
-				glm::sin(p[1]) * glm::cos(p[0]));
+	return r * glm::vec3(glm::cos(theta) * glm::cos(phi),
+			     glm::sin(phi),
+			     glm::sin(theta) * glm::cos(phi));
 }
 
-
+/*
+static inline glm::vec3
+euclidean2poloar(float x, float y, float z)
+{
+	float r = glm::l2Norm(glm::vec3(x,y,z));
+}
+*/
 #endif
