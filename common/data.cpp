@@ -1,6 +1,4 @@
-#include <data.hpp>
-
-#include <glm/gtc/constants.hpp>
+#include <vector>
 #include <GL/glew.h>
 #ifdef __linux__
 #include <GLFW/glfw3.h>
@@ -10,6 +8,11 @@
 #include <GL/glfw3.h>
 #endif
 #include <Eigen/Core>
+#include <glm/gtc/constants.hpp>
+
+#include <data.hpp>
+#include <operations.hpp>
+
 
 float QUADVERTICES[24] = {
 	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -221,17 +224,28 @@ void drawQUAD(unsigned int vao, unsigned int vbo)
 
 void bindSphere(unsigned int vao, unsigned int vbo, float radius)
 {
-	//so we are generating 180 latitude first, then generate lontitude
-	//well, determine how big is the
+	//create UV sphere, we will create a icosphere later
 	float smallest_degree = 0.1 / radius;
 	size_t nlats = (int)(glm::pi<float>() / smallest_degree);
+	size_t nlongs = (int)(glm::pi<float>() * 2 / smallest_degree);
 	size_t latitudes[nlats];
 	int n = 0;
 	std::generate(latitudes, latitudes+nlats, [&]() {return -glm::quarter_pi<float>() * 2.0 + smallest_degree * n++;});
 	latitudes[nlats-1] = glm::quarter_pi<float>()*2;
-	size_t longtitudes[nlats*2];
+	size_t longtitudes[nlongs];
 	n = 0;
-	std::generate(longtitudes, longtitudes+2*nlats, [&]() {return smallest_degree * n++;});
-	longtitudes[nlats*2-1] = glm::pi<float>() * 2;
-	//generat
+	std::generate(longtitudes, longtitudes+nlongs, [&]() {return smallest_degree * n++;});
+	longtitudes[nlongs-1] = glm::pi<float>() * 2;
+	//okay, now we can generate vertices
+	std::vector<glm::vec3> vertices((nlats-2) * nlongs + 2);
+	vertices[0] = glm::vec3(0.0f, -radius, 0.0f);
+	for (int i = 1; i < nlats-1; i++) {
+		for( int j = 0;  j < nlongs; j++) {
+			size_t idx = (i-1) * nlongs +1;
+			vertices[idx] = polar2euclidean(radius, longtitudes[j], latitudes[i]);
+		}
+	}
+	vertices[(nlats-2)*nlongs+1] = glm::vec3(0.0f, radius, 0.0f);
+	//now generate the element buffer
+
 }
