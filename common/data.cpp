@@ -222,30 +222,60 @@ void drawQUAD(unsigned int vao, unsigned int vbo)
 
 }
 
-void bindSphere(unsigned int vao, unsigned int vbo, float radius)
+void bindSphere(unsigned int vao, unsigned int vbo, unsigned int ebo, float radius)
 {
+	//okay, we need to create the iso
 	//create UV sphere, we will create a icosphere later
 	float smallest_degree = 0.1 / radius;
 	size_t nlats = (int)(glm::pi<float>() / smallest_degree);
-	size_t nlongs = (int)(glm::pi<float>() * 2 / smallest_degree);
+	size_t nlongs = (int)(glm::pi<float>() * 2 / smallest_degree) - 1;
 	size_t latitudes[nlats];
 	int n = 0;
-	std::generate(latitudes, latitudes+nlats, [&]() {return -glm::quarter_pi<float>() * 2.0 + smallest_degree * n++;});
+	std::generate(latitudes, latitudes+nlats, [&]() {
+			return -glm::quarter_pi<float>() * 2.0 + smallest_degree * n++;
+		});
 	latitudes[nlats-1] = glm::quarter_pi<float>()*2;
 	size_t longtitudes[nlongs];
 	n = 0;
 	std::generate(longtitudes, longtitudes+nlongs, [&]() {return smallest_degree * n++;});
-	longtitudes[nlongs-1] = glm::pi<float>() * 2;
-	//okay, now we can generate vertices
 	std::vector<glm::vec3> vertices((nlats-2) * nlongs + 2);
 	vertices[0] = glm::vec3(0.0f, -radius, 0.0f);
-	for (int i = 1; i < nlats-1; i++) {
-		for( int j = 0;  j < nlongs; j++) {
-			size_t idx = (i-1) * nlongs +1;
-			vertices[idx] = polar2euclidean(radius, longtitudes[j], latitudes[i]);
+	for (int i = 0; i < nlongs; i++) {
+		for( int j = 1; j < nlats-1; j++) {
+			int idx = i * (nlats-2) + j;
+			vertices[idx] = polar2euclidean(radius, longtitudes[i], latitudes[j]);
 		}
 	}
 	vertices[(nlats-2)*nlongs+1] = glm::vec3(0.0f, radius, 0.0f);
 	//now generate the element buffer
+	std::vector<glm::u32vec3> element_buffer;
+	for (int i = 0; i < nlongs; i++) {
+		int j = 1;
+		int idx = i * (nlats-2)+j;
+		int nextidx = ((i+1) % nlongs) * (nlats-2)+j;
+		element_buffer.push_back(glm::u32vec3(idx, 0, nextidx));
 
+		for (; j < nlats-2; j++) {
+			idx = i * (nlats-2) + j;
+			nextidx = ((i+1) % nlongs) *(nlats-2)+j;
+			element_buffer.push_back(glm::u32vec3(idx, nextidx, nextidx+1));
+			element_buffer.push_back(glm::u32vec3(nextidx+1, idx+1, idx));
+		}
+		idx = i * (nlats-2)+j;
+		nextidx = ((i+1) % nlongs) * (nlats-2)+j;
+		element_buffer.push_back(glm::u32vec3(idx, vertices[vertices.size()-1], nextidx));
+	} //I need to test it
+
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(QUADVERTICES), QUADVERTICES, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (sizeof(glm::vec3)), (GLvoid *)0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, element_buffer.size() * sizeof(glm::u32vec3), &element_buffer[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }

@@ -96,7 +96,7 @@ public:
 	};
 	Mesh1(int option = OPTION::LOAD_NORM | OPTION::LOAD_TEX);
 	Mesh1(const float *vertx, const float *norms, const float *uvs, const int nnodes,
-	     const float *indices = NULL, const int nfaces = 0);
+	      const float *indices = NULL, const int nfaces = 0);
 
 	virtual ~Mesh1() override;
 	virtual bool load(const aiScene *scene) override;

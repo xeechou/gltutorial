@@ -15,9 +15,10 @@ public:
 	//void SetColor(glm::vec4 color);
 };
 
-class SphereModel : public Model {
+//basically we need to write the use the different mesh property
+class isoSphere : public Model {
 public:
-	SphereModel(float radius);
+	isoSphere(float radius);
 };
 
 
