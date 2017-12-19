@@ -99,12 +99,48 @@ Mesh1::Mesh1(const float *vertx, const float *norms, const float *uvs, const int
 }
 
 
+Mesh1::	Mesh1(const std::vector<glm::vec3>&& vertx,
+	      const std::vector<face_t>&& faces,
+	      const std::vector<glm::vec3>&& norms,
+	      const std::vector<glm::vec2>&& uvs)
+{
+	this->init_options = 0;
+	this->meshes_vertices.resize(1);
+	this->meshes_faces.resize(1);
+	this->meshes_vertices[0].Positions = std::move(vertx);
+	if (!norms.empty()) {
+		this->init_options |= OPTION::LOAD_NORM;
+		meshes_vertices[0].Normals = std::move(norms);
+	}
+	if (!uvs.empty()) {
+		this->init_options |= OPTION::LOAD_TEX;
+		meshes_vertices[0].TexCoords = std::move(uvs);
+	}
+	if (faces.empty()) {
+		int nfaces = this->meshes_vertices[0].Positions.size() / 3;
+		std::vector<face_t> faces(nfaces);
+		int idx = 0;
+		std::generate(faces.begin(), faces.end(), [&]() {
+				int cidx = idx;
+				idx+=3;
+				return face_t(cidx, cidx+1, cidx+2);
+			});
+		this->meshes_faces[0] = std::move(faces);
+	} else
+		this->meshes_faces[0] = std::move(faces);
+	layout_count();
+}
+
+
 Mesh1::~Mesh1()
 {}
 
 bool
 Mesh1::load(const aiScene *scene)
 {
+	//if we already load everything, then we jump
+	if (!this->meshes_vertices.empty())
+		return true;
 	int has_tex = 0;
 	int has_norm = 0;
 	//allocate memory

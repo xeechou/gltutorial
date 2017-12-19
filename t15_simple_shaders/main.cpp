@@ -37,9 +37,10 @@
 #include <model.hpp>
 #include <fbobj.hpp>
 #include <context.hpp>
-#include <collections/shaders.hpp>
-#include <data.hpp>
 
+#include <data.hpp>
+#include <collections/shaders.hpp>
+#include <collections/geometry.hpp>
 
 const unsigned int width = 1024;
 const unsigned int height = 1024;
@@ -48,8 +49,8 @@ const unsigned int height = 1024;
 
 class planeOBJ : public DrawObj {
 private:
-	ShaderMan _shader_program;
-	GLuint _vao, _vbo;
+	std::shared_ptr<ShaderMan> _shader_program;
+	std::shared_ptr<Model> model;
 	int time;
 public:
 	planeOBJ(int param);
@@ -60,17 +61,18 @@ public:
 
 planeOBJ::planeOBJ(int param)
 {
+	//yep, we should setup the shader_program
 	this->time = 0;
+	this->model = std::make_shared<isoSphere>(1.0);
+	this->model->addProperty("instancing",
+				 std::make_shared<Instancing>(10, Instancing::OPTION::square_instances, glm::vec3(0.1f)));
 }
 
 int
 planeOBJ::init_setup(void)
 {
-	glGenVertexArrays(1, &_vao);
-	glBindVertexArray(_vao);
-	glGenBuffers(1, &_vbo);
-	bindQUAD(_vao, _vbo);
 	return 0;
+	this->model->push2GPU();
 }
 
 int
@@ -84,7 +86,7 @@ planeOBJ::itr_setup(void)
 int
 planeOBJ::itr_draw(void)
 {
-	drawQUAD(_vao, _vbo);
+	this->model->drawProperty();
 }
 
 int main(int argc, char **argv)
@@ -93,6 +95,9 @@ int main(int argc, char **argv)
 	GLFWwindow *window = cont.getGLFWwindow();
 	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
 	glfwSetScrollCallback(window, unity_like_arcball_scroll);
+
+	planeOBJ obj(0);
+	cont.append_drawObj(&obj);
 
 //	ShaderMan cubeShader("vs.glsl", "fs.glsl");
 //	ShaderMan shadowShader("lightvs.glsl", "lightfs.glsl");

@@ -18,8 +18,25 @@ cstr_eq(const char *lhs, const char *rhs)
 	return true;
 }
 
-//write as much c++11 code as possible
+static inline bool
+is_divisor(long multiple, int div)
+{
+	return (multiple % div == 0) ? true : false;
+}
 
+static inline int
+find_lager_divisor(long multiple, int div)
+{
+	return (multiple % div == 0) ? div : find_lager_divisor(multiple, div+1);
+}
+
+static inline int
+find_smaller_divisor(long multiple, int div)
+{
+	return (multiple % div == 0) ? div : find_smaller_divisor(multiple, div-1);
+}
+
+//write as much c++11 code as possible
 static inline glm::mat4
 trs2mat4(const glm::vec3& t, const glm::quat& r, const glm::vec3& s)
 {
@@ -52,6 +69,19 @@ polar2euclidean(float r, float theta, float phi)
 	return r * glm::vec3(glm::cos(theta) * glm::cos(phi),
 			     glm::sin(phi),
 			     glm::sin(theta) * glm::cos(phi));
+}
+
+/**
+ * degree version
+ */
+static inline glm::vec3
+polar2euclidean(float r, long theta, long phi)
+{
+	float rt = glm::radians((float)theta);
+	float rp = glm::radians((float)phi);
+	return r * glm::vec3(glm::cos(rt) * glm::cos(rp),
+			     glm::sin(rp),
+			     glm::sin(rt) * glm::cos(rp));
 }
 
 /*

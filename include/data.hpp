@@ -12,10 +12,8 @@ void bindQUAD(unsigned int vao, unsigned int vbo);
 void drawQUAD(unsigned int vao, unsigned int vbo);
 void bindCUBE(unsigned int vao, unsigned int vbo);
 void drawCUBE(unsigned int vao, unsigned int vbo);
-void bindSphere(unsigned int vao, unsigned int vbo, unsigned int ebo, float radius);
+//void bindSphere(unsigned int vao, unsigned int vbo, unsigned int ebo, float radius);
 
-#include <Eigen/Core>
-#include <Eigen/Dense>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -60,6 +58,10 @@ aiMat2glmMat(const aiMatrix4x4& in_mat)
      return tmp;
 }
 
+/*
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
 template<typename T>
 Eigen::Matrix<T, 4, 4>
 glmMat2EigenMat(const glm::tmat4x4<T>& mat)
@@ -81,6 +83,7 @@ Eigen2glmMat(const Eigen::Matrix<T,4,4>& mat)
 			ret[i][j] = mat(i,j);
 	return ret;
 }
+*/
 //extern float
 
 #endif

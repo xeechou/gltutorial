@@ -7,7 +7,7 @@
 #elif __WIN32
 #include <GL/glfw3.h>
 #endif
-#include <Eigen/Core>
+
 #include <glm/gtc/constants.hpp>
 
 #include <data.hpp>
@@ -183,7 +183,7 @@ bindCUBE(unsigned int vao, unsigned int vbo)
 	glBufferData(GL_ARRAY_BUFFER, 36 * stride,
 		     NULL, GL_STATIC_DRAW);
 
-	int offset = 0;
+	ptrdiff_t offset = 0;
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(CUBEVERTS), CUBEVERTS);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3*sizeof(float)), (GLvoid *)offset);
@@ -221,7 +221,7 @@ void drawQUAD(unsigned int vao, unsigned int vbo)
 	glBindVertexArray(0);
 
 }
-
+/*
 void bindSphere(unsigned int vao, unsigned int vbo, unsigned int ebo, float radius)
 {
 	//okay, we need to create the iso
@@ -279,3 +279,5 @@ void bindSphere(unsigned int vao, unsigned int vbo, unsigned int ebo, float radi
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
+
+*/

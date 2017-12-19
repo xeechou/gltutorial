@@ -25,9 +25,16 @@ struct mesh_GPU_handle {
 	~mesh_GPU_handle();
 };
 
+
+/**
+ * @brief Model's property
+ *
+ * This maybe GPU datas, maybe just CPU data, maybe something else, in the model
+ * class, the pipeline follows the order of loading, push2gpu, draw->draw->draw
+ * the layout must be ready before push2gpu, the layout.second can be setup in
+ * the constructor or load function
+ */
 class OBJproperty {
-//this class will be the plugins in the model class and mesh class, if the model
-//added the property, the mesh should
 protected:
 	//some of the property has access to GPU, the second is the span
 	std::pair<int, int> shader_layouts;
@@ -95,8 +102,15 @@ public:
 		LOAD_TEX = 2,
 	};
 	Mesh1(int option = OPTION::LOAD_NORM | OPTION::LOAD_TEX);
+	//sometimes they have float data
 	Mesh1(const float *vertx, const float *norms, const float *uvs, const int nnodes,
 	      const float *indices = NULL, const int nfaces = 0);
+	//sometimes they have c++ vector data
+	Mesh1(const std::vector<glm::vec3>&& vertices,
+	      const std::vector<face_t>&& faces = std::vector<face_t>(),
+	      const std::vector<glm::vec3>&& norms = std::vector<glm::vec3>(),
+	      const std::vector<glm::vec2>&& uvs = std::vector<glm::vec2>());
+
 
 	virtual ~Mesh1() override;
 	virtual bool load(const aiScene *scene) override;

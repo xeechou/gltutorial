@@ -209,13 +209,14 @@ Model::load(const std::string &file)
 	this->root_path = file.substr(0, file.find_last_of('/'));
 	aiScene *scene = this->readModel(file);
 
-	int layout_start = 0;
+	//int layout_start = 0;
+	//the layout arrange should happen in the push2gpu
 	for (auto it = this->properties.begin(); it != this->properties.end(); it++) {
 		auto pair = it->second;
 //		std::cerr << pair.first << std::endl;
 		//in this case, every oproperty has layout
-		pair.second->alloc_shader_layout(layout_start);
-		layout_start = pair.second->getLayoutsEnd();
+		//pair.second->alloc_shader_layout(layout_start);
+		// layout_start = pair.second->getLayoutsEnd();
 		pair.second->load(scene);
 	}
 	delete scene;
@@ -226,8 +227,12 @@ Model::load(const std::string &file)
 void
 Model::push2GPU(void)
 {
+	//gpu layouts should be addressed here
+	int layout_start = 0;
 	for (auto it = this->properties.begin(); it != this->properties.end(); it++) {
 		auto pair = it->second;
+		pair.second->alloc_shader_layout(layout_start);
+		layout_start = pair.second->getLayoutsEnd();
 		pair.second->push2GPU();
 	}
 }
