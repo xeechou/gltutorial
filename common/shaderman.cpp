@@ -76,7 +76,7 @@ ShaderMan::getUniform(const std::string name) const
 {
 	auto it = this->uniforms.find(name);
 	return (it != this->uniforms.end()) ? it->second : -1;
-	
+
 	return -1;
 }
 
@@ -98,7 +98,7 @@ ShaderMan::loadShaderProgram(GLuint *shaders, int len)
 	int loglen;
 	GLuint prog_id = glCreateProgram();
 	for (int i = 0; i < len; i++) {
-		glAttachShader(prog_id, shaders[i]);		
+		glAttachShader(prog_id, shaders[i]);
 	}
 
 	glLinkProgram(prog_id);
@@ -189,7 +189,7 @@ ShaderMan::createShaderFromString(const std::string& content, GLenum shadertype)
 	const char *shader_code_pointer = content.c_str();
 	glShaderSource(sid, 1, &shader_code_pointer, NULL);
 	glCompileShader(sid);
-	
+
 	//check compile statues
 	glGetShaderiv(sid, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(sid, GL_INFO_LOG_LENGTH, &loglen);
@@ -203,7 +203,7 @@ ShaderMan::createShaderFromString(const std::string& content, GLenum shadertype)
 		return 0;
 	}
 	return sid;
-	
+
 }
 
 
@@ -258,15 +258,23 @@ TextureMan::loadTexture(const char *img_fname, const char *ind)
 GLint
 load2DTexture2GPU(const std::string fname)
 {
-	GLuint tid;
-
-	glGenTextures(1, &tid);
-	glBindTexture(GL_TEXTURE_2D, tid);
 	cv::Mat img = cv::imread(fname, CV_LOAD_IMAGE_COLOR);
 	if (!img.data) {
 		std::cerr << "not valid image" << std::endl;
 		return -1;
 	}
+	return load2DTexture2GPU(img);
+}
+
+
+
+GLint
+load2DTexture2GPU(const cv::Mat& img)
+{
+	GLuint tid;
+
+	glGenTextures(1, &tid);
+	glBindTexture(GL_TEXTURE_2D, tid);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.cols, img.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, img.data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 

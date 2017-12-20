@@ -1,0 +1,7 @@
+((nil . ((indent-tabs-mode . t)
+				 (tab-width . 8)
+         (fill-column . 80)
+				 (c-basic-offset . 8)
+				 ))
+ (c-mode . ((c-file-style . "linux")))
+ )

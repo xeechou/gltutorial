@@ -24,9 +24,23 @@
 #include "types.hpp"
 
 
-
-//now it becomes the second place where we use the
-//it will be nice if we can provide a string template and then use the string directly in the initializer
+/**
+ * @brief interface to the opengl shader and buffer
+ *
+ * the class represents a shader program, usually a vertex <shader> + <fragment>
+ * + geometry shader, or it can be just computational shader
+ *
+ * There are two different uniforms, normal glUniform and texture uniform,
+ * because texture is loaded by assimp, in which we can only access the texture
+ * by type, so we need to setup some connection between textures and texture
+ * type and its name.
+ *
+ * texture uniform: uniform_id - texture_idx - buffer_id
+ * normal uniform: uniform_id - data
+ * connect uniform_id <->texture_idx in the setup, after you
+ * connect uniform_id and texture_idx, the uniform_id is not really useful anymore
+ * connect buffer_id and texture_idx at draw frame
+ */
 class ShaderMan
 {
 protected:
@@ -76,6 +90,7 @@ public:
 
 //modulelize the shader
 GLint load2DTexture2GPU(const std::string fname);
+GLint load2DTexture2GPU(const cv::Mat& mat);
 
 
 class TextureMan

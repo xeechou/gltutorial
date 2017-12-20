@@ -49,9 +49,11 @@ const unsigned int height = 1024;
 
 class planeOBJ : public DrawObj {
 private:
-	std::shared_ptr<ShaderMan> _shader_program;
+	phongNoShadow shader_program;
 	std::shared_ptr<Model> model;
 	int time;
+	GLuint diffuse;
+	GLuint specular;
 public:
 	planeOBJ(int param);
 	int init_setup(void) override;
@@ -66,6 +68,9 @@ planeOBJ::planeOBJ(int param)
 	this->model = std::make_shared<isoSphere>(1.0);
 	this->model->addProperty("instancing",
 				 std::make_shared<Instancing>(10, Instancing::OPTION::square_instances, glm::vec3(0.1f)));
+	cv::Mat diffuse_texture = cv::Mat(500, 500, CV_8UC3, cv::Scalar(0,0,255));
+	this->diffuse = load2DTexture2GPU(diffuse_texture);
+	this->specular = load2DTexture2GPU(diffuse_texture);
 }
 
 int
@@ -86,7 +91,13 @@ planeOBJ::itr_setup(void)
 int
 planeOBJ::itr_draw(void)
 {
+	this->shader_program.useProgram();
+	glActiveTexture(GL_TEXTURE0 + this->shader_program.getTexUniform(TEX_Diffuse));
+	glBindTexture(GL_TEXTURE_2D, this->diffuse);
+	glActiveTexture(GL_TEXTURE0 + this->shader_program.getTexUniform(TEX_Specular));
+	glBindTexture(GL_TEXTURE_2D, this->specular);
 	this->model->drawProperty();
+	return 0;
 }
 
 int main(int argc, char **argv)
