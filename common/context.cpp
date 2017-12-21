@@ -17,6 +17,7 @@
 #include <context.hpp>
 #include <shaderman.h>
 #include <operations.hpp>
+#include <controls.h>
 
 void
 context_winSizeChange(GLFWwindow *win, int width, int height)
@@ -24,6 +25,13 @@ context_winSizeChange(GLFWwindow *win, int width, int height)
 	context *ctxt = (context *)glfwGetWindowUserPointer(win);
 	ctxt->height = height;
 	ctxt->width  = width;
+	if (ctxt->intrinsic.fov > 0)
+		ctxt->intrinsic.intrinsicMat = glm::perspective(ctxt->intrinsic.fov, (float)width/(float)height,
+							      ctxt->intrinsic.near, ctxt->intrinsic.far);
+	else
+		ctxt->intrinsic.intrinsicMat = glm::ortho(0.0f, (float)width, (float)height, 0.0f,
+							ctxt->intrinsic.near, ctxt->intrinsic.far);
+	glViewport(0, 0, width, height);
 }
 
 
@@ -82,7 +90,7 @@ context::context(int width, int height, const char *winname)
 	fprintf(stderr, "OpenGL version supported %s\n", version);
 	glViewport(0, 0, width, height);
 	std::cerr << this->forward_msg_que.size() << std::endl;
-
+	this->setCameraPerspective(glm::radians(45.0f));
 }
 
 context::~context()
@@ -163,6 +171,46 @@ context::run()
 }
 
 
+
+void
+context::attachArcBallCamera(const float fov, const glm::vec3& pos, const glm::vec3& lookat)
+{
+	glfwSetCursorPosCallback(this->_win, unity_like_arcball_cursor);
+	glfwSetScrollCallback(this->_win, unity_like_arcball_scroll);
+//	glfwSetKeyCallback(this->_win, NULL)
+	this->extrinsic.v = unity_like_get_camera_mat;
+	this->extrinsic.p = unity_like_get_view_pos;
+	this->setCameraPerspective(fov);
+}
+
+void
+context::attachCamera(CameraInterface iface)
+{
+	this->extrinsic = iface;
+	glfwSetCursorPosCallback(this->_win, iface.c);
+	glfwSetScrollCallback(this->_win, iface.s);
+	glfwSetKeyCallback(this->_win, iface.k);
+}
+
+void
+context::setCameraPerspective(const float f, const float n, const float fr)
+{
+	this->intrinsic.fov = f;
+	this->intrinsic.near = n;
+	this->intrinsic.far = fr;
+	this->intrinsic.intrinsicMat = glm::perspective(f, (float)this->width/(float)this->height, n, fr);
+}
+
+void
+context::setCameraOrthognal(const float n, const float f)
+{
+	this->intrinsic.fov = -1.0f;
+	this->intrinsic.near = n;
+	this->intrinsic.far = f;
+	this->intrinsic.intrinsicMat = glm::ortho(0.0f, (float)this->width, (float)this->height, 0.0f, n, f);
+}
+
+/*
 Camera::Camera(const context* c, const float fov,
 	       const glm::vec3& pos, const glm::vec3& lookat,
 	       const float nearplane, const float farplane)
@@ -202,3 +250,4 @@ Camera::pvMat(void) const
 //	print_glmMat4(pmat);
 	return pmat * vmat;
 }
+*/

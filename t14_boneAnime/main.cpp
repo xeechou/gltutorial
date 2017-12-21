@@ -55,7 +55,7 @@ private:
 	std::string file;
 	glm::vec3 lightdir;
 	ShaderMan shader_program;
-	std::shared_ptr<Camera> camera;
+//	std::shared_ptr<Camera> camera;
 public:
 	staticOBJ(void);
 	//make it static, call before init_setup
@@ -73,9 +73,9 @@ int main(int argc, char **argv)
 {
 	context cont(width, height, "window");
 	GLFWwindow *window = cont.getGLFWwindow();
-	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
-	glfwSetScrollCallback(window, unity_like_arcball_scroll);
-
+//	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
+//	glfwSetScrollCallback(window, unity_like_arcball_scroll);
+	cont.attachArcBallCamera(glm::radians(45.0f), glm::vec3(4.0,4.0,3.0f));
 	float angle[3] = {-20.0f, 0.0f, 0.0f};
 	if (argc > 2)
 		sscanf(argv[2], "%f,%f,%f", &angle[0], &angle[1], &angle[2]);
@@ -135,7 +135,7 @@ staticOBJ::init_setup()
 	GLuint totalbone = glGetUniformLocation(this->prog, "totalbone");
 	//this sort of work if we don't have many bones
 	glUniform1i(totalbone, 16);
-	this->camera = std::make_shared<Camera>(this->ctxt, 90.0f,  glm::vec3(0, 2.0, 20.0), glm::vec3(0.0));
+//	this->camera = std::make_shared<Camera>(this->ctxt, 90.0f,  glm::vec3(0, 2.0, 20.0), glm::vec3(0.0));
 	this->shader_program.tex_uniforms.push_back(TEX_TYPE::TEX_Diffuse);
 	GLuint lightAmbientLoc  = glGetUniformLocation(this->prog, "light.ambient");
 	GLuint lightDiffuseLoc  = glGetUniformLocation(this->prog, "light.diffuse");
@@ -162,8 +162,8 @@ staticOBJ::itr_setup()
 //							 0.1f, 100.0f);
 	glm::mat4 m = ((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
 	//the pvMat is correct, but I still don't know why the I still cannot draw anything
-	glm::mat4 mvp = this->camera->pvMat() *
-		((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
+	glm::mat4 mvp =	this->ctxt->getCameraMat() * m;
+//		((Transforming *)this->drawobj->searchProperty("transform"))->getMMat();
 //	std::cout << glm::to_string(mvp) << std::endl;
 	// glm::mat4 mvp = p * v * m;
 	glUniformMatrix4fv(glGetUniformLocation(this->prog, "MVP"), 1, GL_FALSE, &mvp[0][0]);

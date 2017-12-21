@@ -22,8 +22,8 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
-
-#include <context.hpp>
+//if you don't use context, you will get this error
+//#include <context.hpp>
 
 class FacialLandmark {
 	//you need to thread this thing. Because you need to process detect the

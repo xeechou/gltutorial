@@ -83,31 +83,33 @@ public:
 	void setPosinContext(size_t pos);
 };
 
+typedef void (*CameraScrollFunc) (GLFWwindow *window, double xpos, double ypos);
+typedef void (*CameraCursorFunc) (GLFWwindow* window, double xpos, double ypos);
+typedef void (*CameraKeyFunc) (GLFWwindow *window, int key, int scancode, int action, int mods);
+typedef glm::mat4 (*CameraVMatFunc) (void);
+typedef glm::vec3 (*CameraPosFunc) (void);
 
-class Camera {
-	//it should be called in one of the drawobjs, that calls this.
-private:
-	glm::vec3 camera_pos;
-	glm::vec3 look_axies; //axis-angle representation.
-	const context *ctxt;
-	//when fov is 0, means we are using the ortho camera
-	float fov, np,fp;
+class CameraInterface {
 public:
-	glm::mat4 pv;
-	Camera(const context *ctxt, const float fov,
-	       const glm::vec3& pos, const glm::vec3& lookat,
-	       const float nearplane=0.1, const float farplane=100.0);
-
-	Camera(const context *ctxt,
-	       const glm::vec3& pos, const glm::vec3& lookat,
-	       const float nearplane=0.1, const float farplane=100.0);
-	//
-	const glm::mat4 pvMat(void) const;
+	CameraCursorFunc c;
+	CameraScrollFunc s;
+	CameraKeyFunc k;
+	CameraVMatFunc v;
+	CameraPosFunc p;
 };
-
 
 class context {
 protected:
+	//I don't like this struct in here but the callback has to be
+	struct camera {
+		float fov;
+		float near;
+		float far;
+		glm::mat4 intrinsicMat;
+	};
+	camera intrinsic;
+	CameraInterface extrinsic;
+
 	typedef void (*cb_t) (GLuint, void *data);
 	std::vector<DrawObj *> drawobjs;
 	GLFWwindow *_win;
@@ -115,6 +117,8 @@ protected:
 	std::queue<std::pair<int, msg_t> > forward_msg_que;
 	std::queue<msg_t> _bcast_msg_que;
 	int width, height;
+
+
 public:
 	context(int width=1000, int height=1000, const char *winname="window");
 	~context();
@@ -122,12 +126,8 @@ public:
 	void append_drawObj(DrawObj *dobj);
 	int init(void);
 	int run();
-	void (* init_pre_cb) (void *data);
-	void (* init_post_cb) (void *data);
-	void (* itr_pre_cb) (void *data);
-	void (* itr_post_cb) (void *data);
 	//lets test if this shit works
-	glm::mat4 getCameraMat(void) const;
+
 	void sendMsg(const DrawObj& d, const msg_t msg);
 	const msg_t retriveMsg(const DrawObj& d);
 	const glm::vec2 retriveWinsize() const;
@@ -135,12 +135,18 @@ public:
 	const float getHeight(void) const;
 	//friend declarations
 	friend void context_winSizeChange(GLFWwindow *win, int width, int height);
-	//solution to eliminate the setTexShader, getTexShader calls: message
-	//queue. Basically I need a local message queue that send and retrieve
-	//information at every draw iteration. It should be empty and the end.
+	//well, what we want is user can implment the interface so they can have a camera themselves
+	void attachCamera(CameraInterface cam);
+//		CameraPVMatFunc matfun, CameraKeyFunc keyfun, CameraCursorFunc posfun, CameraScrollFunc scrollfun);
+	void attachArcBallCamera(const float fov, const glm::vec3& where, const glm::vec3& lookat=glm::vec3(0.0f));
+	void attachFPSCamera(const float fov, const glm::vec3& where, const glm::vec3& lookat=glm::vec3(0.0f));
+	void setCameraPerspective(const float fov, const float near=0.1f, const float far=100.0f);
+	void setCameraOrthognal(const float near=0.1f, const float far=100.0f);
+	const glm::mat4 getCameraMat(void) const {
+		return this->intrinsic.intrinsicMat * extrinsic.v();
+	}
+
 };
-
-
 
 /*
 template<Derived>
@@ -171,8 +177,6 @@ protected:
 public:
 	ThreadedContext(void);
 	ThreadedContext(unsigned int ms);
-
-
 };
 
 //////inline functions

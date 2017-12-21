@@ -96,6 +96,12 @@ planeOBJ::itr_draw(void)
 	glBindTexture(GL_TEXTURE_2D, this->diffuse);
 	glActiveTexture(GL_TEXTURE0 + this->shader_program.getTexUniform(TEX_Specular));
 	glBindTexture(GL_TEXTURE_2D, this->specular);
+	glm::mat4 mpv = this->ctxt->getCameraMat();
+	glm::vec3 pos = unity_like_get_view_pos();
+	glUniformMatrix4fv(this->shader_program.getUniform(this->shader_program.uniform_MVP),
+			   1, GL_FALSE, &mpv[0][0]);
+	glUniform3f(this->shader_program.getUniform(this->shader_program.uniform_lightPos),
+		    0.0f, 10.0f, 0.0f);
 	this->model->drawProperty();
 	return 0;
 }
@@ -103,10 +109,8 @@ planeOBJ::itr_draw(void)
 int main(int argc, char **argv)
 {
 	context cont(width, height, "window");
+	cont.attachArcBallCamera(glm::radians(45.0f), glm::vec3(4.0,4.0,3.0f));
 	GLFWwindow *window = cont.getGLFWwindow();
-	glfwSetCursorPosCallback(window, unity_like_arcball_cursor);
-	glfwSetScrollCallback(window, unity_like_arcball_scroll);
-
 	planeOBJ obj(0);
 	cont.append_drawObj(&obj);
 
