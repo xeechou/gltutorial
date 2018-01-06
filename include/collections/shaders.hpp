@@ -35,6 +35,7 @@ public:
 	static const std::string uniform_lightPos;
 	static const std::string uniform_texdiffuse;
 	static const std::string uniform_texspecular;
+	static const std::string uniform_viewPos;
 };
 
 

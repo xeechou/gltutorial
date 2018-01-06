@@ -21,7 +21,7 @@ void main()
 	vs_out.FragPos  = vec3(instancesMat * vec4(position, 1.0f));
 	vs_out.Normal   = transpose(inverse(mat3(instancesMat))) * normal;
 	vs_out.TexCoord = texcoord;
-	gl_Position     = MVP * instancesMat * vec4(position, 1.0f);
+	gl_Position     = MVP * vec4(position, 1.0f);
 	vs_out.FragPosCS = gl_Position;
 }
 

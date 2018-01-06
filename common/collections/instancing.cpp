@@ -78,8 +78,10 @@ Instancing::push2GPU(void)
 
 	size_t ninstances = trs.size();
 	std::vector<glm::mat4> instance_mats(ninstances);
-	for (size_t i = 0; i < instance_mats.size(); i++)
+	for (size_t i = 0; i < instance_mats.size(); i++) {
 		instance_mats[i] = glm::translate(trs[i]) * glm::mat4_cast(rts[i]) * glm::scale(scs[i]);
+//		std::cout << glm::to_string(instance_mats[i]) << std::endl;
+	}
 
 	glGenBuffers(1, &this->instanceVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);

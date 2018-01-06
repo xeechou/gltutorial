@@ -66,8 +66,10 @@ planeOBJ::planeOBJ(int param)
 	//yep, we should setup the shader_program
 	this->time = 0;
 	this->model = std::make_shared<isoSphere>(1.0);
+	RSTs instances;
+	instances.addInstance(glm::vec3(0.0f));
 	this->model->addProperty("instancing",
-				 std::make_shared<Instancing>(10, Instancing::OPTION::square_instances, glm::vec3(0.1f)));
+				 std::make_shared<Instancing>(instances));
 	cv::Mat diffuse_texture = cv::Mat(500, 500, CV_8UC3, cv::Scalar(0,0,255));
 	this->diffuse = load2DTexture2GPU(diffuse_texture);
 	this->specular = load2DTexture2GPU(diffuse_texture);
@@ -76,32 +78,40 @@ planeOBJ::planeOBJ(int param)
 int
 planeOBJ::init_setup(void)
 {
-	return 0;
 	this->model->push2GPU();
+	return 0;
 }
 
 int
 planeOBJ::itr_setup(void)
 {
 	//we can increase the time of drawing
-	return 0;
 	this->time += 0.01;
+	return 0;
 }
 
 int
 planeOBJ::itr_draw(void)
 {
 	this->shader_program.useProgram();
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0 + this->shader_program.getTexUniform(TEX_Diffuse));
 	glBindTexture(GL_TEXTURE_2D, this->diffuse);
 	glActiveTexture(GL_TEXTURE0 + this->shader_program.getTexUniform(TEX_Specular));
 	glBindTexture(GL_TEXTURE_2D, this->specular);
 	glm::mat4 mpv = this->ctxt->getCameraMat();
 	glm::vec3 pos = unity_like_get_view_pos();
+//	std::cout << "the pos should be right " << this->shader_program.getUniform(this->shader_program.uniform_lightPos) << "\n";
+
+
 	glUniformMatrix4fv(this->shader_program.getUniform(this->shader_program.uniform_MVP),
 			   1, GL_FALSE, &mpv[0][0]);
 	glUniform3f(this->shader_program.getUniform(this->shader_program.uniform_lightPos),
 		    0.0f, 10.0f, 0.0f);
+	glUniform3f(this->shader_program.getUniform(this->shader_program.uniform_viewPos),
+		    pos[0], pos[1], pos[2]);
 	this->model->drawProperty();
 	return 0;
 }

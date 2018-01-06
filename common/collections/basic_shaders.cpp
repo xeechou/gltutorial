@@ -1,3 +1,4 @@
+#include <iostream>
 #include <collections/shaders.hpp>
 
 
@@ -34,6 +35,7 @@ const std::string phongNoShadow::uniform_MVP = "MVP";
 const std::string phongNoShadow::uniform_lightPos = "lightPos";
 const std::string phongNoShadow::uniform_texdiffuse = "diffuse_tex";
 const std::string phongNoShadow::uniform_texspecular = "specular_tex";
+const std::string phongNoShadow::uniform_viewPos = "viewPos";
 
 phongNoShadow::phongNoShadow(void)
 {
@@ -51,8 +53,11 @@ phongNoShadow::phongNoShadow(void)
 	this->useProgram();
 	GLuint mvp =  glGetUniformLocation(this->pid, this->uniform_MVP.c_str());
 	GLuint lightpos = glGetUniformLocation(this->pid, this->uniform_lightPos.c_str());
+	GLuint viewpos  = glGetUniformLocation(this->pid, this->uniform_viewPos.c_str());
+
 	this->uniforms.insert(std::make_pair(this->uniform_MVP, mvp));
 	this->uniforms.insert(std::make_pair(this->uniform_lightPos, lightpos));
 	this->addTextureUniform(phongNoShadow::uniform_texdiffuse, TEX_Diffuse);
 	this->addTextureUniform(phongNoShadow::uniform_texspecular, TEX_Specular);
+	this->uniforms.insert(std::make_pair(this->uniform_viewPos, viewpos));
 }

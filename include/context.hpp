@@ -142,6 +142,7 @@ public:
 	void attachFPSCamera(const float fov, const glm::vec3& where, const glm::vec3& lookat=glm::vec3(0.0f));
 	void setCameraPerspective(const float fov, const float near=0.1f, const float far=100.0f);
 	void setCameraOrthognal(const float near=0.1f, const float far=100.0f);
+	const CameraInterface *getCameraExtrinsics(void) const { return &this->extrinsic; }
 	const glm::mat4 getCameraMat(void) const {
 		return this->intrinsic.intrinsicMat * extrinsic.v();
 	}

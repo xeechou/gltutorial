@@ -9,7 +9,6 @@ layout (location = 3) in mat4 instancesMat;
 
 uniform mat4 MVP;
 uniform mat4 lightMat;
-uniform vec3 lightPos;
 
 out VS_OUT {
 	vec3 FragPos;

@@ -104,6 +104,7 @@ Mesh1::	Mesh1(const std::vector<glm::vec3>&& vertx,
 	      const std::vector<glm::vec3>&& norms,
 	      const std::vector<glm::vec2>&& uvs)
 {
+
 	this->init_options = 0;
 	this->meshes_vertices.resize(1);
 	this->meshes_faces.resize(1);
@@ -279,8 +280,9 @@ Mesh1::draw(const msg_t arg)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle.EBO);
 		if (instancing)
 			instancing->draw(msg_t((uint32_t)(faces.size() *3)));
-		else
+		else{
 			glDrawElements(GL_TRIANGLES, faces.size() * 3, GL_UNSIGNED_INT, 0);
+		}
 	}
 }
 
